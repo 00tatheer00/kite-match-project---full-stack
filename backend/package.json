@@ -9,6 +9,7 @@
     "start": "node src/index.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "seed:products:cloudinary": "node scripts/seedProductsCloudinary.js",
+    "sync:production": "node scripts/syncFromProduction.js",
     "seo:generate-sitemap": "node scripts/generateSitemap.js",
     "images:to-webp": "node scripts/convertFolderToWebp.js"
   },
