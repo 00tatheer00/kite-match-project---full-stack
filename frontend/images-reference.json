@@ -1,0 +1,344 @@
+{
+  "website_images": {
+    "total_images_needed": 40,
+    "hero_carousel": {
+      "location": "src/assets/hero/",
+      "images": [
+        {
+          "filename": "textile-division-hero.jpg",
+          "size": "1920x800px",
+          "description": "Modern textile factory floor with spinning machinery",
+          "component": "HeroCarousel.jsx",
+          "alt_text": "Aziz Group Textile Division"
+        },
+        {
+          "filename": "fmcg-division-hero.jpg",
+          "size": "1920x800px",
+          "description": "FMCG products display - matches and detergents",
+          "component": "HeroCarousel.jsx",
+          "alt_text": "Aziz Group FMCG Division"
+        },
+        {
+          "filename": "board-division-hero.jpg",
+          "size": "1920x800px",
+          "description": "MDF and particle board production facility",
+          "component": "HeroCarousel.jsx",
+          "alt_text": "Aziz Group Board Division"
+        },
+        {
+          "filename": "real-estate-hero.jpg",
+          "size": "1920x800px",
+          "description": "AJ Towers building exterior view",
+          "component": "HeroCarousel.jsx",
+          "alt_text": "Aziz Group Real Estate - AJ Towers"
+        }
+      ]
+    },
+    "leadership": {
+      "location": "src/assets/leadership/",
+      "images": [
+        {
+          "filename": "chairman-profile.jpg",
+          "size": "400x400px",
+          "description": "Professional headshot of Chairman Mr. Mohsin Aziz",
+          "component": "AboutSection.jsx",
+          "alt_text": "Mr. Mohsin Aziz - Chairman"
+        },
+        {
+          "filename": "ceo-profile.jpg",
+          "size": "400x400px",
+          "description": "Professional headshot of CEO",
+          "component": "AboutSection.jsx",
+          "alt_text": "Chief Executive Officer"
+        },
+        {
+          "filename": "md-profile.jpg",
+          "size": "400x400px",
+          "description": "Professional headshot of Managing Director",
+          "component": "AboutSection.jsx",
+          "alt_text": "Managing Director"
+        }
+      ]
+    },
+    "products": {
+      "location": "src/assets/products/",
+      "images": [
+        {
+          "filename": "textile-products.jpg",
+          "size": "600x400px",
+          "description": "Yarn spools and textile products showcase",
+          "component": "ProductsSection.jsx",
+          "alt_text": "Textile Products"
+        },
+        {
+          "filename": "fmcg-products.jpg",
+          "size": "600x400px",
+          "description": "Match boxes and detergent products display",
+          "component": "ProductsSection.jsx",
+          "alt_text": "FMCG Products"
+        },
+        {
+          "filename": "board-products.jpg",
+          "size": "600x400px",
+          "description": "MDF and laminated board samples",
+          "component": "ProductsSection.jsx",
+          "alt_text": "Board Products"
+        },
+        {
+          "filename": "featured-products-showcase.jpg",
+          "size": "800x600px",
+          "description": "Multiple product ranges arranged professionally",
+          "component": "ProductsSection.jsx",
+          "alt_text": "Featured Products Showcase"
+        }
+      ]
+    },
+    "offers": {
+      "location": "src/assets/offers/",
+      "images": [
+        {
+          "filename": "bulk-order-offer.jpg",
+          "size": "400x300px",
+          "description": "Warehouse with large inventory display",
+          "component": "OffersPackagingSection.jsx",
+          "alt_text": "Bulk Order Discount Offer"
+        },
+        {
+          "filename": "export-package-offer.jpg",
+          "size": "400x300px",
+          "description": "Packaged goods ready for international shipping",
+          "component": "OffersPackagingSection.jsx",
+          "alt_text": "Export Package Offer"
+        },
+        {
+          "filename": "premium-quality-offer.jpg",
+          "size": "400x300px",
+          "description": "Premium products with quality certification badges",
+          "component": "OffersPackagingSection.jsx",
+          "alt_text": "Premium Quality Products"
+        }
+      ]
+    },
+    "packaging": {
+      "location": "src/assets/packaging/",
+      "images": [
+        {
+          "filename": "custom-packaging.jpg",
+          "size": "400x300px",
+          "description": "Branded and customized packaging samples",
+          "component": "OffersPackagingSection.jsx",
+          "alt_text": "Custom Packaging Solutions"
+        },
+        {
+          "filename": "bulk-packaging.jpg",
+          "size": "400x300px",
+          "description": "Large quantity bulk packaging",
+          "component": "OffersPackagingSection.jsx",
+          "alt_text": "Bulk Packaging"
+        },
+        {
+          "filename": "export-packaging.jpg",
+          "size": "400x300px",
+          "description": "International shipping standard packages",
+          "component": "OffersPackagingSection.jsx",
+          "alt_text": "Export Packaging"
+        },
+        {
+          "filename": "retail-packaging.jpg",
+          "size": "400x300px",
+          "description": "Consumer-ready retail packaging",
+          "component": "OffersPackagingSection.jsx",
+          "alt_text": "Retail Packaging"
+        }
+      ]
+    },
+    "export": {
+      "location": "src/assets/export/",
+      "images": [
+        {
+          "filename": "world-map-export-destinations.jpg",
+          "size": "1200x600px",
+          "description": "Interactive world map with export destination markers",
+          "component": "ExportSection.jsx",
+          "alt_text": "Global Export Destinations Map"
+        },
+        {
+          "filename": "export-shipping-container.jpg",
+          "size": "800x600px",
+          "description": "Shipping container being loaded or transported",
+          "component": "ExportSection.jsx",
+          "alt_text": "Export Shipping Container"
+        }
+      ]
+    },
+    "export_services": {
+      "location": "src/assets/export/services/",
+      "images": [
+        {
+          "filename": "logistics-support.jpg",
+          "size": "600x400px",
+          "description": "Shipping containers, trucks, and warehouse operations",
+          "component": "ExportSection.jsx",
+          "alt_text": "Logistics Support Services"
+        },
+        {
+          "filename": "quality-certification.jpg",
+          "size": "600x400px",
+          "description": "Display of quality certificates and ISO badges",
+          "component": "ExportSection.jsx",
+          "alt_text": "Quality Certification"
+        },
+        {
+          "filename": "documentation-assistance.jpg",
+          "size": "600x400px",
+          "description": "Export documents and paperwork process",
+          "component": "ExportSection.jsx",
+          "alt_text": "Documentation Assistance"
+        },
+        {
+          "filename": "partnership-programs.jpg",
+          "size": "600x400px",
+          "description": "Business handshake or partnership meeting",
+          "component": "ExportSection.jsx",
+          "alt_text": "Partnership Programs"
+        }
+      ]
+    },
+    "certifications": {
+      "location": "src/assets/certifications/",
+      "images": [
+        {
+          "filename": "iso-9001-certificate.jpg",
+          "size": "300x400px",
+          "description": "Scanned ISO 9001:2015 quality management certificate",
+          "component": "CertificationsSlider.jsx",
+          "alt_text": "ISO 9001:2015 Certificate"
+        },
+        {
+          "filename": "iso-14001-certificate.jpg",
+          "size": "300x400px",
+          "description": "Environmental management system certificate",
+          "component": "CertificationsSlider.jsx",
+          "alt_text": "ISO 14001 Certificate"
+        },
+        {
+          "filename": "ohsas-18001-certificate.jpg",
+          "size": "300x400px",
+          "description": "Occupational health and safety certificate",
+          "component": "CertificationsSlider.jsx",
+          "alt_text": "OHSAS 18001 Certificate"
+        },
+        {
+          "filename": "bsci-certificate.jpg",
+          "size": "300x400px",
+          "description": "Business Social Compliance Initiative certificate",
+          "component": "CertificationsSlider.jsx",
+          "alt_text": "BSCI Certificate"
+        },
+        {
+          "filename": "gots-certificate.jpg",
+          "size": "300x400px",
+          "description": "Global Organic Textile Standard certificate",
+          "component": "CertificationsSlider.jsx",
+          "alt_text": "GOTS Certificate"
+        },
+        {
+          "filename": "bci-certificate.jpg",
+          "size": "300x400px",
+          "description": "Better Cotton Initiative certificate",
+          "component": "CertificationsSlider.jsx",
+          "alt_text": "BCI Certificate"
+        },
+        {
+          "filename": "oeko-tex-certificate.jpg",
+          "size": "300x400px",
+          "description": "OEKO-TEX product safety certificate",
+          "component": "CertificationsSlider.jsx",
+          "alt_text": "OEKO-TEX Certificate"
+        },
+        {
+          "filename": "grs-certificate.jpg",
+          "size": "300x400px",
+          "description": "Global Recycled Standard certificate",
+          "component": "CertificationsSlider.jsx",
+          "alt_text": "GRS Certificate"
+        }
+      ]
+    },
+    "partners": {
+      "location": "src/assets/partners/",
+      "format": "PNG with transparent background",
+      "images": [
+        {
+          "filename": "angel-logo.png",
+          "size": "150x80px",
+          "description": "Angel brand logo",
+          "component": "TrustSection.jsx",
+          "alt_text": "Angel - Partner Brand"
+        },
+        {
+          "filename": "bledina-logo.png",
+          "size": "150x80px",
+          "description": "Blédina brand logo",
+          "component": "TrustSection.jsx",
+          "alt_text": "Blédina - Partner Brand"
+        },
+        {
+          "filename": "colgate-logo.png",
+          "size": "150x80px",
+          "description": "Colgate brand logo",
+          "component": "TrustSection.jsx",
+          "alt_text": "Colgate - Partner Brand"
+        },
+        {
+          "filename": "danone-logo.png",
+          "size": "150x80px",
+          "description": "Danone brand logo",
+          "component": "TrustSection.jsx",
+          "alt_text": "Danone - Partner Brand"
+        },
+        {
+          "filename": "johnson-johnson-logo.png",
+          "size": "150x80px",
+          "description": "Johnson & Johnson logo",
+          "component": "TrustSection.jsx",
+          "alt_text": "Johnson & Johnson - Partner Brand"
+        },
+        {
+          "filename": "sc-johnson-logo.png",
+          "size": "150x80px",
+          "description": "SC Johnson brand logo",
+          "component": "TrustSection.jsx",
+          "alt_text": "SC Johnson - Partner Brand"
+        },
+        {
+          "filename": "tiger-head-logo.png",
+          "size": "150x80px",
+          "description": "Tiger Head brand logo",
+          "component": "TrustSection.jsx",
+          "alt_text": "Tiger Head - Partner Brand"
+        },
+        {
+          "filename": "compal-logo.png",
+          "size": "150x80px",
+          "description": "Compal brand logo",
+          "component": "TrustSection.jsx",
+          "alt_text": "Compal - Partner Brand"
+        }
+      ]
+    }
+  },
+  "optimization_guidelines": {
+    "format": "JPG for photos, PNG for logos with transparency, WebP for best compression",
+    "max_file_size": "500KB per image (compressed)",
+    "quality": "High resolution, web-optimized",
+    "tools": ["TinyPNG", "ImageOptim", "Squoosh", "Adobe Photoshop"],
+    "responsive": "Consider providing 2x and 3x versions for retina displays"
+  },
+  "implementation_notes": {
+    "import_example": "import heroImage from '../assets/hero/textile-division-hero.jpg';",
+    "usage_example": "<img src={heroImage} alt='Textile Division' />",
+    "lazy_loading": "Images are automatically lazy-loaded by React",
+    "alt_text": "Always include descriptive alt text for accessibility"
+  }
+}

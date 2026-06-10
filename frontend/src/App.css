@@ -1,0 +1,217 @@
+/* Aziz Group - Custom Styles */
+/* Note: Tailwind's preflight/reset handles margin, padding, box-sizing */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  color: #222222;
+  background-color: #ffffff;
+  line-height: 1.6;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00aeef;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0095cc;
+}
+
+/* Selection colors */
+::selection {
+  background-color: #00aeef;
+  color: white;
+}
+
+::-moz-selection {
+  background-color: #00aeef;
+  color: white;
+}
+
+/* Smooth transitions for all interactive elements */
+a,
+button {
+  transition: all 0.3s ease;
+}
+
+/* Focus states for accessibility */
+a:focus,
+button:focus,
+input:focus,
+textarea:focus {
+  /* outline: 2px solid #00AEEF; */
+  outline-offset: 2px;
+}
+
+/* Image optimization */
+img {
+  /* max-width: 100%; */
+  /* height: auto; */
+  display: block;
+  /* object-fit: cover; */
+}
+
+/* Mobile-specific image optimization - exclude carousel images */
+@media (max-width: 640px) {
+  img:not(.hero-carousel-img) {
+    max-height: 400px;
+    object-fit: cover;
+  }
+
+  img.product-gallery-image {
+    max-height: none;
+    object-fit: contain;
+  }
+}
+
+/* Typography enhancements */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  /* color: #222222; */
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+body:not(.admin-route) p {
+  /* color: #666666; */
+  line-height: 1.8;
+}
+
+/* Link styles within paragraphs */
+p a {
+  color: #00aeef;
+  /* text-decoration: underline; */
+  text-decoration-color: #00aeef;
+  text-decoration-thickness: 2px;
+  /* text-underline-offset: 3px; */
+  /* appearance: none; */
+}
+
+p a:hover {
+  color: #0095cc;
+  text-decoration-color: #0095cc;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s ease;
+  border: 2px solid #e0e0e0;
+}
+
+.card-hover:hover {
+  border-color: #ff8ace;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Input field styles */
+body:not(.admin-route) input[type="text"],
+body:not(.admin-route) input[type="email"],
+body:not(.admin-route) input[type="tel"],
+body:not(.admin-route) textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #222222;
+  transition: all 0.3s ease;
+}
+
+body:not(.admin-route) input:focus,
+body:not(.admin-route) textarea:focus {
+  border-color: #00aeef;
+  outline: none;
+}
+
+/* Hide carousel nav on tablet/mobile */
+@media (max-width: 1024px) {
+  .swiper-button-next,
+  .swiper-button-prev {
+    display: none !important;
+  }
+}
+
+body:not(.admin-route) input:hover,
+body:not(.admin-route) textarea:hover {
+  border-color: #ff8ace;
+}
+
+/* Loading animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Section spacing */
+section {
+  position: relative;
+}
+
+/* Make all app pages smaller so more content is visible vertically */
+.app-page-compact {
+  --home-scale: 0.75;
+  zoom: var(--home-scale);
+}
+
+@supports not (zoom: 1) {
+  .app-page-compact {
+    transform: scale(var(--home-scale));
+    transform-origin: top center;
+    width: calc(100% / var(--home-scale));
+  }
+}
+
+/* Mobile responsiveness improvements */
+@media (max-width: 768px) {
+  /* Reduce heading sizes on mobile */
+  body:not(.admin-route) h1 {
+    font-size: 2rem !important;
+  }
+
+  body:not(.admin-route) h2 {
+    font-size: 1.75rem !important;
+  }
+
+  body:not(.admin-route) h3 {
+    font-size: 1.5rem !important;
+  }
+
+  /* Adjust padding and margins */
+  body:not(.admin-route) section {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  /* Keep grid behavior controlled by per-component Tailwind breakpoints */
+}
