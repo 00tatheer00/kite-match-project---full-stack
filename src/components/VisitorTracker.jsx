@@ -73,11 +73,17 @@ export default function VisitorTracker() {
       device = 'mobile';
     }
 
+    let tz = '';
+    try {
+      tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    } catch {}
+
     const payload = {
       path: pathname || '/',
       source: detectedSource,
       referrer: referrer ? referrer.slice(0, 200) : '',
       device,
+      timeZone: tz,
       timestamp: new Date().toISOString(),
       screen: `${window.innerWidth}x${window.innerHeight}`,
     };

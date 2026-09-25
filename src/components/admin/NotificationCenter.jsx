@@ -5,7 +5,7 @@ import Pusher from 'pusher-js';
 import { Bell } from 'lucide-react';
 import { useNavigate } from '@/components/RouterCompat';
 
-const NotificationCenter = () => {
+const NotificationCenter = ({ dark = false }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -110,24 +110,32 @@ const NotificationCenter = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={handleOpen}
-        className="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none hover:bg-gray-100 rounded-full transition-colors"
+        className={`relative p-2 rounded-full transition-colors ${
+          dark
+            ? 'text-slate-300 hover:text-white hover:bg-[#1E293B] focus:outline-none'
+            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none'
+        }`}
       >
-        <Bell size={24} />
+        <Bell size={22} />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-white">
+          <span className="absolute top-1 right-1 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-slate-900">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-50">
-          <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="font-semibold text-gray-800">Notifications</h3>
+        <div className={`absolute right-0 mt-2 w-80 rounded-xl shadow-2xl border overflow-hidden z-50 ${
+          dark ? 'bg-[#111726] border-[#1E293B] text-slate-100' : 'bg-white border-gray-100 text-gray-800'
+        }`}>
+          <div className={`px-4 py-3 border-b flex justify-between items-center ${
+            dark ? 'bg-[#161D2E] border-[#1E293B]' : 'bg-gray-50 border-gray-100'
+          }`}>
+            <h3 className={`font-semibold text-sm ${dark ? 'text-white' : 'text-gray-800'}`}>Notifications</h3>
             {notifications.some(n => n.read) && (
               <button 
                 onClick={handleClearSeen}
-                className="text-xs text-gray-500 hover:text-red-500 transition-colors"
+                className="text-xs text-gray-400 hover:text-red-400 transition-colors"
               >
                 Clear seen
               </button>

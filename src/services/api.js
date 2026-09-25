@@ -346,3 +346,10 @@ export async function adminGetAnalytics() {
   });
   return handleResponse(res);
 }
+
+export async function adminGetDashboard() {
+  const res = await fetch(`${API_BASE_URL}/admin/dashboard`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse(res);
+}

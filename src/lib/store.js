@@ -346,6 +346,14 @@ export function recordVisitorEvent(payload = {}) {
   analytics.topPages = analytics.topPages || {};
   analytics.topPages[p] = (analytics.topPages[p] || 0) + 1;
 
+  const city = payload.city || 'Pakistan';
+  analytics.cities = analytics.cities || {};
+  analytics.cities[city] = (analytics.cities[city] || 0) + 1;
+
+  const country = payload.country || 'PK';
+  analytics.countries = analytics.countries || {};
+  analytics.countries[country] = (analytics.countries[country] || 0) + 1;
+
   analytics.recentVisits = analytics.recentVisits || [];
   analytics.recentVisits.unshift({
     id: `v_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -353,7 +361,8 @@ export function recordVisitorEvent(payload = {}) {
     path: p,
     source: src,
     device: dev,
-    city: payload.city || 'Pakistan',
+    city: city,
+    country: country,
   });
 
   if (analytics.recentVisits.length > 50) {
