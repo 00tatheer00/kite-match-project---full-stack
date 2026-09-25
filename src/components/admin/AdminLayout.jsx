@@ -165,14 +165,25 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
       )}
 
       {/* ========================================================================= */}
-      {/* DESKTOP SIDEBAR (Strictly Fixed 288px Width, 100vh No Scroll, No Scrollbar) */}
+      {/* ========================================================================= */}
+      {/* DESKTOP SIDEBAR (Strictly Fixed 288px Width, 100vh Full Height, No Scroll) */}
       {/* ========================================================================= */}
       <aside
-        className={`hidden md:flex md:w-64 lg:w-72 md:min-w-[16rem] lg:min-w-[18rem] md:max-w-[18rem] flex-shrink-0 md:sticky md:top-0 h-screen max-h-screen flex-col justify-between border-r transition-colors duration-200 z-40 overflow-hidden no-scrollbar select-none ${
+        className={`admin-fixed-sidebar hidden md:flex flex-col justify-between border-r transition-colors duration-200 z-40 overflow-hidden no-scrollbar select-none ${
           isDark
             ? "border-[#1E293B] bg-[#0B0F19]"
-            : "border-slate-200 bg-white shadow-sm"
+            : "border-slate-200 bg-white"
         }`}
+        style={{
+          position: "fixed",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: "18rem",
+          height: "100vh",
+          maxHeight: "100vh",
+          zIndex: 40,
+        }}
       >
         <div className="flex flex-col flex-1 min-h-0">
           {/* Brand Header */}
@@ -202,7 +213,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
           </div>
 
           {/* Navigation Menu (Strictly fits without scroll) */}
-          <nav className="p-3 space-y-1 flex-1 overflow-hidden">
+          <nav className="p-3 space-y-1 flex-1 overflow-y-auto no-scrollbar">
             {links.map((link) => {
               const active = location.pathname === link.to;
               if (isDark) {
@@ -277,7 +288,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
       {/* ========================================================================= */}
       {/* MAIN CONTENT VIEW (Expansive Wide Layout, Normal Desktop Scale) */}
       {/* ========================================================================= */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="admin-main-offset flex-1 flex flex-col min-w-0 min-h-screen md:ml-72 md:ml-[18rem]">
         {/* Desktop Top Header Bar */}
         <header
           className={`hidden md:flex items-center justify-between px-6 sm:px-8 lg:px-10 py-4 border-b transition-colors duration-200 ${
