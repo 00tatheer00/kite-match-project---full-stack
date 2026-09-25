@@ -176,13 +176,20 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
         }`}
         style={{
           position: "fixed",
-          top: 0,
-          bottom: 0,
-          left: 0,
+          top: "0px",
+          bottom: "0px",
+          left: "0px",
           width: "18rem",
           height: "100vh",
+          minHeight: "100vh",
           maxHeight: "100vh",
           zIndex: 40,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          boxSizing: "border-box",
+          backgroundColor: isDark ? "#0B0F19" : "#ffffff",
+          borderRight: isDark ? "1px solid #1E293B" : "1px solid #e2e8f0",
         }}
       >
         <div className="flex flex-col flex-1 min-h-0">
