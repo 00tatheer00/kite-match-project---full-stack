@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is the official [Next.js](https://nextjs.org) production application for Kite Match Brand Pakistan.
+
+<!-- Deployment build trigger: 2026-09-25T21:37:00 -->
 
 ## Getting Started
 
