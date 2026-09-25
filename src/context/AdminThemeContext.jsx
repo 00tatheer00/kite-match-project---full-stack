@@ -63,3 +63,5 @@ export const AdminThemeProvider = ({ children }) => {
 };
 
 export const useAdminTheme = () => useContext(AdminThemeContext);
+export { AdminThemeContext };
+export default AdminThemeContext;

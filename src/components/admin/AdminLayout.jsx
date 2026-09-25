@@ -1,10 +1,11 @@
 'use client';
 
+import { useContext } from 'react';
 import { Link, useLocation, useNavigate } from '@/components/RouterCompat';
 import { colors } from "../../theme";
 import NotificationCenter from "./NotificationCenter";
 import ThemeToggleBtn from "./ThemeToggleBtn";
-import { AdminThemeProvider, useAdminTheme } from "@/context/AdminThemeContext";
+import { AdminThemeContext, AdminThemeProvider, useAdminTheme } from "@/context/AdminThemeContext";
 
 const AdminLayoutContent = ({ children, darkOverride }) => {
   const location = useLocation();
@@ -185,6 +186,10 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
 };
 
 export default function AdminLayout(props) {
+  const themeCtx = useContext(AdminThemeContext);
+  if (themeCtx && themeCtx.mounted !== undefined) {
+    return <AdminLayoutContent {...props} />;
+  }
   return (
     <AdminThemeProvider>
       <AdminLayoutContent {...props} />

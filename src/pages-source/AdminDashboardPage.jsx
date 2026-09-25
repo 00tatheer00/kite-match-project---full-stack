@@ -23,7 +23,7 @@ import {
   FaChartBar
 } from "react-icons/fa";
 
-export default function AdminDashboardPage() {
+function DashboardContent() {
   const { isDark } = useAdminTheme();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -96,8 +96,7 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-8 font-sans selection:bg-[#8B5CF6] selection:text-white">
+    <div className="space-y-8 font-sans selection:bg-[#8B5CF6] selection:text-white">
         
         {/* ========================================================================= */}
         {/* 1. TOP HEADER & FILTER PILLS (Large, Normal Screen Scale) */}
@@ -833,8 +832,14 @@ export default function AdminDashboardPage() {
             </div>
           )}
         </div>
-
       </div>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <AdminLayout>
+      <DashboardContent />
     </AdminLayout>
   );
 }
