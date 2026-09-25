@@ -1,0 +1,1050 @@
+{
+  "products": [
+    {
+      "_id": "69f1f22b0b33d68c0d38880b",
+      "id": "dish-wash-bar",
+      "category": "Dish Wash",
+      "title": "Kite Dish Wash Bar",
+      "productType": "dish-wash",
+      "navGroup": "Dish Wash",
+      "iconType": "dish-wash",
+      "description": "Premium lemon fragrance with slow dissolution technology. Perfect for sparkling clean dishes with powerful grease removal. Gentle on hands.\r\n",
+      "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777551300/kite/products/1777551298717-dwb1.png",
+      "images": [],
+      "color": "#059669",
+      "tagline": "-کائیٹ ڈش واش بار کم گھلے، زیادہ چلے",
+      "features": [
+        "Slow Dissolution",
+        "Premium Lemon Scent",
+        "Tough on Grease",
+        "Gentle On Hands"
+      ],
+      "variants": [
+        {
+          "name": "SUPER BAR",
+          "detail": "200 g",
+          "packing": "36 pcs/ctn",
+          "price": 60
+        },
+        {
+          "name": "LONG BAR",
+          "detail": "190 g",
+          "packing": "36 pcs/ctn",
+          "price": 60
+        },
+        {
+          "name": "CLASSIC BAR",
+          "detail": "80 g",
+          "packing": "36 pcs/ctn",
+          "price": 30
+        },
+        {
+          "name": "LARGE BAR",
+          "detail": "70 G",
+          "packing": "36 pcs/ctn",
+          "price": 20
+        },
+        {
+          "name": "REGULAR BAR",
+          "detail": "40 g",
+          "packing": "48 pcs/ctn",
+          "price": 10
+        }
+      ],
+      "variantImages": [
+        {
+          "name": "SUPER BAR",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777551359/kite/products/variants/1777551357465-dwb2.png"
+        },
+        {
+          "name": "LONG BAR",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777480236/kite/products/variants/1777480234673-long-bar-640x640.png"
+        },
+        {
+          "name": "CLASSIC BAR",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1786358371/kite/products/variants/1786358370498-large-bar-640x640.webp"
+        },
+        {
+          "name": "LARGE BAR",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777551410/kite/products/variants/1777551408650-dwb2.png"
+        },
+        {
+          "name": "REGULAR BAR",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777480607/kite/products/variants/1777480606043-regular-bar-640x640.png"
+        }
+      ],
+      "brands": [],
+      "sizes": [],
+      "skus": [],
+      "facilities": [],
+      "services": "Nation wide Available, For Bulk Order Contact Head Office.",
+      "displayOrder": 0,
+      "isActive": true,
+      "showOnLanding": true,
+      "showInProductsPage": true,
+      "showInNavbar": true,
+      "createdAt": "2026-04-29T11:57:31.789Z",
+      "updatedAt": "2026-08-10T10:40:33.960Z",
+      "__v": 0,
+      "carouselOrder": 3
+    },
+    {
+      "_id": "69df73b40be6348606c95775",
+      "id": "kite-glow",
+      "__v": 0,
+      "brands": [],
+      "category": "Detergents",
+      "color": "#00AEEF",
+      "createdAt": "2026-04-15T11:17:06.986Z",
+      "description": "Proudly Pakistani, our 2025 flagship brand with Triple Enzyme Formula for deep cleaning, fabric care, and Long-lasting Fragnance.",
+      "displayOrder": 0,
+      "facilities": [],
+      "features": [
+        "Triple Enzyme Formula",
+        "Fabric care",
+        "Color protection",
+        "Long-lasting Fragnance"
+      ],
+      "iconType": "layer",
+      "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1779001405/kite/products/1779001404256-kite1kg.webp",
+      "images": [],
+      "isActive": true,
+      "navGroup": "Detergents",
+      "productType": "detergents",
+      "services": "Nation wide Available, For Bulk Order Contact Head Office.",
+      "showInNavbar": true,
+      "showInProductsPage": true,
+      "showOnLanding": true,
+      "sizes": [],
+      "skus": [],
+      "title": "Kite Glow Detergent",
+      "updatedAt": "2026-08-10T10:25:53.060Z",
+      "variants": [
+        {
+          "name": "2 KG",
+          "detail": "2000 g",
+          "packing": "6 pcs/ctn",
+          "price": 650
+        },
+        {
+          "name": "1 KG",
+          "detail": "1000 g",
+          "packing": "12 pcs/ctn",
+          "price": 350
+        },
+        {
+          "name": "500 GM",
+          "detail": "500 g",
+          "packing": "24 pcs/ctn",
+          "price": 180
+        },
+        {
+          "name": "RS.99",
+          "detail": "285 g",
+          "packing": "24 pcs/ctn",
+          "price": 99
+        },
+        {
+          "name": "RS.50",
+          "detail": "140 g",
+          "packing": "48 pcs/ctn",
+          "price": 50
+        },
+        {
+          "name": "RS.20",
+          "detail": "56 g",
+          "packing": "96pcs/ctn",
+          "price": 20
+        },
+        {
+          "name": "RS.10",
+          "detail": "25 g",
+          "packing": "144 pcs/ctn",
+          "price": 10
+        }
+      ],
+      "tagline": "!کائیٹ گلو لائے بھرپور خوشبو ، بہترین صفائی",
+      "variantImages": [
+        {
+          "name": "2 KG",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1779253919/kite/products/variants/1779253918653-kite2kg.webp"
+        },
+        {
+          "name": "1 KG",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1779254078/kite/products/variants/1779254076645-kite1kg.webp"
+        },
+        {
+          "name": "500 GM",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1779254079/kite/products/variants/1779254076946-kite500g.webp"
+        },
+        {
+          "name": "RS.99",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1779254078/kite/products/variants/1779254077345-kiters99.webp"
+        },
+        {
+          "name": "RS.50",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1779254078/kite/products/variants/1779254075251-kiters50.webp"
+        },
+        {
+          "name": "RS.20",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1779254079/kite/products/variants/1779254078646-kiters20.webp"
+        },
+        {
+          "name": "RS.10",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1779254079/kite/products/variants/1779254078650-kiters10.webp"
+        }
+      ],
+      "carouselOrder": 0
+    },
+    {
+      "_id": "6a26a75e6b67b78b4132fca1",
+      "id": "safety-matches",
+      "category": "Safety Matches",
+      "title": "Safety Matches Collection",
+      "productType": "matches",
+      "navGroup": "Safety Matches",
+      "iconType": "fire",
+      "description": "Our premium collection of safety matches, trusted across households and industries for superior quality, reliability, and damp-proof performance.",
+      "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1780918106/kite/products/1780918107712-all-matches-640x640.webp",
+      "images": [],
+      "color": "#ED028C",
+      "tagline": "",
+      "features": [],
+      "variants": [
+        {
+          "name": "LARGE",
+          "detail": "58 Sticks",
+          "packing": "500 pcs/ctn",
+          "price": 2000
+        },
+        {
+          "name": "CLASSIC",
+          "detail": "45 Sticks",
+          "packing": "500 pcs/ctn",
+          "price": 1750
+        },
+        {
+          "name": "REGULAR",
+          "detail": "42 Sticks",
+          "packing": "1000 pcs/ctn",
+          "price": 2750
+        },
+        {
+          "name": "SMALL",
+          "detail": "32 Sticks",
+          "packing": "1000 pcs/ctn",
+          "price": 2200
+        }
+      ],
+      "variantImages": [
+        {
+          "name": "LARGE",
+          "image": ""
+        },
+        {
+          "name": "CLASSIC",
+          "image": ""
+        },
+        {
+          "name": "REGULAR",
+          "image": ""
+        },
+        {
+          "name": "SMALL",
+          "image": ""
+        }
+      ],
+      "brands": [
+        {
+          "name": "Kite Safety Matches",
+          "category": "Safety Matches",
+          "description": "Our flagship premium brand and Pakistan's leading export match. Known for reliability and superior ignition, Kite represents over 50 years of manufacturing excellence.",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1780920350/kite/products/brands/1780920352667-1777462281058-kite-640x640.webp",
+          "tagline": "",
+          "features": [
+            "Premium Quality",
+            "Damp proof",
+            "Carbonised sticks",
+            "Extra sticks",
+            "Reliable always"
+          ],
+          "variants": [
+            {
+              "name": "LARGE",
+              "detail": "58 Sticks",
+              "packing": "500 pcs/ctn",
+              "price": 2000
+            },
+            {
+              "name": "CLASSIC",
+              "detail": "45 Sticks",
+              "packing": "500 pcs/ctn",
+              "price": 1750
+            },
+            {
+              "name": "REGULAR",
+              "detail": "42 Sticks",
+              "packing": "1000 pcs/ctn",
+              "price": 2750
+            },
+            {
+              "name": "SMALL",
+              "detail": "32 Sticks",
+              "packing": "1000 pcs/ctn",
+              "price": 2200
+            }
+          ]
+        },
+        {
+          "name": "Olympia Safety Matches",
+          "category": "Safety Matches",
+          "description": "Designed for high-performance and durability. Olympia matches undergo rigorous quality checks to ensure they perform in various environmental conditions.",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1781770637/kite/products/brands/1781770636746-olympia-640x640.webp",
+          "tagline": "",
+          "features": [
+            "High Performance",
+            "Sturdy sticks",
+            "Damp proof",
+            "Precision box striking surface",
+            "Eco-friendly materials"
+          ],
+          "variants": [
+            {
+              "name": "LARGE",
+              "detail": "58 Sticks",
+              "packing": "500 pcs/ctn",
+              "price": 2000
+            },
+            {
+              "name": "CLASSIC",
+              "detail": "45 Sticks",
+              "packing": "500 pcs/ctn",
+              "price": 1750
+            },
+            {
+              "name": "REGULAR",
+              "detail": "42 STICKS",
+              "packing": "1000 pcs/ctn",
+              "price": 2750
+            },
+            {
+              "name": "SMALL",
+              "detail": "32 Sticks",
+              "packing": "1000 pcs/ctn",
+              "price": 2200
+            }
+          ]
+        },
+        {
+          "name": "Party Safety Matches",
+          "category": "Safety Matches",
+          "description": "A vibrant and reliable choice for every occasion. Party matches provide the perfect balance of quantity and quality for busy households.",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1781770637/kite/products/brands/1781770635845-party-640x640.webp",
+          "tagline": "",
+          "features": [
+            "Fast ignition",
+            "Easy strike",
+            "Damp proof",
+            "Compact packaging",
+            "Uniform stick size"
+          ],
+          "variants": [
+            {
+              "name": "LARGE",
+              "detail": "58 Sticks",
+              "packing": "500 pcs/ctn",
+              "price": 2000
+            },
+            {
+              "name": "CLASSIC",
+              "detail": "45 Sticks",
+              "packing": "500 pcs/ctn",
+              "price": 1750
+            },
+            {
+              "name": "REGULAR",
+              "detail": "42 Sticks",
+              "packing": "1000 pcs/ctn",
+              "price": 2750
+            }
+          ]
+        },
+        {
+          "name": "Tanga Safety Matches",
+          "category": "Safety Matches",
+          "description": "A vibrant and reliable choice for every occasion. Party matches provide the perfect balance of quantity and quality for busy households.",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1781770638/kite/products/brands/1781770637051-tanga-640x640.webp",
+          "tagline": "",
+          "features": [
+            "Fast ignition",
+            "Easy strike",
+            "Damp proof",
+            "Compact packaging",
+            "Uniform stick size"
+          ],
+          "variants": [
+            {
+              "name": "LARGE",
+              "detail": "58 Sticks",
+              "packing": "500 pcs/ctn",
+              "price": 2000
+            },
+            {
+              "name": "CLASSIC",
+              "detail": "45 Sticks",
+              "packing": "500 pcs/ctn",
+              "price": 1750
+            },
+            {
+              "name": "REGULAR",
+              "detail": "42 Sticks",
+              "packing": "1000 pcs/ctn",
+              "price": 2750
+            }
+          ]
+        },
+        {
+          "name": "Bird Safety Matches",
+          "category": "Safety Matches",
+          "description": "A trusted household name providing consistent quality and ease of use. Bird matches are designed for daily domestic utility with high safety standars.",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1781770638/kite/products/brands/1781770636649-bird-640x640.webp",
+          "tagline": "",
+          "features": [
+            "Reliable ignition",
+            "Damp proof",
+            "Strong sticks",
+            "Standard count",
+            "Safe handling"
+          ],
+          "variants": [
+            {
+              "name": "LARGE",
+              "detail": "58 Sticks",
+              "packing": "500 pcs/ctn",
+              "price": 2000
+            },
+            {
+              "name": "CLASSIC",
+              "detail": "45 Sticks",
+              "packing": "500 pcs/ctn",
+              "price": 1750
+            }
+          ]
+        }
+      ],
+      "sizes": [],
+      "skus": [],
+      "facilities": [
+        {
+          "name": "Mohsin Match Factory",
+          "location": "Hayatabad, Peshawar",
+          "note": "Established 1974"
+        },
+        {
+          "name": "AJ Match Factory",
+          "location": "Sheikhupura, Lahore",
+          "note": "Established 2006"
+        }
+      ],
+      "services": "Global export and bulk wholesale available. Regional supply and local market distribution.",
+      "displayOrder": 1,
+      "carouselOrder": 3,
+      "isActive": true,
+      "showOnLanding": true,
+      "showInProductsPage": true,
+      "showInNavbar": true,
+      "createdAt": "2026-06-08T11:28:30.529Z",
+      "updatedAt": "2026-06-18T08:17:18.978Z",
+      "__v": 0
+    },
+    {
+      "_id": "69ef4b0491588c3d7f965168",
+      "id": "burq-action",
+      "category": "Detergents",
+      "title": "BURQ Action Detergent",
+      "productType": "detergents",
+      "navGroup": "Detergents",
+      "iconType": "layer",
+      "description": "BURQ Action is designed for the mid-tier market, combining Colour Guard technology, superior stain removal, and long-lasting freshness to deliver outstanding value at a competitive price.\r\n",
+      "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1779002087/kite/products/1779002086650-burq1kg-1.webp",
+      "images": [],
+      "color": "#00AEEF",
+      "tagline": "داغ کا صفایا صرف برق ایکشن لایا۔",
+      "features": [
+        "Colour Guard Technology",
+        "Powerful stain removal",
+        "Fabric protection",
+        "Skin friendly",
+        "Budget Friendly"
+      ],
+      "variants": [
+        {
+          "name": "2.3 KG",
+          "detail": "2100 g",
+          "packing": "6 pcs/ctn",
+          "price": 499
+        },
+        {
+          "name": "1 KG",
+          "detail": "1000 g",
+          "packing": "12 pcs/ctn",
+          "price": 270
+        },
+        {
+          "name": "RS.99",
+          "detail": "430 g",
+          "packing": "24 pcs/ctn",
+          "price": 99
+        },
+        {
+          "name": "RS.50",
+          "detail": "160 g",
+          "packing": "48 pcs/ctn",
+          "price": 50
+        },
+        {
+          "name": "RS.20",
+          "detail": "75 g",
+          "packing": "96 pcs/ctn",
+          "price": 20
+        },
+        {
+          "name": "RS.10",
+          "detail": "40 g",
+          "packing": "204 pcs/ctn",
+          "price": 10
+        }
+      ],
+      "variantImages": [
+        {
+          "name": "2.3 KG",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1787385161/kite/products/variants/1787385160584-burq-2-3kg.webp"
+        },
+        {
+          "name": "1 KG",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1779002089/kite/products/variants/1779002089157-burq1kg-1.webp"
+        },
+        {
+          "name": "RS.99",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777289987/kite/products/variants/1777289986449-04d6e812-a2b2-4a29-8da1-3e7a138f777a.png"
+        },
+        {
+          "name": "RS.50",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777289988/kite/products/variants/1777289986450-a230fac5-f2af-47ad-af24-b01e1f09a028.png"
+        },
+        {
+          "name": "RS.20",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777289988/kite/products/variants/1777289986451-6583d6b3-69b4-4d98-ac50-8e37de4d51dd.png"
+        },
+        {
+          "name": "RS.10",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777289988/kite/products/variants/1777289986452-7d78e76e-f0cd-4948-9e87-f2cb94d088f0.png"
+        }
+      ],
+      "brands": [],
+      "sizes": [],
+      "skus": [],
+      "facilities": [],
+      "services": "Nation Wide Available, For Bulk Order Contact Head Office.",
+      "displayOrder": 1,
+      "isActive": true,
+      "showOnLanding": true,
+      "showInProductsPage": true,
+      "showInNavbar": true,
+      "createdAt": "2026-04-27T11:39:48.837Z",
+      "updatedAt": "2026-08-22T07:52:42.552Z",
+      "__v": 0,
+      "carouselOrder": 1
+    },
+    {
+      "_id": "69df73b40be6348606c95777",
+      "id": "vero",
+      "__v": 0,
+      "brands": [],
+      "category": "Detergents",
+      "color": "#00AEEF",
+      "createdAt": "2026-04-15T11:17:06.986Z",
+      "description": "Trusted by bulk buyers across Pakistan for its reliable quality and cost-effective performance.",
+      "displayOrder": 7,
+      "facilities": [],
+      "features": [
+        "Natural ingredients",
+        "Cost-effective",
+        "Excellent cleaning",
+        "Safe for colors",
+        "Long lasting freshness"
+      ],
+      "iconType": "layer",
+      "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777462173/kite/products/1777462171810-veroo-640x640.png",
+      "images": [],
+      "isActive": true,
+      "navGroup": "Detergents",
+      "productType": "detergents",
+      "services": "Private labeling and toll manufacturing available.",
+      "showInNavbar": true,
+      "showInProductsPage": true,
+      "showOnLanding": true,
+      "sizes": [],
+      "skus": [],
+      "title": "Vero Detergent",
+      "updatedAt": "2026-08-10T10:31:08.162Z",
+      "variants": [
+        {
+          "name": "20 KG",
+          "detail": "20000 g",
+          "packing": "1 pcs/ctn",
+          "price": 5500
+        },
+        {
+          "name": "5 KG",
+          "detail": "5000 g",
+          "packing": "4 pcs/ctn",
+          "price": 1300
+        }
+      ],
+      "tagline": "",
+      "variantImages": [
+        {
+          "name": "20 KG",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777478446/kite/products/variants/1777478444371-veero-2000x2000.png"
+        },
+        {
+          "name": "5 KG",
+          "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777457604/kite/products/variants/1777457602135-veroo-640x640.png"
+        }
+      ],
+      "carouselOrder": 2
+    }
+  ],
+  "promotions": [
+    {
+      "_id": "69ef4d4c91588c3d7f965174",
+      "id": "pkg-super-bulk",
+      "title": "Super Bulk Package",
+      "category": "Combo Packages",
+      "description": "",
+      "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1777290572/kite/promotions/1777290570728-superbulk.jpg",
+      "images": [],
+      "items": [
+        {
+          "product": "Kite Glow 1 KG",
+          "quantity": 5,
+          "price": 350
+        },
+        {
+          "product": "Kite Large Gross",
+          "quantity": 1,
+          "price": 200
+        },
+        {
+          "product": "Kite Long Bar",
+          "quantity": 3,
+          "price": 60
+        },
+        {
+          "product": "Kite Super Bar",
+          "quantity": 2,
+          "price": 60
+        }
+      ],
+      "totalQuantity": 11,
+      "totalPrice": 2250,
+      "displayOrder": 0,
+      "isActive": true,
+      "createdAt": "2026-04-27T11:49:32.938Z",
+      "updatedAt": "2026-08-10T10:44:40.402Z",
+      "__v": 0
+    },
+    {
+      "_id": "69df69efd3ffecbb27683638",
+      "id": "pkg-mega-family",
+      "title": "Mega Family Pack",
+      "category": "Combo Packages",
+      "description": "",
+      "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1776331024/kite/promotions/1776331023361-megafamily.jpg",
+      "images": [],
+      "items": [
+        {
+          "product": "Kite Glow 1 KG",
+          "quantity": 3,
+          "price": 350
+        },
+        {
+          "product": "Kite Large Gross",
+          "quantity": 1,
+          "price": 200
+        },
+        {
+          "product": "Kite Super Bar",
+          "quantity": 2,
+          "price": 60
+        }
+      ],
+      "totalQuantity": 6,
+      "totalPrice": 1370,
+      "displayOrder": 0,
+      "isActive": true,
+      "createdAt": "2026-04-15T10:35:27.909Z",
+      "updatedAt": "2026-08-10T10:44:50.094Z",
+      "__v": 0
+    },
+    {
+      "_id": "69df697fd3ffecbb2768362e",
+      "id": "pkg-monthly-family",
+      "title": "Monthly Family Package",
+      "category": "Combo Packages",
+      "description": "",
+      "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1776331038/kite/promotions/1776331038604-monthlyfamily.webp",
+      "images": [],
+      "items": [
+        {
+          "product": "Kite Glow 1 KG",
+          "quantity": 2,
+          "price": 350
+        },
+        {
+          "product": "Kite Large Gross",
+          "quantity": 1,
+          "price": 200
+        },
+        {
+          "product": "Kite Long Bar",
+          "quantity": 2,
+          "price": 60
+        }
+      ],
+      "totalQuantity": 5,
+      "totalPrice": 1020,
+      "displayOrder": 0,
+      "isActive": true,
+      "createdAt": "2026-04-15T10:33:36.003Z",
+      "updatedAt": "2026-08-10T10:45:03.601Z",
+      "__v": 0
+    },
+    {
+      "_id": "69df693ed3ffecbb2768362a",
+      "id": "pkg-smart-budget",
+      "title": "Smart Budget Package",
+      "category": "Combo Packages",
+      "description": "",
+      "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1776331054/kite/promotions/1776331053059-smartbudget.jpg",
+      "images": [],
+      "items": [
+        {
+          "product": "Kite Glow 1KG",
+          "quantity": 1,
+          "price": 350
+        },
+        {
+          "product": "Kite Match Gatha",
+          "quantity": 1,
+          "price": 50
+        },
+        {
+          "product": "Kite Super Bar",
+          "quantity": 1,
+          "price": 60
+        }
+      ],
+      "totalQuantity": 3,
+      "totalPrice": 460,
+      "displayOrder": 0,
+      "isActive": true,
+      "createdAt": "2026-04-15T10:32:30.035Z",
+      "updatedAt": "2026-05-21T09:30:52.910Z",
+      "__v": 0
+    },
+    {
+      "_id": "69df6903d3ffecbb27683626",
+      "id": "pkg-starter",
+      "title": "Starter Package",
+      "category": "Combo Packages",
+      "description": "",
+      "image": "https://res.cloudinary.com/dhjfljocf/image/upload/v1776331069/kite/promotions/1776331068253-starterpackage.jpg",
+      "images": [],
+      "items": [
+        {
+          "product": "Kite Glow 500 G",
+          "quantity": 2,
+          "price": 180
+        },
+        {
+          "product": "Kite Long Bar",
+          "quantity": 1,
+          "price": 60
+        }
+      ],
+      "totalQuantity": 3,
+      "totalPrice": 420,
+      "displayOrder": 0,
+      "isActive": true,
+      "createdAt": "2026-04-15T10:31:31.102Z",
+      "updatedAt": "2026-08-10T10:45:40.583Z",
+      "__v": 0
+    }
+  ],
+  "orders": [
+    {
+      "_id": "ord_1001_kite",
+      "orderNumber": "KT-001",
+      "type": "product",
+      "productId": "kite-glow",
+      "quantity": 2,
+      "customerName": "Muhammad Ali",
+      "phone": "03123456789",
+      "email": "muhammad.ali@gmail.com",
+      "address": "House #42, Street 11, Sector F-7/2",
+      "city": "Islamabad",
+      "note": "Please deliver after 2 PM",
+      "paymentMethod": "COD",
+      "totalAmount": 1950,
+      "shippingCost": 150,
+      "status": "confirmed",
+      "createdAt": "2026-09-22T10:45:19.909Z",
+      "updatedAt": "2026-09-23T10:45:19.910Z",
+      "items": [
+        {
+          "itemType": "product",
+          "productId": "kite-glow",
+          "brandName": "Kite Glow",
+          "selectedVariant": "1 kg Box",
+          "quantity": 2,
+          "price": 900
+        }
+      ]
+    },
+    {
+      "_id": "ord_1002_kite",
+      "orderNumber": "KT-002",
+      "type": "promotion",
+      "promotionId": "pkg-super-bulk",
+      "quantity": 1,
+      "customerName": "Tariq Mehmood",
+      "phone": "03009876543",
+      "email": "tariq.m@yahoo.com",
+      "address": "Plot 15, Block B, DHA Phase 5",
+      "city": "Lahore",
+      "note": "Call before arriving",
+      "paymentMethod": "COD",
+      "totalAmount": 3450,
+      "shippingCost": 0,
+      "status": "shipped",
+      "createdAt": "2026-09-23T10:45:19.910Z",
+      "updatedAt": "2026-09-24T10:45:19.910Z",
+      "items": [
+        {
+          "itemType": "promotion",
+          "promotionId": "pkg-super-bulk",
+          "brandName": "Super Bulk Package",
+          "selectedVariant": "Mega Bundle",
+          "quantity": 1,
+          "price": 3450
+        }
+      ]
+    },
+    {
+      "_id": "ord_1003_kite",
+      "orderNumber": "KT-003",
+      "type": "product",
+      "productId": "dish-wash-bar",
+      "quantity": 4,
+      "customerName": "Ayesha Siddiqui",
+      "phone": "03215554321",
+      "email": "ayesha.s@outlook.com",
+      "address": "Apartment 4B, Clifton Block 2",
+      "city": "Karachi",
+      "note": "Leave with guard if unavailable",
+      "paymentMethod": "Easypaisa",
+      "totalAmount": 850,
+      "shippingCost": 150,
+      "status": "pending",
+      "createdAt": "2026-09-24T16:45:19.910Z",
+      "updatedAt": "2026-09-24T16:45:19.911Z",
+      "items": [
+        {
+          "itemType": "product",
+          "productId": "dish-wash-bar",
+          "brandName": "Kite Dish Wash Bar",
+          "selectedVariant": "Standard 250g",
+          "quantity": 4,
+          "price": 175
+        }
+      ]
+    },
+    {
+      "_id": "ord_1004_kite",
+      "orderNumber": "KT-004",
+      "type": "product",
+      "productId": "safety-matches",
+      "quantity": 5,
+      "customerName": "Usman Farooq",
+      "phone": "03334445566",
+      "email": "usman.f@gmail.com",
+      "address": "House 88, Bahria Town Phase 4",
+      "city": "Rawalpindi",
+      "note": "",
+      "paymentMethod": "COD",
+      "totalAmount": 1200,
+      "shippingCost": 150,
+      "status": "delivered",
+      "createdAt": "2026-09-20T10:45:19.911Z",
+      "updatedAt": "2026-09-21T10:45:19.911Z",
+      "items": [
+        {
+          "itemType": "product",
+          "productId": "safety-matches",
+          "brandName": "Kite Safety Matches",
+          "selectedVariant": "Classic Pack",
+          "quantity": 5,
+          "price": 210
+        }
+      ]
+    },
+    {
+      "_id": "ord_1005_kite",
+      "orderNumber": "KT-005",
+      "type": "promotion",
+      "promotionId": "pkg-monthly-family",
+      "quantity": 1,
+      "customerName": "Fatima Zahra",
+      "phone": "03456789012",
+      "email": "fatima.z@gmail.com",
+      "address": "Canal Road, Near Chenab Club",
+      "city": "Faisalabad",
+      "note": "Urgent delivery requested",
+      "paymentMethod": "JazzCash",
+      "totalAmount": 2800,
+      "shippingCost": 150,
+      "status": "pending",
+      "createdAt": "2026-09-25T04:45:19.911Z",
+      "updatedAt": "2026-09-25T04:45:19.911Z",
+      "items": [
+        {
+          "itemType": "promotion",
+          "promotionId": "pkg-monthly-family",
+          "brandName": "Monthly Family Package",
+          "selectedVariant": "Family Pack",
+          "quantity": 1,
+          "price": 2650
+        }
+      ]
+    },
+    {
+      "_id": "ord_1006_kite",
+      "orderNumber": "KT-006",
+      "type": "product",
+      "productId": "burq-action",
+      "quantity": 2,
+      "customerName": "Bilal Ahmed",
+      "phone": "03023334455",
+      "email": "bilal.ahmed@live.com",
+      "address": "Gulgasht Colony, Bosan Road",
+      "city": "Multan",
+      "note": "",
+      "paymentMethod": "COD",
+      "totalAmount": 1600,
+      "shippingCost": 150,
+      "status": "confirmed",
+      "createdAt": "2026-09-25T08:45:19.911Z",
+      "updatedAt": "2026-09-25T08:45:19.911Z",
+      "items": [
+        {
+          "itemType": "product",
+          "productId": "burq-action",
+          "brandName": "BURQ Action Detergent",
+          "selectedVariant": "1 kg Pouch",
+          "quantity": 2,
+          "price": 725
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "defaultShippingCost": 150
+  },
+  "analytics": {
+    "totalVisitors": 14821,
+    "todayVisitors": 285,
+    "totalPageviews": 46211,
+    "sources": {
+      "whatsapp": 5481,
+      "facebook": 3820,
+      "instagram": 2340,
+      "google": 1950,
+      "direct": 980,
+      "other": 250
+    },
+    "devices": {
+      "mobile": 11421,
+      "desktop": 2810,
+      "tablet": 590
+    },
+    "topPages": {
+      "/": 18450,
+      "/online-order": 12381,
+      "/products": 6820,
+      "/export/safety-matches": 4120,
+      "/export/wooden-splints": 2480,
+      "/fmcg-division": 1960
+    },
+    "recentVisits": [
+      {
+        "id": "v_1790335154997_r1ad",
+        "timestamp": "2026-09-25T11:19:14.997Z",
+        "path": "/online-order",
+        "source": "whatsapp",
+        "device": "mobile",
+        "city": "Pakistan"
+      },
+      {
+        "id": "v1",
+        "timestamp": "2026-09-25T11:17:14.895Z",
+        "path": "/online-order",
+        "source": "whatsapp",
+        "device": "mobile",
+        "city": "Lahore, PK"
+      },
+      {
+        "id": "v2",
+        "timestamp": "2026-09-25T11:12:14.899Z",
+        "path": "/",
+        "source": "facebook",
+        "device": "mobile",
+        "city": "Karachi, PK"
+      },
+      {
+        "id": "v3",
+        "timestamp": "2026-09-25T11:05:14.899Z",
+        "path": "/products",
+        "source": "instagram",
+        "device": "mobile",
+        "city": "Islamabad, PK"
+      },
+      {
+        "id": "v4",
+        "timestamp": "2026-09-25T10:58:14.899Z",
+        "path": "/export/safety-matches",
+        "source": "google",
+        "device": "desktop",
+        "city": "Peshawar, PK"
+      },
+      {
+        "id": "v5",
+        "timestamp": "2026-09-25T10:44:14.899Z",
+        "path": "/online-order",
+        "source": "whatsapp",
+        "device": "mobile",
+        "city": "Multan, PK"
+      },
+      {
+        "id": "v6",
+        "timestamp": "2026-09-25T10:31:14.899Z",
+        "path": "/",
+        "source": "direct",
+        "device": "desktop",
+        "city": "Faisalabad, PK"
+      }
+    ],
+    "lastUpdated": "2026-09-25T11:19:14.997Z"
+  }
+}

@@ -1,0 +1,306 @@
+@import url("https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+@import "tailwindcss";
+
+/* Tailwind v4 - Custom Theme Configuration */
+@theme {
+  /* ============================================
+     AZIZ GROUP DESIGN SYSTEM
+     ============================================
+  */
+
+  /* PRIMARY COLORS - Main brand color (Cyan Blue) */
+  --color-primary: #00aeef;
+  --color-primary-50: #e6f7fd;
+  --color-primary-100: #b3e7fa;
+  --color-primary-200: #80d7f7;
+  --color-primary-300: #4dc7f4;
+  --color-primary-400: #1ab7f1;
+  --color-primary-500: #00aeef; /* Main */
+  --color-primary-600: #0095cc; /* Hover state */
+  --color-primary-700: #007ba7;
+  --color-primary-800: #006182;
+  --color-primary-900: #00475d;
+
+  /* ACCENT COLORS - Secondary brand color (Magenta) */
+  --color-accent: #ed028c;
+  --color-accent-50: #fef0f8;
+  --color-accent-100: #fcd1e9;
+  --color-accent-200: #fab2da;
+  --color-accent-300: #f893cb;
+  --color-accent-400: #f674bc;
+  --color-accent-500: #ed028c; /* Main */
+  --color-accent-600: #d4027a;
+  --color-accent-700: #bb0268;
+  --color-accent-800: #a20156;
+  --color-accent-900: #890144;
+  --color-accent-light: #ff8ace; /* Borders/highlights */
+  --color-accent-tint: #ffeff9; /* Subtle backgrounds */
+
+  /* TEXT COLORS */
+  --color-text-primary: #222222; /* Headings, main text */
+  --color-text-secondary: #666666; /* Body text, descriptions */
+  --color-text-tertiary: #999999; /* Muted text */
+  --color-text-white: #ffffff; /* White text on dark backgrounds */
+  --color-text-white-90: rgba(255, 255, 255, 0.9);
+  --color-text-white-80: rgba(255, 255, 255, 0.8);
+  --color-text-black: #000000; /* Pure black when needed */
+
+  /* BACKGROUND COLORS */
+  --color-bg-main: #ffffff;
+  --color-bg-light: #f9f9f9;
+  --color-bg-dark: #222222;
+  --color-bg-darker: #1a1a1a;
+  --color-bg-gray: #f3f4f6;
+
+  /* BORDER COLORS */
+  --color-border-light: #e0e0e0;
+  --color-border-gray: #d1d5db;
+  --color-border-dark: #374151;
+
+  /* SEMANTIC COLORS */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+}
+
+/* ============================================
+   CUSTOM UTILITY CLASSES
+   ============================================
+*/
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/* ============================================
+   UNIVERSAL CARD HOVER EFFECT
+   ============================================
+*/
+.card-hover {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.card-hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, transparent, transparent);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+    0 20px 40px -12px rgba(0, 174, 239, 0.2),
+    0 10px 20px -8px rgba(237, 2, 140, 0.15),
+    0 0 0 1px rgba(0, 174, 239, 0.1);
+}
+
+.card-hover:hover::before {
+  opacity: 1;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 174, 239, 0.3) 0%,
+    rgba(237, 2, 140, 0.3) 50%,
+    rgba(255, 138, 206, 0.3) 100%
+  );
+}
+
+.card-hover:active {
+  transform: translateY(-4px) scale(1.01);
+  transition-duration: 0.1s;
+}
+
+.font-amiri {
+  font-family: "Amiri", serif;
+}
+
+/* Global base styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  color: var(--color-text-primary);
+  background-color: #ffffff;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global Button Enhancements */
+button, 
+[role="button"] {
+  cursor: pointer;
+  transition: transform 0.15s ease-out, background-color 0.15s ease-out, color 0.15s ease-out;
+}
+
+button:active, 
+[role="button"]:active {
+  transform: scale(0.96);
+}
+
+/* Cart Drawer Animations */
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Swiper custom overrides */
+.swiper-pagination-bullet-active {
+  background-color: #00aeef !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00aeef;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0095cc;
+}
+
+/* Selection colors */
+::selection {
+  background-color: #00aeef;
+  color: white;
+}
+
+/* Image optimization */
+img {
+  display: block;
+}
+
+@media (max-width: 640px) {
+  img:not(.hero-carousel-img) {
+    max-height: 400px;
+    object-fit: cover;
+  }
+
+  img.product-gallery-image {
+    max-height: none;
+    object-fit: contain;
+  }
+}
+
+/* Typography enhancements */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+body:not(.admin-route) p {
+  line-height: 1.8;
+}
+
+p a {
+  color: #00aeef;
+  text-decoration-color: #00aeef;
+  text-decoration-thickness: 2px;
+}
+
+p a:hover {
+  color: #0095cc;
+  text-decoration-color: #0095cc;
+}
+
+/* Input field styles */
+body:not(.admin-route) input[type="text"],
+body:not(.admin-route) input[type="email"],
+body:not(.admin-route) input[type="tel"],
+body:not(.admin-route) textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #222222;
+  transition: all 0.3s ease;
+}
+
+body:not(.admin-route) input:focus,
+body:not(.admin-route) textarea:focus {
+  border-color: #00aeef;
+  outline: none;
+}
+
+body:not(.admin-route) input:hover,
+body:not(.admin-route) textarea:hover {
+  border-color: #ff8ace;
+}
+
+@media (max-width: 1024px) {
+  .swiper-button-next,
+  .swiper-button-prev {
+    display: none !important;
+  }
+}
+
+/* Make all app pages smaller so more content is visible vertically */
+.app-page-compact {
+  --home-scale: 0.75;
+  zoom: var(--home-scale);
+}
+
+@supports not (zoom: 1) {
+  .app-page-compact {
+    transform: scale(var(--home-scale));
+    transform-origin: top center;
+    width: calc(100% / var(--home-scale));
+  }
+}
+
+@media (max-width: 768px) {
+  body:not(.admin-route) h1 {
+    font-size: 2rem !important;
+  }
+
+  body:not(.admin-route) h2 {
+    font-size: 1.75rem !important;
+  }
+
+  body:not(.admin-route) h3 {
+    font-size: 1.5rem !important;
+  }
+
+  body:not(.admin-route) section {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
