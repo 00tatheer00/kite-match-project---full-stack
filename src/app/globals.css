@@ -304,3 +304,24 @@ body:not(.admin-route) textarea:hover {
     padding-bottom: 2rem;
   }
 }
+
+/* ========================================================================= */
+/* ADMIN PANEL THEME HELPERS (Light / Dark Mode Form & Table Styling) */
+/* ========================================================================= */
+.admin-dark-theme input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.admin-dark-theme select,
+.admin-dark-theme textarea {
+  background-color: #0B0F19 !important;
+  border-color: #1E293B !important;
+  color: #F8FAFC !important;
+}
+
+.admin-dark-theme input::placeholder,
+.admin-dark-theme textarea::placeholder {
+  color: #64748B !important;
+}
+
+.admin-dark-theme label {
+  color: #CBD5E1 !important;
+}
+

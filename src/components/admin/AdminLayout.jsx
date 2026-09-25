@@ -33,49 +33,49 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
     <div
       className={`min-h-screen flex flex-col md:flex-row transition-colors duration-200 text-base ${
         isDark
-          ? "bg-[#080C14] text-slate-100"
+          ? "bg-[#080C14] text-slate-100 admin-dark-theme"
           : "bg-slate-50 text-slate-800"
       }`}
     >
       {/* ========================================================================= */}
-      {/* SIDEBAR NAVIGATION (Broad, Clear, Readable Desktop Scale) */}
+      {/* SIDEBAR NAVIGATION (Strictly Fixed 288px Width, Sticky Full Desktop Height) */}
       {/* ========================================================================= */}
       <aside
-        className={`w-full md:w-72 lg:w-80 flex-shrink-0 border-b md:border-b-0 md:border-r transition-colors duration-200 ${
+        className={`w-full md:w-72 md:min-w-[18rem] md:max-w-[18rem] flex-shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto flex flex-col justify-between border-b md:border-b-0 md:border-r transition-colors duration-200 z-40 ${
           isDark
             ? "border-[#1E293B] bg-[#0B0F19]"
             : "border-slate-200 bg-white shadow-sm"
         }`}
       >
-        {/* Brand Header */}
-        <div
-          className={`px-6 py-6 lg:py-7 border-b transition-colors ${
-            isDark ? "border-[#1E293B]" : "border-slate-200"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-              <h1
-                className="text-2xl font-black tracking-tight"
-                style={{ color: isDark ? "#38BDF8" : colors.primary.main }}
-              >
-                Admin Panel
-              </h1>
-            </div>
-          </div>
-          <p
-            className={`mt-1.5 text-xs font-medium tracking-wide uppercase ${
-              isDark ? "text-slate-400" : "text-slate-500"
+        <div>
+          {/* Brand Header */}
+          <div
+            className={`px-6 py-6 lg:py-7 border-b transition-colors ${
+              isDark ? "border-[#1E293B]" : "border-slate-200"
             }`}
           >
-            Kite Matches &bull; Chemicals &bull; FMCG
-          </p>
-        </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                <h1
+                  className="text-2xl font-black tracking-tight"
+                  style={{ color: isDark ? "#38BDF8" : colors.primary.main }}
+                >
+                  Admin Panel
+                </h1>
+              </div>
+            </div>
+            <p
+              className={`mt-1.5 text-xs font-medium tracking-wide uppercase ${
+                isDark ? "text-slate-400" : "text-slate-500"
+              }`}
+            >
+              Kite Matches &bull; Chemicals &bull; FMCG
+            </p>
+          </div>
 
-        {/* Navigation Menu */}
-        <div className="p-4 lg:p-5 flex flex-col justify-between h-[calc(100%-95px)]">
-          <nav className="space-y-2 text-sm lg:text-base">
+          {/* Navigation Menu */}
+          <nav className="p-4 lg:p-5 space-y-2 text-sm lg:text-base">
             {links.map((link) => {
               const active = location.pathname === link.to;
               if (isDark) {
@@ -119,24 +119,28 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
               );
             })}
           </nav>
+        </div>
 
-          {/* Sidebar Footer: Mode Toggle & Logout */}
-          <div className="pt-6 space-y-3 border-t border-slate-200/60 dark:border-slate-800">
-            {/* Theme Toggle Button inside sidebar */}
-            <ThemeToggleBtn variant="sidebar" />
+        {/* Sidebar Footer: Mode Toggle & Logout (Anchored to Bottom) */}
+        <div
+          className={`p-4 lg:p-5 space-y-3 border-t transition-colors ${
+            isDark ? "border-[#1E293B]" : "border-slate-200"
+          }`}
+        >
+          {/* Theme Toggle Button inside sidebar */}
+          <ThemeToggleBtn variant="sidebar" />
 
-            <button
-              onClick={handleLogout}
-              className={`w-full text-left px-4 py-3 rounded-xl border transition-all font-medium text-sm cursor-pointer flex items-center justify-between ${
-                isDark
-                  ? "border-[#1E293B] text-slate-400 hover:text-white hover:bg-[#131823] hover:border-slate-600"
-                  : "border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
-              }`}
-            >
-              <span>Logout Admin</span>
-              <span className="text-xs opacity-60">&rarr;</span>
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className={`w-full text-left px-4 py-3 rounded-xl border transition-all font-medium text-sm cursor-pointer flex items-center justify-between ${
+              isDark
+                ? "border-[#1E293B] text-slate-400 hover:text-white hover:bg-[#131823] hover:border-slate-600"
+                : "border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+            }`}
+          >
+            <span>Logout Admin</span>
+            <span className="text-xs opacity-60">&rarr;</span>
+          </button>
         </div>
       </aside>
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
 import RequireAdminAuth from "../components/admin/RequireAdminAuth";
+import { useAdminTheme } from "@/context/AdminThemeContext";
 import {
   adminGetPromotions,
   adminCreatePromotion,
@@ -27,6 +28,8 @@ const emptyForm = {
 };
 
 const AdminPromotionsPage = () => {
+  const { isDark } = useAdminTheme();
+  const [showForm, setShowForm] = useState(false);
   const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -137,6 +140,7 @@ const AdminPromotionsPage = () => {
       }
       setForm(emptyForm);
       setEditingId(null);
+      setShowForm(false);
       setPromotionImages([]);
       await load();
     } catch (err) {
@@ -148,6 +152,7 @@ const AdminPromotionsPage = () => {
 
   const handleEdit = (p) => {
     setEditingId(p.id);
+    setShowForm(true);
     setForm({
       id: p.id || "",
       title: p.title || "",
@@ -181,32 +186,54 @@ const AdminPromotionsPage = () => {
     <RequireAdminAuth>
       <AdminLayout>
         <div className="flex flex-col gap-8">
-          <div>
-            <h1
-              className="text-2xl font-bold"
-              style={{ color: colors.text.primary }}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1
+                className={`text-2xl sm:text-3xl font-black ${
+                  isDark ? "text-white" : "text-slate-900"
+                }`}
+              >
+                Promotions &amp; Packages
+              </h1>
+              <p
+                className={`mt-1 text-sm ${
+                  isDark ? "text-slate-400" : "text-slate-600"
+                }`}
+              >
+                Create, update, and delete promotions with easy item and image fields.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (showForm && !editingId) {
+                  setShowForm(false);
+                } else {
+                  setEditingId(null);
+                  setForm(emptyForm);
+                  setShowForm(true);
+                }
+              }}
+              className="px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-md shadow-pink-500/20 flex items-center gap-2 cursor-pointer self-start sm:self-auto transition-all"
             >
-              Promotions & Packages
-            </h1>
-            <p
-              className="mt-1 text-sm"
-              style={{ color: colors.text.secondary }}
-            >
-              Create, update, and delete promotions with easy item and image
-              fields.
-            </p>
+              <span>{showForm && !editingId ? "✕ Close Form" : "+ Add New Promotion"}</span>
+            </button>
           </div>
 
           {loading ? (
-            <div className="text-sm" style={{ color: colors.text.secondary }}>
+            <div className={`text-sm ${isDark ? "text-slate-400" : "text-slate-600"}`}>
               Loading promotions...
             </div>
           ) : (
-            <div className="bg-white border border-[#E0E0E0] rounded-2xl p-5 md:p-6">
+            <div className={`border rounded-2xl p-5 md:p-6 transition-colors shadow-sm ${
+              isDark ? "bg-[#111726] border-[#1E293B]" : "bg-white border-slate-200"
+            }`}>
               <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[#E0E0E0]">
+                    <tr className={`border-b text-xs font-bold uppercase tracking-wider ${
+                      isDark ? "border-[#1E293B] text-slate-300" : "border-slate-200 text-slate-700"
+                    }`}>
                       <th className="text-left py-3 pr-4">ID</th>
                       <th className="text-left py-3 pr-4">Title</th>
                       <th className="text-left py-3 pr-4">Category</th>
@@ -216,17 +243,17 @@ const AdminPromotionsPage = () => {
                       <th className="text-right py-3 pl-4">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className={isDark ? "divide-y divide-[#1E293B]/60 text-slate-200" : "divide-y divide-slate-100 text-slate-800"}>
                     {promos.map((p) => (
-                      <tr key={p.id} className="border-b border-[#F0F0F0]">
-                        <td className="py-3 pr-4 font-mono text-xs">{p.id}</td>
-                        <td className="py-3 pr-4">{p.title}</td>
+                      <tr key={p.id} className={`transition-colors ${isDark ? "hover:bg-[#161D2E]" : "hover:bg-slate-50"}`}>
+                        <td className={`py-3 pr-4 font-mono text-xs font-semibold ${isDark ? "text-sky-400" : "text-sky-600"}`}>{p.id}</td>
+                        <td className="py-3 pr-4 font-medium">{p.title}</td>
                         <td className="py-3 pr-4">{p.category}</td>
                         <td className="py-3 pr-4">{p.totalQuantity ?? "-"}</td>
-                        <td className="py-3 pr-4">
-                          {p.totalPrice != null ? p.totalPrice : "-"}
+                        <td className="py-3 pr-4 font-semibold">
+                          {p.totalPrice != null ? `Rs. ${p.totalPrice}` : "-"}
                         </td>
-                        <td className="py-3 pr-4 text-xs text-[#666666]">
+                        <td className={`py-3 pr-4 text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                           {p.updatedAt
                             ? new Date(p.updatedAt).toLocaleString()
                             : "-"}
@@ -234,13 +261,21 @@ const AdminPromotionsPage = () => {
                         <td className="py-3 pl-4 text-right space-x-2">
                           <button
                             onClick={() => handleEdit(p)}
-                            className="px-3 py-1 rounded-lg text-xs font-semibold border border-[#E0E0E0] hover:border-[#00AEEF]"
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                              isDark
+                                ? "border-[#1E293B] bg-[#161D2E] text-sky-400 hover:bg-[#1E293B]"
+                                : "border-slate-200 text-slate-700 hover:bg-slate-100"
+                            }`}
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(p.id)}
-                            className="px-3 py-1 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50"
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                              isDark
+                                ? "border-red-900/40 bg-red-950/20 text-red-400 hover:bg-red-900/40"
+                                : "border-red-200 text-red-600 hover:bg-red-50"
+                            }`}
                           >
                             Delete
                           </button>
@@ -250,10 +285,10 @@ const AdminPromotionsPage = () => {
                     {promos.length === 0 && (
                       <tr>
                         <td
-                          className="py-6 text-center text-[#666666]"
+                          className={`py-8 text-center text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}
                           colSpan={7}
                         >
-                          No promotions yet. Use the form below to add one.
+                          No promotions yet. Click &quot;+ Add New Promotion&quot; above to add one.
                         </td>
                       </tr>
                     )}
@@ -265,20 +300,22 @@ const AdminPromotionsPage = () => {
                 {promos.map((p) => (
                   <div
                     key={p.id}
-                    className="border border-[#E0E0E0] rounded-xl p-4"
+                    className={`border rounded-xl p-4 ${
+                      isDark ? "border-[#1E293B] bg-[#161D2E]" : "border-slate-200 bg-slate-50"
+                    }`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold">{p.title}</p>
-                        <p className="text-xs text-[#666666]">
+                        <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>{p.title}</p>
+                        <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                           {p.category || "-"}
                         </p>
                       </div>
-                      <span className="text-xs font-mono text-[#666666]">
+                      <span className={`text-xs font-mono ${isDark ? "text-sky-400" : "text-sky-600"}`}>
                         {p.id}
                       </span>
                     </div>
-                    <div className="mt-3 text-xs text-[#666666] space-y-1">
+                    <div className={`mt-3 text-xs space-y-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                       <span className="block">
                         Total Qty: {p.totalQuantity ?? "-"}
                       </span>
@@ -295,13 +332,15 @@ const AdminPromotionsPage = () => {
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button
                         onClick={() => handleEdit(p)}
-                        className="px-3 py-1 rounded-lg text-xs font-semibold border border-[#E0E0E0] hover:border-[#00AEEF]"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+                          isDark ? "border-[#1E293B] bg-[#161D2E] text-sky-400" : "border-slate-200 text-slate-700"
+                        }`}
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(p.id)}
-                        className="px-3 py-1 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50"
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50"
                       >
                         Delete
                       </button>
@@ -309,21 +348,45 @@ const AdminPromotionsPage = () => {
                   </div>
                 ))}
                 {promos.length === 0 && (
-                  <p className="text-center text-sm text-[#666666] py-6">
-                    No promotions yet. Use the form below to add one.
+                  <p className={`text-center text-sm py-6 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    No promotions yet. Click &quot;+ Add New Promotion&quot; above to add one.
                   </p>
                 )}
               </div>
             </div>
           )}
 
-          <div className="bg-white border border-[#E0E0E0] rounded-2xl p-5 md:p-6">
-            <h2
-              className="text-lg font-semibold mb-4"
-              style={{ color: colors.text.primary }}
-            >
-              {editingId ? "Edit Promotion" : "Add New Promotion"}
-            </h2>
+          {showForm && (
+            <div className={`border rounded-2xl p-5 md:p-7 shadow-xl transition-all ${
+              isDark ? "bg-[#111726] border-[#1E293B] text-slate-100" : "bg-white border-slate-200 text-slate-900 shadow-sm"
+            }`}>
+              <div className={`flex items-center justify-between mb-5 border-b pb-4 ${
+                isDark ? "border-[#1E293B]" : "border-slate-200"
+              }`}>
+                <div>
+                  <h2 className={`text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+                    {editingId ? "Edit Promotion Details" : "Add New Promotion"}
+                  </h2>
+                  <p className={`text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    {editingId ? `Updating promotion: ${form.title || form.id}` : "Configure bundle package, items, and pricing"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingId(null);
+                    setForm(emptyForm);
+                  }}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
+                    isDark
+                      ? "border-[#1E293B] text-slate-400 hover:text-white hover:bg-[#161D2E]"
+                      : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  ✕ Close Form
+                </button>
+              </div>
             {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
             <form
               onSubmit={handleSubmit}
@@ -462,9 +525,13 @@ const AdminPromotionsPage = () => {
                   <button
                     type="button"
                     onClick={addImageUrl}
-                    className="px-3 py-2 rounded-lg border border-[#E0E0E0] hover:bg-[#F9F9F9]"
+                    className={`px-3 py-2 rounded-lg border text-sm font-semibold transition-colors ${
+                      isDark
+                        ? "border-[#1E293B] bg-[#161D2E] text-slate-200 hover:bg-[#1E293B]"
+                        : "border-[#E0E0E0] bg-white text-slate-700 hover:bg-[#F9F9F9]"
+                    }`}
                   >
-                    Add URL
+                    + Add URL
                   </button>
                 </div>
               </div>
@@ -511,7 +578,7 @@ const AdminPromotionsPage = () => {
                       <button
                         type="button"
                         onClick={() => removeItem(idx)}
-                        className="px-3 py-2 rounded-lg border border-red-200 text-red-600"
+                        className="px-3 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-500/10"
                       >
                         Remove
                       </button>
@@ -520,9 +587,13 @@ const AdminPromotionsPage = () => {
                   <button
                     type="button"
                     onClick={addItem}
-                    className="px-3 py-2 rounded-lg border border-[#E0E0E0] hover:bg-[#F9F9F9]"
+                    className={`px-3 py-2 rounded-lg border text-sm font-semibold transition-colors ${
+                      isDark
+                        ? "border-[#1E293B] bg-[#161D2E] text-slate-200 hover:bg-[#1E293B]"
+                        : "border-[#E0E0E0] bg-white text-slate-700 hover:bg-[#F9F9F9]"
+                    }`}
                   >
-                    Add Item
+                    + Add Item
                   </button>
                 </div>
               </div>
@@ -530,7 +601,7 @@ const AdminPromotionsPage = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-[#00AEEF] to-[#0095CC] hover:shadow-lg hover:shadow-[#00AEEF]/30 transition-all disabled:opacity-60"
+                  className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-[#00AEEF] to-[#0095CC] hover:shadow-lg hover:shadow-[#00AEEF]/30 transition-all disabled:opacity-60 cursor-pointer"
                 >
                   {saving
                     ? "Saving..."
@@ -545,8 +616,13 @@ const AdminPromotionsPage = () => {
                       setEditingId(null);
                       setForm(emptyForm);
                       setPromotionImages([]);
+                      setShowForm(false);
                     }}
-                    className="px-5 py-2 rounded-lg text-sm font-semibold border border-[#E0E0E0] hover:bg-[#F9F9F9]"
+                    className={`px-5 py-2 rounded-lg text-sm font-semibold border transition-colors cursor-pointer ${
+                      isDark
+                        ? "border-[#1E293B] bg-[#161D2E] text-slate-300 hover:bg-[#1E293B]"
+                        : "border-[#E0E0E0] bg-white text-slate-700 hover:bg-[#F9F9F9]"
+                    }`}
                   >
                     Cancel Edit
                   </button>
@@ -554,6 +630,7 @@ const AdminPromotionsPage = () => {
               </div>
             </form>
           </div>
+          )}
         </div>
       </AdminLayout>
     </RequireAdminAuth>

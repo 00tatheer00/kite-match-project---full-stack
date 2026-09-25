@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
 import RequireAdminAuth from "../components/admin/RequireAdminAuth";
 import { getSettings, adminUpdateSettings } from "../services/api";
-import { colors } from "../theme";
+import { useAdminTheme } from "../context/AdminThemeContext";
 
 const AdminSettingsPage = () => {
+  const { isDark } = useAdminTheme();
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,35 +58,43 @@ const AdminSettingsPage = () => {
       <AdminLayout>
         <div className="flex flex-col gap-8">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: colors.text.primary }}>
+            <h1 className={`text-2xl sm:text-3xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
               Global Settings
             </h1>
-            <p className="mt-1 text-sm" style={{ color: colors.text.secondary }}>
+            <p className={`mt-1 text-sm ${isDark ? "text-slate-400" : "text-slate-600"}`}>
               Manage global configuration for your store.
             </p>
           </div>
 
           {loading ? (
-            <div className="text-sm" style={{ color: colors.text.secondary }}>
+            <div className={`text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>
               Loading settings...
             </div>
           ) : (
-            <div className="bg-white border border-[#E0E0E0] rounded-2xl p-5 md:p-6 max-w-xl">
-              {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
-              {success && <p className="text-sm text-green-600 mb-4">{success}</p>}
+            <div className={`border rounded-2xl p-6 md:p-8 max-w-xl shadow-sm transition-colors ${
+              isDark ? "bg-[#111726] border-[#1E293B]" : "bg-white border-slate-200"
+            }`}>
+              {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
+              {success && <p className="text-sm text-emerald-500 mb-4 font-semibold">{success}</p>}
               
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block mb-1.5 font-medium">Default Shipping Cost (Rs)</label>
+                  <label className={`block mb-2 font-semibold text-sm ${isDark ? "text-slate-200" : "text-slate-700"}`}>
+                    Default Shipping Cost (Rs)
+                  </label>
                   <input
                     type="number"
                     value={defaultShippingCost}
                     onChange={(e) => setDefaultShippingCost(e.target.value)}
                     required
                     min="0"
-                    className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                    className={`w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF] transition-colors ${
+                      isDark
+                        ? "bg-[#0B0F19] border-[#1E293B] text-white"
+                        : "bg-white border-slate-200 text-slate-800"
+                    }`}
                   />
-                  <p className="text-xs text-[#666666] mt-1.5">
+                  <p className={`text-xs mt-2 leading-relaxed ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                     This shipping cost is applied if a product or promotion does not have a specific shipping cost override. 
                     If multiple items are in the cart, the highest applicable shipping cost is charged exactly once.
                   </p>
@@ -95,7 +104,7 @@ const AdminSettingsPage = () => {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-6 py-2.5 bg-[#00AEEF] text-white rounded-lg font-bold hover:bg-[#0095CC] transition-colors disabled:opacity-70"
+                    className="px-6 py-2.5 bg-gradient-to-r from-[#00AEEF] to-[#0095CC] text-white rounded-xl font-bold shadow-md shadow-[#00AEEF]/20 hover:opacity-95 transition-all disabled:opacity-70 cursor-pointer text-sm"
                   >
                     {saving ? "Saving..." : "Save Settings"}
                   </button>
