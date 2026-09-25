@@ -271,42 +271,55 @@ export function getAnalyticsSummary() {
   const db = getDb();
   if (!db.analytics) {
     db.analytics = {
-      totalVisitors: 14820,
-      todayVisitors: 284,
-      totalPageviews: 46210,
+      totalVisitors: 0,
+      todayVisitors: 0,
+      totalPageviews: 0,
       sources: {
-        whatsapp: 5480,   // ~37% (major in Pakistan for FMCG orders)
-        facebook: 3820,   // ~26%
-        instagram: 2340,  // ~16%
-        google: 1950,     // ~13%
-        direct: 980,      // ~7%
-        other: 250,       // ~1%
+        whatsapp: 0,
+        facebook: 0,
+        instagram: 0,
+        google: 0,
+        direct: 0,
+        other: 0,
       },
       devices: {
-        mobile: 11420,    // 77%
-        desktop: 2810,    // 19%
-        tablet: 590,      // 4%
+        mobile: 0,
+        desktop: 0,
+        tablet: 0,
       },
-      topPages: {
-        '/': 18450,
-        '/online-order': 12380,
-        '/products': 6820,
-        '/export/safety-matches': 4120,
-        '/export/wooden-splints': 2480,
-        '/fmcg-division': 1960,
-      },
-      recentVisits: [
-        { id: 'v1', timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(), path: '/online-order', source: 'whatsapp', device: 'mobile', city: 'Lahore, PK' },
-        { id: 'v2', timestamp: new Date(Date.now() - 7 * 60 * 1000).toISOString(), path: '/', source: 'facebook', device: 'mobile', city: 'Karachi, PK' },
-        { id: 'v3', timestamp: new Date(Date.now() - 14 * 60 * 1000).toISOString(), path: '/products', source: 'instagram', device: 'mobile', city: 'Islamabad, PK' },
-        { id: 'v4', timestamp: new Date(Date.now() - 21 * 60 * 1000).toISOString(), path: '/export/safety-matches', source: 'google', device: 'desktop', city: 'Peshawar, PK' },
-        { id: 'v5', timestamp: new Date(Date.now() - 35 * 60 * 1000).toISOString(), path: '/online-order', source: 'whatsapp', device: 'mobile', city: 'Multan, PK' },
-        { id: 'v6', timestamp: new Date(Date.now() - 48 * 60 * 1000).toISOString(), path: '/', source: 'direct', device: 'desktop', city: 'Faisalabad, PK' },
-      ],
+      topPages: {},
+      recentVisits: [],
       lastUpdated: new Date().toISOString(),
     };
     saveDb(db);
   }
+  return db.analytics;
+}
+
+export function resetAnalytics() {
+  const db = getDb();
+  db.analytics = {
+    totalVisitors: 0,
+    todayVisitors: 0,
+    totalPageviews: 0,
+    sources: {
+      whatsapp: 0,
+      facebook: 0,
+      instagram: 0,
+      google: 0,
+      direct: 0,
+      other: 0,
+    },
+    devices: {
+      mobile: 0,
+      desktop: 0,
+      tablet: 0,
+    },
+    topPages: {},
+    recentVisits: [],
+    lastUpdated: new Date().toISOString(),
+  };
+  saveDb(db);
   return db.analytics;
 }
 

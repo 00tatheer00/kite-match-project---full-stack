@@ -963,88 +963,24 @@
     "defaultShippingCost": 150
   },
   "analytics": {
-    "totalVisitors": 14821,
-    "todayVisitors": 285,
-    "totalPageviews": 46211,
+    "totalVisitors": 0,
+    "todayVisitors": 0,
+    "totalPageviews": 0,
     "sources": {
-      "whatsapp": 5481,
-      "facebook": 3820,
-      "instagram": 2340,
-      "google": 1950,
-      "direct": 980,
-      "other": 250
+      "whatsapp": 0,
+      "facebook": 0,
+      "instagram": 0,
+      "google": 0,
+      "direct": 0,
+      "other": 0
     },
     "devices": {
-      "mobile": 11421,
-      "desktop": 2810,
-      "tablet": 590
+      "mobile": 0,
+      "desktop": 0,
+      "tablet": 0
     },
-    "topPages": {
-      "/": 18450,
-      "/online-order": 12381,
-      "/products": 6820,
-      "/export/safety-matches": 4120,
-      "/export/wooden-splints": 2480,
-      "/fmcg-division": 1960
-    },
-    "recentVisits": [
-      {
-        "id": "v_1790335154997_r1ad",
-        "timestamp": "2026-09-25T11:19:14.997Z",
-        "path": "/online-order",
-        "source": "whatsapp",
-        "device": "mobile",
-        "city": "Pakistan"
-      },
-      {
-        "id": "v1",
-        "timestamp": "2026-09-25T11:17:14.895Z",
-        "path": "/online-order",
-        "source": "whatsapp",
-        "device": "mobile",
-        "city": "Lahore, PK"
-      },
-      {
-        "id": "v2",
-        "timestamp": "2026-09-25T11:12:14.899Z",
-        "path": "/",
-        "source": "facebook",
-        "device": "mobile",
-        "city": "Karachi, PK"
-      },
-      {
-        "id": "v3",
-        "timestamp": "2026-09-25T11:05:14.899Z",
-        "path": "/products",
-        "source": "instagram",
-        "device": "mobile",
-        "city": "Islamabad, PK"
-      },
-      {
-        "id": "v4",
-        "timestamp": "2026-09-25T10:58:14.899Z",
-        "path": "/export/safety-matches",
-        "source": "google",
-        "device": "desktop",
-        "city": "Peshawar, PK"
-      },
-      {
-        "id": "v5",
-        "timestamp": "2026-09-25T10:44:14.899Z",
-        "path": "/online-order",
-        "source": "whatsapp",
-        "device": "mobile",
-        "city": "Multan, PK"
-      },
-      {
-        "id": "v6",
-        "timestamp": "2026-09-25T10:31:14.899Z",
-        "path": "/",
-        "source": "direct",
-        "device": "desktop",
-        "city": "Faisalabad, PK"
-      }
-    ],
-    "lastUpdated": "2026-09-25T11:19:14.997Z"
+    "topPages": {},
+    "recentVisits": [],
+    "lastUpdated": ""
   }
 }

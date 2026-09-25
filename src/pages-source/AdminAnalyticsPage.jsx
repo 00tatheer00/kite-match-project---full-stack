@@ -39,6 +39,25 @@ const AdminAnalyticsPage = () => {
     }
   };
 
+  const handleReset = async () => {
+    if (!window.confirm("Are you sure you want to reset all visitor analytics to 0?")) return;
+    setRefreshing(true);
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem("adminToken") : "";
+      const res = await fetch('/api/admin/analytics/reset', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        await loadData(true);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     loadData();
     // Auto-refresh every 30 seconds
@@ -47,12 +66,12 @@ const AdminAnalyticsPage = () => {
   }, []);
 
   const sources = analytics?.sources || {
-    whatsapp: 5480,
-    facebook: 3820,
-    instagram: 2340,
-    google: 1950,
-    direct: 980,
-    other: 250,
+    whatsapp: 0,
+    facebook: 0,
+    instagram: 0,
+    google: 0,
+    direct: 0,
+    other: 0,
   };
 
   const totalSourceVisits = Object.values(sources).reduce((sum, v) => sum + Number(v), 0) || 1;
@@ -110,16 +129,10 @@ const AdminAnalyticsPage = () => {
     },
   ];
 
-  const devices = analytics?.devices || { mobile: 11420, desktop: 2810, tablet: 590 };
+  const devices = analytics?.devices || { mobile: 0, desktop: 0, tablet: 0 };
   const totalDeviceVisits = Object.values(devices).reduce((sum, v) => sum + Number(v), 0) || 1;
 
-  const topPages = analytics?.topPages || {
-    '/': 18450,
-    '/online-order': 12380,
-    '/products': 6820,
-    '/export/safety-matches': 4120,
-    '/export/wooden-splints': 2480,
-  };
+  const topPages = analytics?.topPages || {};
   const maxPageViews = Math.max(...Object.values(topPages), 1);
 
   const recentVisits = analytics?.recentVisits || [];
@@ -199,11 +212,21 @@ const AdminAnalyticsPage = () => {
               </button>
             </div>
 
+            {/* Reset to 0 Button */}
+            <button
+              onClick={handleReset}
+              disabled={refreshing}
+              className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer"
+              title="Reset all analytics to 0"
+            >
+              Reset to 0
+            </button>
+
             {/* Refresh Button */}
             <button
               onClick={() => loadData(true)}
               disabled={refreshing}
-              className="p-2.5 rounded-lg border border-[#E0E0E0] bg-white text-[#555555] hover:text-[#222222] hover:bg-[#F9F9F9] transition-all disabled:opacity-50"
+              className="p-2.5 rounded-lg border border-[#E0E0E0] bg-white text-[#555555] hover:text-[#222222] hover:bg-[#F9F9F9] transition-all disabled:opacity-50 cursor-pointer"
               title="Refresh Analytics"
             >
               <FaSyncAlt className={`text-sm ${refreshing ? "animate-spin text-[#00AEEF]" : ""}`} />
@@ -224,11 +247,10 @@ const AdminAnalyticsPage = () => {
               </div>
             </div>
             <div className="text-2xl sm:text-3xl font-black text-[#222222] mb-1">
-              {formatNumber(analytics?.totalVisitors || 14820)}
+              {formatNumber(analytics?.totalVisitors ?? 0)}
             </div>
             <div className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
-              <span>↑ +18.4%</span>
-              <span className="text-[#888888] font-normal">vs previous period</span>
+              <span>● Live Tracking Active</span>
             </div>
           </div>
 
@@ -241,7 +263,7 @@ const AdminAnalyticsPage = () => {
               </div>
             </div>
             <div className="text-2xl sm:text-3xl font-black text-[#222222] mb-1">
-              {formatNumber(analytics?.todayVisitors || 284)}
+              {formatNumber(analytics?.todayVisitors ?? 0)}
             </div>
             <div className="text-[11px] font-semibold text-sky-600 flex items-center gap-1">
               <span>Active Today</span>
@@ -258,10 +280,10 @@ const AdminAnalyticsPage = () => {
               </div>
             </div>
             <div className="text-2xl sm:text-3xl font-black text-[#222222] mb-1">
-              {formatNumber(analytics?.totalPageviews || 46210)}
+              {formatNumber(analytics?.totalPageviews ?? 0)}
             </div>
             <div className="text-[11px] text-[#777777]">
-              ~3.1 pages viewed per visitor
+              Real-time page views
             </div>
           </div>
 
@@ -274,10 +296,10 @@ const AdminAnalyticsPage = () => {
               </div>
             </div>
             <div className="text-2xl sm:text-3xl font-black text-emerald-600 mb-1">
-              WhatsApp
+              {sources.whatsapp > 0 ? "WhatsApp" : (Object.entries(sources).sort((a,b) => b[1]-a[1])[0]?.[0] || "WhatsApp")}
             </div>
             <div className="text-[11px] text-[#777777]">
-              37% of customer inquiries &amp; orders
+              {sources.whatsapp > 0 ? `${Math.round((sources.whatsapp / totalSourceVisits) * 100)}% of tracked traffic` : "Direct customer inquiries"}
             </div>
           </div>
         </div>
