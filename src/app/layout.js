@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+  const GA_ID = process.env.NEXT_PUBLIC_GA_ID || 'G-ZBCNV5GV6C';
 
   return (
     <html lang="en">
