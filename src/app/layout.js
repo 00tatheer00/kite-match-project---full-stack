@@ -1,13 +1,28 @@
 import "./globals.css";
 import ClientShell from "@/components/ClientShell";
+import PwaRegister from "@/components/PwaRegister";
 import Script from "next/script";
 
 export const metadata = {
   title: "Kite Match - Leading Industries of Pakistan",
   description: "A modern, high-performance e-commerce storefront for Kite — Pakistan's trusted FMCG brand.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Kite Admin",
+  },
   icons: {
     icon: "/logo.png",
+    apple: "/apple-touch-icon.png",
   },
+};
+
+export const viewport = {
+  themeColor: "#00AEEF",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({ children }) {
@@ -17,8 +32,14 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <link rel="icon" type="image/svg+xml" href="/logo.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="theme-color" content="#00AEEF" />
       </head>
       <body>
+        <PwaRegister />
         {GA_ID && (
           <>
             <Script

@@ -73,7 +73,7 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
         {/* Scrollable body */}
         <div className={`flex-1 overflow-y-auto divide-y ${isDark ? "divide-[#1E293B]" : "divide-slate-100"}`}>
           {/* Status & Meta */}
-          <div className="px-6 py-5">
+          <div className="px-4 sm:px-6 py-4 sm:py-5">
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <span
                 className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border ${
@@ -118,7 +118,7 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
           </div>
 
           {/* Items */}
-          <div className="px-6 py-5">
+          <div className="px-4 sm:px-6 py-4 sm:py-5">
             <h3 className={`text-sm font-bold uppercase tracking-wider flex items-center gap-2 mb-4 ${isDark ? "text-white" : "text-[#222222]"}`}>
               <Package size={16} className="text-[#00AEEF]" />
               Items Ordered
@@ -202,7 +202,7 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
           </div>
 
           {/* Amount Breakdown */}
-          <div className="px-6 py-5">
+          <div className="px-4 sm:px-6 py-4 sm:py-5">
             <h3 className={`text-sm font-bold uppercase tracking-wider flex items-center gap-2 mb-4 ${isDark ? "text-white" : "text-[#222222]"}`}>
               <CreditCard size={16} className="text-[#00AEEF]" />
               Amount Breakdown
@@ -242,7 +242,7 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
           </div>
 
           {/* Customer Info */}
-          <div className="px-6 py-5">
+          <div className="px-4 sm:px-6 py-4 sm:py-5">
             <h3 className={`text-sm font-bold uppercase tracking-wider flex items-center gap-2 mb-4 ${isDark ? "text-white" : "text-[#222222]"}`}>
               <User size={16} className="text-[#00AEEF]" />
               Customer Details
@@ -282,7 +282,7 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
           </div>
 
           {/* Order Reference IDs */}
-          <div className="px-6 py-5">
+          <div className="px-4 sm:px-6 py-4 sm:py-5">
             <h3 className={`text-sm font-bold uppercase tracking-wider flex items-center gap-2 mb-4 ${isDark ? "text-white" : "text-[#222222]"}`}>
               <Hash size={16} className="text-[#00AEEF]" />
               Reference Numbers

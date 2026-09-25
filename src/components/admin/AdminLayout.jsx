@@ -1,13 +1,16 @@
 'use client';
 
-import { useContext } from 'react';
+import { useState, useContext } from 'react';
 import { Link, useLocation, useNavigate } from '@/components/RouterCompat';
 import { colors } from "../../theme";
 import NotificationCenter from "./NotificationCenter";
 import ThemeToggleBtn from "./ThemeToggleBtn";
+import InstallAppBtn from "./InstallAppBtn";
 import { AdminThemeContext, AdminThemeProvider, useAdminTheme } from "@/context/AdminThemeContext";
+import { Menu, X } from "lucide-react";
 
 const AdminLayoutContent = ({ children, darkOverride }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { isDark: contextDark } = useAdminTheme();
@@ -38,10 +41,134 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
       }`}
     >
       {/* ========================================================================= */}
-      {/* SIDEBAR NAVIGATION (Strictly Fixed 288px Width, Sticky Full Desktop Height) */}
+      {/* MOBILE TOP BAR (Only visible on screens < md) */}
+      {/* ========================================================================= */}
+      <header
+        className={`md:hidden sticky top-0 z-40 px-4 py-3 flex items-center justify-between border-b backdrop-blur-md transition-colors ${
+          isDark
+            ? "border-[#1E293B] bg-[#0B0F19]/95"
+            : "border-slate-200 bg-white/95 shadow-xs"
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span className="font-black text-lg tracking-tight" style={{ color: isDark ? "#38BDF8" : colors.primary.main }}>
+            Admin Panel
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <InstallAppBtn variant="header" />
+          <ThemeToggleBtn variant="header" />
+          <NotificationCenter dark={isDark} />
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+              isDark
+                ? "border-[#1E293B] bg-[#161D2E] text-slate-300 hover:text-white"
+                : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+            }`}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+      </header>
+
+      {/* ========================================================================= */}
+      {/* MOBILE DRAWER OVERLAY & MENU (Screens < md) */}
+      {/* ========================================================================= */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Slide-over Drawer */}
+          <div
+            className={`fixed inset-y-0 left-0 w-72 max-w-[85vw] z-50 flex flex-col justify-between p-5 border-r shadow-2xl overflow-y-auto animate-slide-in-left ${
+              isDark ? "bg-[#0B0F19] border-[#1E293B] text-white" : "bg-white border-slate-200 text-slate-900"
+            }`}
+          >
+            <div>
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between pb-5 border-b border-inherit">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="font-black text-xl" style={{ color: isDark ? "#38BDF8" : colors.primary.main }}>
+                    Admin Panel
+                  </span>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <nav className="py-4 space-y-1.5">
+                {links.map((link) => {
+                  const active = location.pathname === link.to;
+                  return (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all font-medium text-sm ${
+                        active
+                          ? isDark
+                            ? "bg-[#161D2E] text-sky-400 font-bold border border-sky-500/40"
+                            : "bg-sky-50 text-[#0095CC] font-bold border border-sky-200"
+                          : isDark
+                            ? "hover:bg-[#161D2E] text-slate-300 hover:text-white"
+                            : "hover:bg-slate-100 text-slate-700"
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                      {link.badge && (
+                        <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                          {link.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* PWA Install Button in Drawer */}
+              <div className="pt-2">
+                <InstallAppBtn variant="sidebar" />
+              </div>
+            </div>
+
+            {/* Mobile Drawer Footer */}
+            <div className="pt-5 border-t border-inherit space-y-3">
+              <ThemeToggleBtn variant="sidebar" />
+              <button
+                onClick={handleLogout}
+                className={`w-full text-left px-4 py-2.5 rounded-xl border transition-all font-medium text-sm flex items-center justify-between ${
+                  isDark
+                    ? "border-[#1E293B] text-slate-400 hover:text-white hover:bg-[#161D2E]"
+                    : "border-slate-200 text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <span>Logout Admin</span>
+                <span>&rarr;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* DESKTOP SIDEBAR (Strictly Fixed 288px Width, Sticky Full Desktop Height) */}
       {/* ========================================================================= */}
       <aside
-        className={`w-full md:w-72 md:min-w-[18rem] md:max-w-[18rem] flex-shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto flex flex-col justify-between border-b md:border-b-0 md:border-r transition-colors duration-200 z-40 ${
+        className={`hidden md:flex md:w-72 md:min-w-[18rem] md:max-w-[18rem] flex-shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto flex-col justify-between border-r transition-colors duration-200 z-40 ${
           isDark
             ? "border-[#1E293B] bg-[#0B0F19]"
             : "border-slate-200 bg-white shadow-sm"
@@ -121,12 +248,15 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
           </nav>
         </div>
 
-        {/* Sidebar Footer: Mode Toggle & Logout (Anchored to Bottom) */}
+        {/* Sidebar Footer: PWA Install App Option, Theme Toggle & Logout */}
         <div
-          className={`p-4 lg:p-5 space-y-3 border-t transition-colors ${
+          className={`p-4 lg:p-5 space-y-3.5 border-t transition-colors ${
             isDark ? "border-[#1E293B]" : "border-slate-200"
           }`}
         >
+          {/* Option: Install App */}
+          <InstallAppBtn variant="sidebar" />
+
           {/* Theme Toggle Button inside sidebar */}
           <ThemeToggleBtn variant="sidebar" />
 
@@ -148,9 +278,9 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
       {/* MAIN CONTENT VIEW (Expansive Wide Layout, Normal Desktop Scale) */}
       {/* ========================================================================= */}
       <main className="flex-1 flex flex-col min-w-0">
-        {/* Top Header Bar */}
+        {/* Desktop Top Header Bar */}
         <header
-          className={`flex items-center justify-between px-6 sm:px-8 lg:px-10 py-4 border-b transition-colors duration-200 ${
+          className={`hidden md:flex items-center justify-between px-6 sm:px-8 lg:px-10 py-4 border-b transition-colors duration-200 ${
             isDark
               ? "border-[#1E293B] bg-[#0B0F19]/90 backdrop-blur sticky top-0 z-30"
               : "border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-30 shadow-xs"
@@ -172,17 +302,19 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
             </span>
           </div>
 
-          {/* Header Controls: Theme Toggle & Notification Bell */}
+          {/* Header Controls: Install App, Theme Toggle & Notification Bell */}
           <div className="flex items-center gap-3 sm:gap-4">
+            <InstallAppBtn variant="header" />
+            <div className={`h-6 w-px ${isDark ? "bg-[#1E293B]" : "bg-slate-200"}`}></div>
             <ThemeToggleBtn variant="header" />
             <div className={`h-6 w-px ${isDark ? "bg-[#1E293B]" : "bg-slate-200"}`}></div>
             <NotificationCenter dark={isDark} />
           </div>
         </header>
 
-        {/* Page Children Container - Normal wide desktop screen */}
-        <div className="flex-1 p-6 sm:p-8 lg:p-10">
-          <div className="w-full max-w-[1720px] mx-auto">{children}</div>
+        {/* Page Children Container - 100% responsive on mobile, tablet & large desktop */}
+        <div className="flex-1 p-3.5 sm:p-6 lg:p-8 min-w-0">
+          <div className="w-full max-w-[1720px] mx-auto min-w-0">{children}</div>
         </div>
       </main>
     </div>

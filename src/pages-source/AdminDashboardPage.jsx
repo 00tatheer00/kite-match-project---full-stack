@@ -515,7 +515,7 @@ function DashboardContent() {
           
           {/* Location Tracing (2 Columns) */}
           <div
-            className={`lg:col-span-2 rounded-2xl p-7 lg:p-8 border transition-all space-y-6 ${
+            className={`lg:col-span-2 rounded-2xl p-4 sm:p-6 lg:p-8 border transition-all space-y-6 ${
               isDark
                 ? "bg-[#111726] border-[#1E293B] shadow-xl"
                 : "bg-white border-slate-200 shadow-sm hover:shadow-md"
@@ -614,7 +614,7 @@ function DashboardContent() {
 
           {/* Acquisition & Devices (1 Column) */}
           <div
-            className={`rounded-2xl p-7 lg:p-8 border transition-all space-y-6 ${
+            className={`rounded-2xl p-4 sm:p-6 lg:p-8 border transition-all space-y-6 ${
               isDark
                 ? "bg-[#111726] border-[#1E293B] shadow-xl"
                 : "bg-white border-slate-200 shadow-sm hover:shadow-md"
@@ -739,7 +739,7 @@ function DashboardContent() {
         {/* 5. LIVE RECENT CUSTOMER ACTIVITY STREAM TABLE (High Readability) */}
         {/* ========================================================================= */}
         <div
-          className={`rounded-2xl p-7 lg:p-8 border transition-all ${
+          className={`rounded-2xl p-4 sm:p-6 lg:p-8 border transition-all ${
             isDark
               ? "bg-[#111726] border-[#1E293B] shadow-xl"
               : "bg-white border-slate-200 shadow-sm hover:shadow-md"
@@ -774,8 +774,8 @@ function DashboardContent() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+            <div className="overflow-x-auto -mx-1 sm:mx-0">
+              <table className="w-full min-w-[580px] text-left text-sm">
                 <thead>
                   <tr
                     className={`border-b uppercase text-xs font-bold tracking-wider ${
