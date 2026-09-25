@@ -165,27 +165,27 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
       )}
 
       {/* ========================================================================= */}
-      {/* DESKTOP SIDEBAR (Strictly Fixed 288px Width, Sticky Full Desktop Height) */}
+      {/* DESKTOP SIDEBAR (Strictly Fixed 288px Width, 100vh No Scroll, No Scrollbar) */}
       {/* ========================================================================= */}
       <aside
-        className={`hidden md:flex md:w-72 md:min-w-[18rem] md:max-w-[18rem] flex-shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto flex-col justify-between border-r transition-colors duration-200 z-40 ${
+        className={`hidden md:flex md:w-64 lg:w-72 md:min-w-[16rem] lg:min-w-[18rem] md:max-w-[18rem] flex-shrink-0 md:sticky md:top-0 h-screen max-h-screen flex-col justify-between border-r transition-colors duration-200 z-40 overflow-hidden no-scrollbar select-none ${
           isDark
             ? "border-[#1E293B] bg-[#0B0F19]"
             : "border-slate-200 bg-white shadow-sm"
         }`}
       >
-        <div>
+        <div className="flex flex-col flex-1 min-h-0">
           {/* Brand Header */}
           <div
-            className={`px-6 py-6 lg:py-7 border-b transition-colors ${
+            className={`px-5 py-4 border-b transition-colors flex-shrink-0 ${
               isDark ? "border-[#1E293B]" : "border-slate-200"
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 <h1
-                  className="text-2xl font-black tracking-tight"
+                  className="text-xl font-black tracking-tight"
                   style={{ color: isDark ? "#38BDF8" : colors.primary.main }}
                 >
                   Admin Panel
@@ -193,7 +193,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
               </div>
             </div>
             <p
-              className={`mt-1.5 text-xs font-medium tracking-wide uppercase ${
+              className={`mt-0.5 text-[10px] font-semibold tracking-wider uppercase ${
                 isDark ? "text-slate-400" : "text-slate-500"
               }`}
             >
@@ -201,8 +201,8 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
             </p>
           </div>
 
-          {/* Navigation Menu */}
-          <nav className="p-4 lg:p-5 space-y-2 text-sm lg:text-base">
+          {/* Navigation Menu (Strictly fits without scroll) */}
+          <nav className="p-3 space-y-1 flex-1 overflow-hidden">
             {links.map((link) => {
               const active = location.pathname === link.to;
               if (isDark) {
@@ -210,15 +210,15 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all font-medium ${
+                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all font-semibold text-xs lg:text-sm ${
                       active
-                        ? "bg-[#161D2E] text-sky-400 font-bold border border-sky-500/40 shadow-md shadow-sky-500/5 translate-x-1"
+                        ? "bg-[#161D2E] text-sky-400 font-bold border border-sky-500/40 shadow-sm"
                         : "hover:bg-[#131823] text-slate-300 hover:text-white"
                     }`}
                   >
                     <span className="tracking-wide">{link.label}</span>
                     {link.badge && (
-                      <span className="text-xs font-black px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                         {link.badge}
                       </span>
                     )}
@@ -230,15 +230,15 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all font-medium ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all font-semibold text-xs lg:text-sm ${
                     active
-                      ? "bg-sky-50 text-[#0095CC] font-bold border border-sky-200 shadow-sm translate-x-1"
+                      ? "bg-sky-50 text-[#0095CC] font-bold border border-sky-200 shadow-xs"
                       : "hover:bg-slate-100 text-slate-700 hover:text-slate-900"
                   }`}
                 >
                   <span className="tracking-wide">{link.label}</span>
                   {link.badge && (
-                    <span className="text-xs font-black px-2 py-0.5 rounded-md bg-sky-100 text-[#0095CC] border border-sky-200">
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-sky-100 text-[#0095CC] border border-sky-200">
                       {link.badge}
                     </span>
                   )}
@@ -250,7 +250,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
 
         {/* Sidebar Footer: PWA Install App Option, Theme Toggle & Logout */}
         <div
-          className={`p-4 lg:p-5 space-y-3.5 border-t transition-colors ${
+          className={`p-3 space-y-2 border-t flex-shrink-0 transition-colors ${
             isDark ? "border-[#1E293B]" : "border-slate-200"
           }`}
         >
@@ -262,7 +262,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
 
           <button
             onClick={handleLogout}
-            className={`w-full text-left px-4 py-3 rounded-xl border transition-all font-medium text-sm cursor-pointer flex items-center justify-between ${
+            className={`w-full text-left px-3.5 py-2 rounded-xl border transition-all font-semibold text-xs cursor-pointer flex items-center justify-between ${
               isDark
                 ? "border-[#1E293B] text-slate-400 hover:text-white hover:bg-[#131823] hover:border-slate-600"
                 : "border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"

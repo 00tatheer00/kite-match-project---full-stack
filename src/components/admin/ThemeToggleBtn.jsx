@@ -11,27 +11,27 @@ export default function ThemeToggleBtn({ variant = 'header' }) {
       <button
         onClick={toggleTheme}
         type="button"
-        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all cursor-pointer font-medium text-sm ${
+        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-semibold text-xs ${
           isDark
             ? 'bg-[#131823] border-[#1E293B] text-slate-200 hover:text-white hover:border-slate-600'
             : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200/80'
         }`}
         title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           {isDark ? (
-            <FaMoon className="text-purple-400 text-base" />
+            <FaMoon className="text-purple-400 text-sm" />
           ) : (
-            <FaSun className="text-amber-500 text-base" />
+            <FaSun className="text-amber-500 text-sm" />
           )}
           <span>{isDark ? 'Dark Theme' : 'Light Theme'}</span>
         </div>
         <div
-          className={`w-11 h-6 rounded-full p-0.5 flex items-center transition-colors ${
+          className={`w-9 h-5 rounded-full p-0.5 flex items-center transition-colors ${
             isDark ? 'bg-purple-600 justify-end' : 'bg-slate-300 justify-start'
           }`}
         >
-          <div className="w-5 h-5 rounded-full bg-white shadow-md transform transition-transform" />
+          <div className="w-4 h-4 rounded-full bg-white shadow-md transform transition-transform" />
         </div>
       </button>
     );

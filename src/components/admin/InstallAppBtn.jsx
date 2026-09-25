@@ -124,37 +124,28 @@ export default function InstallAppBtn({ variant = "sidebar" }) {
     );
   }
 
-  // Sidebar / Mobile Drawer variant
+  // Sidebar / Mobile Drawer variant (Sleek Compact Bar)
   return (
     <>
-      <div className={`p-3 rounded-2xl border transition-all ${
-        isDark
-          ? "bg-gradient-to-b from-[#131B2E] to-[#0E1524] border-sky-500/30 shadow-lg shadow-sky-500/5"
-          : "bg-gradient-to-b from-sky-50 to-white border-sky-200 shadow-sm"
-      }`}>
-        <div className="flex items-start gap-2.5 mb-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#00AEEF] text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-[#00AEEF]/25">
-            <Smartphone size={16} />
-          </div>
-          <div>
-            <h4 className={`text-xs font-black tracking-wide ${isDark ? "text-white" : "text-slate-900"}`}>
-              Kite Admin App
-            </h4>
-            <p className={`text-[10px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-              Install on your phone or desktop for 1-click instant access
-            </p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleInstallClick}
-          className="w-full py-2 px-3 rounded-xl font-bold text-xs bg-gradient-to-r from-[#00AEEF] to-[#0095CC] hover:from-[#0095CC] hover:to-sky-700 text-white flex items-center justify-center gap-2 shadow-md shadow-[#00AEEF]/20 transition-all cursor-pointer active:scale-95"
-        >
-          <Download size={14} className="animate-bounce" />
-          <span>Install App Now</span>
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={handleInstallClick}
+        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer group ${
+          isDark
+            ? "bg-gradient-to-r from-sky-500/10 to-blue-500/10 border-sky-500/30 text-sky-400 hover:bg-sky-500/20 hover:border-sky-500/50"
+            : "bg-sky-50 border-sky-200 text-[#0095CC] hover:bg-sky-100 hover:border-sky-300 shadow-xs"
+        }`}
+        title="Install Kite Admin on your desktop / phone"
+      >
+        <span className="flex items-center gap-2">
+          <Smartphone size={15} className="text-[#00AEEF] flex-shrink-0" />
+          <span className="tracking-wide">Install Kite App</span>
+        </span>
+        <span className="flex items-center gap-1 text-[11px] font-semibold opacity-90 group-hover:translate-x-0.5 transition-transform">
+          <Download size={13} className="animate-bounce" />
+          <span>Install</span>
+        </span>
+      </button>
 
       {showIosModal && (
         <IosInstallModal isDark={isDark} onClose={() => setShowIosModal(false)} />

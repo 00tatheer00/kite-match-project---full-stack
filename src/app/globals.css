@@ -187,22 +187,36 @@ button:active,
   background-color: #00aeef !important;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar for page */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #00aeef;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #0095cc;
+}
+
+/* Strict Scrollbar Removal for Sidebar & Modals */
+.no-scrollbar::-webkit-scrollbar,
+aside::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar,
+aside {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
 }
 
 /* Selection colors */
