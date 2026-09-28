@@ -29,6 +29,22 @@ export default function ClientShell({ children }) {
     }
   }, [isAdminRoute]);
 
+  if (isAdminRoute) {
+    return (
+      <CartProvider>
+        <Suspense fallback={null}>
+          <VisitorTracker />
+        </Suspense>
+        <Toaster position="top-right" />
+        <div className="min-h-screen w-full flex flex-col">
+          <Suspense fallback={<RouteLoadingFallback />}>
+            {children}
+          </Suspense>
+        </div>
+      </CartProvider>
+    );
+  }
+
   return (
     <CartProvider>
       <Suspense fallback={null}>
@@ -37,17 +53,18 @@ export default function ClientShell({ children }) {
       <ScrollToTop />
       <Toaster position="top-right" />
       <div className="min-h-screen bg-white app-page-compact">
-        {!isAdminRoute && <Navbar />}
+        <Navbar />
         <main id="main-content">
           <Suspense fallback={<RouteLoadingFallback />}>
             {children}
           </Suspense>
         </main>
-        {!isAdminRoute && <CartDrawer />}
-        {!isAdminRoute && <FloatingCartButton />}
-        {!isAdminRoute && <Footer />}
-        {!isAdminRoute && <WhatsAppButton />}
+        <CartDrawer />
+        <FloatingCartButton />
+        <Footer />
+        <WhatsAppButton />
       </div>
     </CartProvider>
   );
 }
+
