@@ -309,14 +309,11 @@ body:not(.admin-route) textarea:hover {
   }
 }
 
-/* Ensure Admin Panel is strictly 100% unscaled full-screen */
-body.admin-route,
-body.admin-route .app-page-compact,
-.admin-route .app-page-compact,
-.admin-route {
-  zoom: 1 !important;
-  transform: none !important;
-  width: 100% !important;
+/* ========================================================================= */
+/* ADMIN SCALE CONTROL (80% Compact Default with 100% Full Viewport Bounds)  */
+/* ========================================================================= */
+:root {
+  --admin-scale: 0.8;
 }
 
 body.admin-route {
@@ -363,20 +360,23 @@ body.admin-route {
   color: #CBD5E1 !important;
 }
 
-/* ========================================================================= */
-/* ADMIN FIXED SIDEBAR & MAIN OFFSET (100% Full Viewport Height, 0 Gap) */
-/* ========================================================================= */
 @media (min-width: 768px) {
+  .admin-compact-scale {
+    zoom: var(--admin-scale, 0.8) !important;
+    width: calc(100% / var(--admin-scale, 0.8)) !important;
+    min-height: calc(100vh / var(--admin-scale, 0.8)) !important;
+  }
+
   .admin-fixed-sidebar {
     position: fixed !important;
     top: 0px !important;
     bottom: 0px !important;
     left: 0px !important;
     width: 18rem !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    min-height: 100vh !important;
-    max-height: 100vh !important;
+    height: calc(100vh / var(--admin-scale, 0.8)) !important;
+    height: calc(100dvh / var(--admin-scale, 0.8)) !important;
+    min-height: calc(100vh / var(--admin-scale, 0.8)) !important;
+    max-height: calc(100vh / var(--admin-scale, 0.8)) !important;
     z-index: 40 !important;
     display: flex !important;
     flex-direction: column !important;
@@ -388,8 +388,9 @@ body.admin-route {
     margin-left: 18rem !important;
     width: calc(100% - 18rem) !important;
     min-width: 0 !important;
-    min-height: 100vh !important;
+    min-height: calc(100vh / var(--admin-scale, 0.8)) !important;
     box-sizing: border-box !important;
   }
 }
+
 

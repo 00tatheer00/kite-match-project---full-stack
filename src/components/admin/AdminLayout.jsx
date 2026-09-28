@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link, useLocation, useNavigate } from '@/components/RouterCompat';
 import { colors } from "../../theme";
 import NotificationCenter from "./NotificationCenter";
@@ -17,6 +17,28 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
 
   // If darkOverride is passed explicitly use it, otherwise use context
   const isDark = darkOverride !== undefined ? darkOverride : contextDark;
+
+  // Scale state: '80' (compact, default matching browser 80%) or '100' (standard)
+  const [scale, setScale] = useState('80');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('adminScale') || '80';
+      setScale(saved);
+      document.body.style.setProperty('--admin-scale', saved === '80' ? '0.8' : '1');
+      document.body.classList.toggle('admin-scale-80', saved === '80');
+    }
+  }, []);
+
+  const toggleScale = () => {
+    const next = scale === '80' ? '100' : '80';
+    setScale(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('adminScale', next);
+      document.body.style.setProperty('--admin-scale', next === '80' ? '0.8' : '1');
+      document.body.classList.toggle('admin-scale-80', next === '80');
+    }
+  };
 
   const links = [
     { to: "/admin/dashboard", label: "Executive Dashboard", badge: "LIVE" },
@@ -38,7 +60,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
         isDark
           ? "bg-[#080C14] text-slate-100 admin-dark-theme"
           : "bg-slate-50 text-slate-800"
-      }`}
+      } ${scale === '80' ? 'admin-compact-scale' : ''}`}
     >
       {/* ========================================================================= */}
       {/* MOBILE TOP BAR (Only visible on screens < md) */}
@@ -147,6 +169,20 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
 
             {/* Mobile Drawer Footer */}
             <div className="pt-5 border-t border-inherit space-y-3">
+              <button
+                type="button"
+                onClick={toggleScale}
+                className={`w-full text-left px-4 py-2.5 rounded-xl border transition-all font-semibold text-xs flex items-center justify-between ${
+                  isDark
+                    ? "border-[#1E293B] text-slate-300 hover:text-white hover:bg-[#161D2E]"
+                    : "border-slate-200 text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <span>Display Scale</span>
+                <span className="px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-600 font-extrabold text-xs">
+                  {scale === '80' ? '80% Compact' : '100%'}
+                </span>
+              </button>
               <ThemeToggleBtn variant="sidebar" />
               <button
                 onClick={handleLogout}
@@ -180,9 +216,9 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
           bottom: "0px",
           left: "0px",
           width: "18rem",
-          height: "100vh",
-          minHeight: "100vh",
-          maxHeight: "100vh",
+          height: scale === '80' ? "calc(100vh / 0.8)" : "100vh",
+          minHeight: scale === '80' ? "calc(100vh / 0.8)" : "100vh",
+          maxHeight: scale === '80' ? "calc(100vh / 0.8)" : "100vh",
           zIndex: 40,
           display: "flex",
           flexDirection: "column",
@@ -295,7 +331,12 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
       {/* ========================================================================= */}
       {/* MAIN CONTENT VIEW (Expansive Wide Layout, Normal Desktop Scale) */}
       {/* ========================================================================= */}
-      <main className="admin-main-offset flex-1 flex flex-col min-w-0 min-h-screen md:ml-72 md:ml-[18rem]">
+      <main
+        className="admin-main-offset flex-1 flex flex-col min-w-0 md:ml-72 md:ml-[18rem]"
+        style={{
+          minHeight: scale === '80' ? "calc(100vh / 0.8)" : "100vh",
+        }}
+      >
         {/* Desktop Top Header Bar */}
         <header
           className={`hidden md:flex items-center justify-between px-6 sm:px-8 lg:px-10 py-4 border-b transition-colors duration-200 ${
@@ -320,8 +361,24 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
             </span>
           </div>
 
-          {/* Header Controls: Install App, Theme Toggle & Notification Bell */}
+          {/* Header Controls: Scale Switcher, Install App, Theme Toggle & Notification Bell */}
           <div className="flex items-center gap-3 sm:gap-4">
+            <button
+              type="button"
+              onClick={toggleScale}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-2 select-none ${
+                isDark
+                  ? "border-[#1E293B] bg-[#161D2E] text-slate-200 hover:text-white hover:border-sky-500/50"
+                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-sky-300 shadow-2xs"
+              }`}
+              title="Click to toggle display scale (80% Compact vs 100% Standard)"
+            >
+              <span className="text-[10px] uppercase font-black tracking-wider text-sky-500">Scale</span>
+              <span className="px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-600 font-extrabold text-xs">
+                {scale === '80' ? '80% Compact' : '100%'}
+              </span>
+            </button>
+            <div className={`h-6 w-px ${isDark ? "bg-[#1E293B]" : "bg-slate-200"}`}></div>
             <InstallAppBtn variant="header" />
             <div className={`h-6 w-px ${isDark ? "bg-[#1E293B]" : "bg-slate-200"}`}></div>
             <ThemeToggleBtn variant="header" />
