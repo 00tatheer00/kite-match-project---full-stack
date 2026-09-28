@@ -96,36 +96,36 @@ function DashboardContent() {
   };
 
   return (
-    <div className="space-y-8 font-sans selection:bg-[#8B5CF6] selection:text-white">
+    <div className="space-y-5 sm:space-y-6 font-sans selection:bg-[#8B5CF6] selection:text-white">
         
         {/* ========================================================================= */}
-        {/* 1. TOP HEADER & FILTER PILLS (Large, Normal Screen Scale) */}
+        {/* 1. TOP HEADER & FILTER PILLS */}
         {/* ========================================================================= */}
         <div
-          className={`flex flex-col xl:flex-row xl:items-end justify-between gap-6 pb-6 border-b transition-colors ${
+          className={`flex flex-col xl:flex-row xl:items-end justify-between gap-4 pb-4 border-b transition-colors ${
             isDark ? "border-[#1E293B]" : "border-slate-200"
           }`}
         >
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-black tracking-widest uppercase text-sky-500">
+              <span className="text-[11px] font-black tracking-widest uppercase text-sky-500">
                 OVERVIEW &bull; OPERATIONS
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-              <span className="text-xs font-semibold text-emerald-500 flex items-center gap-1">
+              <span className="text-[11px] font-semibold text-emerald-500 flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                 LIVE CONNECTED
               </span>
             </div>
             <h1
-              className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight ${
+              className={`text-2xl sm:text-3xl font-black tracking-tight ${
                 isDark ? "text-white" : "text-slate-900"
               }`}
             >
               Executive Dashboard
             </h1>
             <p
-              className={`text-sm sm:text-base font-medium mt-2 max-w-3xl ${
+              className={`text-xs sm:text-sm font-medium mt-1 max-w-3xl ${
                 isDark ? "text-slate-400" : "text-slate-600"
               }`}
             >
@@ -133,15 +133,15 @@ function DashboardContent() {
             </p>
           </div>
 
-          {/* Filter Pills & Actions (Normal, Clickable Size) */}
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          {/* Filter Pills & Actions */}
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setActiveFilter("all")}
-              className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 activeFilter === "all"
                   ? isDark
-                    ? "bg-[#1E293B] text-white border border-slate-500 shadow-md"
-                    : "bg-slate-900 text-white shadow-md shadow-slate-900/10"
+                    ? "bg-[#1E293B] text-white border border-slate-500 shadow-sm"
+                    : "bg-slate-900 text-white shadow-sm shadow-slate-900/10"
                   : isDark
                   ? "bg-[#131823] text-slate-400 hover:text-white border border-[#1E293B]"
                   : "bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-100"
@@ -152,123 +152,123 @@ function DashboardContent() {
 
             <button
               onClick={() => setActiveFilter("matches")}
-              className={`px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeFilter === "matches"
                   ? isDark
-                    ? "bg-[#1E293B] text-white border border-blue-500 shadow-md shadow-blue-500/10"
-                    : "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                    ? "bg-[#1E293B] text-white border border-blue-500 shadow-sm shadow-blue-500/10"
+                    : "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
                   : isDark
                   ? "bg-[#131823] text-slate-400 hover:text-white border border-[#1E293B]"
                   : "bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-100"
               }`}
             >
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
               Matches (Kite &bull; Olympia)
             </button>
 
             <button
               onClick={() => setActiveFilter("detergents")}
-              className={`px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeFilter === "detergents"
                   ? isDark
-                    ? "bg-[#1E293B] text-white border border-emerald-500 shadow-md shadow-emerald-500/10"
-                    : "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                    ? "bg-[#1E293B] text-white border border-emerald-500 shadow-sm shadow-emerald-500/10"
+                    : "bg-emerald-600 text-white shadow-sm shadow-emerald-600/20"
                   : isDark
                   ? "bg-[#131823] text-slate-400 hover:text-white border border-[#1E293B]"
                   : "bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-100"
               }`}
             >
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
               Detergents (Burq &bull; Vero)
             </button>
 
             <Link
               to="/admin/orders"
-              className="px-5 py-2.5 rounded-full text-sm font-bold bg-gradient-to-r from-amber-600 to-orange-500 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-102 transition-all flex items-center gap-2 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-600 to-orange-500 text-white shadow-md shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-102 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <span>{pendingOrders} Pending Orders</span>
-              <FaArrowRight className="text-xs" />
+              <FaArrowRight className="text-[10px]" />
             </Link>
 
             <button
               onClick={() => loadDashboard(true)}
               disabled={refreshing}
-              className={`p-3 rounded-full border transition-all cursor-pointer ${
+              className={`p-2 rounded-full border transition-all cursor-pointer ${
                 isDark
                   ? "bg-[#131823] border-[#1E293B] text-slate-300 hover:text-white hover:border-slate-500"
                   : "bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
               }`}
               title="Refresh Live Data"
             >
-              <FaSyncAlt className={`text-sm ${refreshing ? "animate-spin text-purple-500" : ""}`} />
+              <FaSyncAlt className={`text-xs ${refreshing ? "animate-spin text-purple-500" : ""}`} />
             </button>
           </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. THREE DIVISION MODULE CARDS (P1, P2, P3 - Big, High Contrast) */}
+        {/* 2. THREE DIVISION MODULE CARDS */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
           
           {/* P1: Safety Matches Division */}
           <div
-            className={`relative rounded-2xl p-6 lg:p-7 transition-all group overflow-hidden border ${
+            className={`relative rounded-2xl p-4 sm:p-5 transition-all group overflow-hidden border ${
               isDark
-                ? "bg-[#111726] border-[#1E293B] hover:border-blue-500/50 shadow-xl"
-                : "bg-white border-slate-200 hover:border-blue-400 shadow-sm hover:shadow-md"
+                ? "bg-[#111726] border-[#1E293B] hover:border-blue-500/50 shadow-md"
+                : "bg-white border-slate-200 hover:border-blue-400 shadow-xs hover:shadow-md"
             }`}
           >
-            <div className="absolute top-0 right-0 w-36 h-36 bg-blue-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-blue-500/20 transition-all"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-blue-500/20 transition-all"></div>
             
-            <div className="flex items-start justify-between mb-5">
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/15 border border-blue-500/30 text-blue-500 flex items-center justify-center text-sm font-black shadow-inner">
+            <div className="flex items-start justify-between mb-3.5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-500 flex items-center justify-center text-xs font-black shadow-inner">
                   P1
                 </div>
                 <div>
                   <h3
-                    className={`font-black text-lg transition-colors ${
+                    className={`font-black text-base transition-colors ${
                       isDark ? "text-white group-hover:text-blue-400" : "text-slate-900 group-hover:text-blue-600"
                     }`}
                   >
                     Safety Matches (Module 1)
                   </h3>
-                  <p className={`text-xs sm:text-sm font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    Kite, Olympia, Bird, Party &bull; Wood Splints
+                  <p className={`text-xs font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    Kite, Olympia, Bird &bull; Wood Splints
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-500/30">
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-500/30">
                 5 Brands
               </span>
             </div>
 
             <div
-              className={`grid grid-cols-3 gap-3 pt-4 border-t text-center ${
+              className={`grid grid-cols-3 gap-2 pt-3 border-t text-center ${
                 isDark ? "border-[#1E293B]" : "border-slate-100"
               }`}
             >
               <div>
-                <div className="text-2xl lg:text-3xl font-black text-emerald-500">
+                <div className="text-xl sm:text-2xl font-black text-emerald-500">
                   {approvedOrders > 0 ? approvedOrders : 12}
                 </div>
-                <div className={`text-xs uppercase font-bold tracking-wider mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                   Approved
                 </div>
               </div>
               <div>
-                <div className="text-2xl lg:text-3xl font-black text-amber-500">
+                <div className="text-xl sm:text-2xl font-black text-amber-500">
                   {pendingOrders}
                 </div>
-                <div className={`text-xs uppercase font-bold tracking-wider mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                   Pending
                 </div>
               </div>
               <div>
-                <div className={`text-2xl lg:text-3xl font-black ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                <div className={`text-xl sm:text-2xl font-black ${isDark ? "text-slate-200" : "text-slate-800"}`}>
                   100%
                 </div>
-                <div className={`text-xs uppercase font-bold tracking-wider mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                   Fulfillment
                 </div>
               </div>
@@ -277,63 +277,63 @@ function DashboardContent() {
 
           {/* P2: Detergents & Care Division */}
           <div
-            className={`relative rounded-2xl p-6 lg:p-7 transition-all group overflow-hidden border ${
+            className={`relative rounded-2xl p-4 sm:p-5 transition-all group overflow-hidden border ${
               isDark
-                ? "bg-[#111726] border-[#1E293B] hover:border-emerald-500/50 shadow-xl"
-                : "bg-white border-slate-200 hover:border-emerald-400 shadow-sm hover:shadow-md"
+                ? "bg-[#111726] border-[#1E293B] hover:border-emerald-500/50 shadow-md"
+                : "bg-white border-slate-200 hover:border-emerald-400 shadow-xs hover:shadow-md"
             }`}
           >
-            <div className="absolute top-0 right-0 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
             
-            <div className="flex items-start justify-between mb-5">
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 flex items-center justify-center text-sm font-black shadow-inner">
+            <div className="flex items-start justify-between mb-3.5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 flex items-center justify-center text-xs font-black shadow-inner">
                   P2
                 </div>
                 <div>
                   <h3
-                    className={`font-black text-lg transition-colors ${
+                    className={`font-black text-base transition-colors ${
                       isDark ? "text-white group-hover:text-emerald-400" : "text-slate-900 group-hover:text-emerald-600"
                     }`}
                   >
                     Detergents &amp; Care (Module 2)
                   </h3>
-                  <p className={`text-xs sm:text-sm font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  <p className={`text-xs font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                     BURQ Active Clean &bull; VERO Dishwash
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
                 8 SKUs
               </span>
             </div>
 
             <div
-              className={`grid grid-cols-3 gap-3 pt-4 border-t text-center ${
+              className={`grid grid-cols-3 gap-2 pt-3 border-t text-center ${
                 isDark ? "border-[#1E293B]" : "border-slate-100"
               }`}
             >
               <div>
-                <div className="text-2xl lg:text-3xl font-black text-emerald-500">
+                <div className="text-xl sm:text-2xl font-black text-emerald-500">
                   2.3 KG
                 </div>
-                <div className={`text-xs uppercase font-bold tracking-wider mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                   Flagship
                 </div>
               </div>
               <div>
-                <div className="text-2xl lg:text-3xl font-black text-amber-500">
+                <div className="text-xl sm:text-2xl font-black text-amber-500">
                   Rs.99
                 </div>
-                <div className={`text-xs uppercase font-bold tracking-wider mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                   Popular
                 </div>
               </div>
               <div>
-                <div className={`text-2xl lg:text-3xl font-black ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                <div className={`text-xl sm:text-2xl font-black ${isDark ? "text-slate-200" : "text-slate-800"}`}>
                   Active
                 </div>
-                <div className={`text-xs uppercase font-bold tracking-wider mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                   Status
                 </div>
               </div>
@@ -342,63 +342,63 @@ function DashboardContent() {
 
           {/* P3: Export & Global Splints Division */}
           <div
-            className={`relative rounded-2xl p-6 lg:p-7 transition-all group overflow-hidden border ${
+            className={`relative rounded-2xl p-4 sm:p-5 transition-all group overflow-hidden border ${
               isDark
-                ? "bg-[#111726] border-[#1E293B] hover:border-purple-500/50 shadow-xl"
-                : "bg-white border-slate-200 hover:border-purple-400 shadow-sm hover:shadow-md"
+                ? "bg-[#111726] border-[#1E293B] hover:border-purple-500/50 shadow-md"
+                : "bg-white border-slate-200 hover:border-purple-400 shadow-xs hover:shadow-md"
             }`}
           >
-            <div className="absolute top-0 right-0 w-36 h-36 bg-purple-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-500/20 transition-all"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-500/20 transition-all"></div>
             
-            <div className="flex items-start justify-between mb-5">
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-500 flex items-center justify-center text-sm font-black shadow-inner">
+            <div className="flex items-start justify-between mb-3.5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-500 flex items-center justify-center text-xs font-black shadow-inner">
                   P3
                 </div>
                 <div>
                   <h3
-                    className={`font-black text-lg transition-colors ${
+                    className={`font-black text-base transition-colors ${
                       isDark ? "text-white group-hover:text-purple-400" : "text-slate-900 group-hover:text-purple-600"
                     }`}
                   >
                     Export &amp; Splints (Module 3)
                   </h3>
-                  <p className={`text-xs sm:text-sm font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  <p className={`text-xs font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                     Global Wooden Match Splints &bull; 5 Routes
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/30">
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/30">
                 Global Flow
               </span>
             </div>
 
             <div
-              className={`grid grid-cols-3 gap-3 pt-4 border-t text-center ${
+              className={`grid grid-cols-3 gap-2 pt-3 border-t text-center ${
                 isDark ? "border-[#1E293B]" : "border-slate-100"
               }`}
             >
               <div>
-                <div className="text-2xl lg:text-3xl font-black text-purple-500">
+                <div className="text-xl sm:text-2xl font-black text-purple-500">
                   5
                 </div>
-                <div className={`text-xs uppercase font-bold tracking-wider mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                   Continents
                 </div>
               </div>
               <div>
-                <div className="text-2xl lg:text-3xl font-black text-sky-500">
+                <div className="text-xl sm:text-2xl font-black text-sky-500">
                   2026
                 </div>
-                <div className={`text-xs uppercase font-bold tracking-wider mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                   Active
                 </div>
               </div>
               <div>
-                <div className="text-2xl lg:text-3xl font-black text-emerald-500">
+                <div className="text-xl sm:text-2xl font-black text-emerald-500">
                   ISO
                 </div>
-                <div className={`text-xs uppercase font-bold tracking-wider mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                   Certified
                 </div>
               </div>
@@ -408,100 +408,100 @@ function DashboardContent() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 3. FOUR KPI METRIC STAT CARDS (Large Bold Numbers, Clear Desktop Scale) */}
+        {/* 3. FOUR KPI METRIC STAT CARDS (Compact Executive Proportions) */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           
           {/* Card 1: Total Orders */}
           <div
-            className={`rounded-2xl p-6 border transition-all ${
+            className={`rounded-2xl p-4 sm:p-5 border transition-all ${
               isDark
                 ? "bg-[#111726] border-[#1E293B] hover:border-slate-600 shadow-md"
-                : "bg-white border-slate-200 hover:border-slate-400 shadow-sm hover:shadow-md"
+                : "bg-white border-slate-200 hover:border-slate-400 shadow-xs hover:shadow-md"
             }`}
           >
             <div
-              className={`w-11 h-11 rounded-xl flex items-center justify-center text-base mb-4 ${
+              className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm mb-3 ${
                 isDark ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-700"
               }`}
             >
               <FaClipboardList />
             </div>
-            <div className={`text-4xl lg:text-5xl font-black tracking-tight mb-2 ${isDark ? "text-white" : "text-slate-900"}`}>
+            <div className={`text-2xl sm:text-3xl font-black tracking-tight mb-1 ${isDark ? "text-white" : "text-slate-900"}`}>
               {totalOrders > 0 ? formatNumber(totalOrders) : "0"}
             </div>
-            <div className={`text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+            <div className={`text-xs sm:text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
               Total Orders &amp; Inquiries
             </div>
-            <div className={`text-xs mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+            <div className={`text-[11px] sm:text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
               Customer submissions via Web &amp; WhatsApp
             </div>
           </div>
 
           {/* Card 2: Dispatched / Approved */}
           <div
-            className={`rounded-2xl p-6 border transition-all ${
+            className={`rounded-2xl p-4 sm:p-5 border transition-all ${
               isDark
                 ? "bg-[#111726] border-[#1E293B] hover:border-emerald-500/40 shadow-md"
-                : "bg-white border-slate-200 hover:border-emerald-400 shadow-sm hover:shadow-md"
+                : "bg-white border-slate-200 hover:border-emerald-400 shadow-xs hover:shadow-md"
             }`}
           >
-            <div className="w-11 h-11 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center text-base mb-4">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center text-sm mb-3">
               <FaChartBar />
             </div>
-            <div className="text-4xl lg:text-5xl font-black tracking-tight mb-2 text-emerald-500">
+            <div className="text-2xl sm:text-3xl font-black tracking-tight mb-1 text-emerald-500">
               {approvedOrders > 0 ? formatNumber(approvedOrders) : "0"}
             </div>
-            <div className={`text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+            <div className={`text-xs sm:text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
               Dispatched / Processed
             </div>
-            <div className="text-xs text-emerald-500 font-bold mt-1">
+            <div className="text-[11px] sm:text-xs text-emerald-500 font-bold mt-0.5">
               &uarr; 100% factory confirmation rate
             </div>
           </div>
 
           {/* Card 3: Pending Review (Alert) */}
           <div
-            className={`rounded-2xl p-6 border transition-all relative ${
+            className={`rounded-2xl p-4 sm:p-5 border transition-all relative ${
               isDark
                 ? "bg-[#111726] border-[#1E293B] hover:border-amber-500/40 shadow-md"
-                : "bg-white border-slate-200 hover:border-amber-400 shadow-sm hover:shadow-md"
+                : "bg-white border-slate-200 hover:border-amber-400 shadow-xs hover:shadow-md"
             }`}
           >
-            <span className="absolute top-5 right-5 w-3 h-3 rounded-full bg-amber-500 animate-ping"></span>
-            <div className="w-11 h-11 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center text-base mb-4">
+            <span className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+            <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center text-sm mb-3">
               <FaClock />
             </div>
-            <div className="text-4xl lg:text-5xl font-black tracking-tight mb-2 text-amber-500">
+            <div className="text-2xl sm:text-3xl font-black tracking-tight mb-1 text-amber-500">
               {pendingOrders}
             </div>
-            <div className={`text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+            <div className={`text-xs sm:text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
               Pending Review
             </div>
-            <div className={`text-xs mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+            <div className={`text-[11px] sm:text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
               Awaiting dispatch &amp; payment confirmation
             </div>
           </div>
 
           {/* Card 4: Live Active Visitors */}
           <div
-            className={`rounded-2xl p-6 border transition-all relative ${
+            className={`rounded-2xl p-4 sm:p-5 border transition-all relative ${
               isDark
                 ? "bg-[#111726] border-[#1E293B] hover:border-purple-500/40 shadow-md"
-                : "bg-white border-slate-200 hover:border-purple-400 shadow-sm hover:shadow-md"
+                : "bg-white border-slate-200 hover:border-purple-400 shadow-xs hover:shadow-md"
             }`}
           >
-            <span className="absolute top-5 right-5 w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
-            <div className="w-11 h-11 rounded-xl bg-purple-500/15 text-purple-500 flex items-center justify-center text-base mb-4">
+            <span className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <div className="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-500 flex items-center justify-center text-sm mb-3">
               <FaUsers />
             </div>
-            <div className={`text-4xl lg:text-5xl font-black tracking-tight mb-2 ${isDark ? "text-white" : "text-slate-900"}`}>
+            <div className={`text-2xl sm:text-3xl font-black tracking-tight mb-1 ${isDark ? "text-white" : "text-slate-900"}`}>
               {formatNumber(totalVisitors)}
             </div>
-            <div className={`text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+            <div className={`text-xs sm:text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
               Live Active Visitors
             </div>
-            <div className="text-xs text-purple-500 font-bold mt-1">
+            <div className="text-[11px] sm:text-xs text-purple-500 font-bold mt-0.5">
               {todayVisitors} active sessions captured today
             </div>
           </div>
@@ -511,7 +511,7 @@ function DashboardContent() {
         {/* ========================================================================= */}
         {/* 4. REAL-TIME LOCATION & CITY TRACING (Large Map & City Breakdown) */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
           
           {/* Location Tracing (2 Columns) */}
           <div

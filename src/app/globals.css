@@ -310,15 +310,18 @@ body:not(.admin-route) textarea:hover {
 }
 
 /* ========================================================================= */
-/* ADMIN SCALE CONTROL (80% Compact Default with 100% Full Viewport Bounds)  */
+/* ADMIN PANEL CLEAN RESPONSIVE LAYOUT (100% Native Standard Viewport)       */
 /* ========================================================================= */
-:root {
-  --admin-scale: 0.8;
-}
-
 body.admin-route {
   background-color: #f8fafc;
   min-height: 100vh;
+  zoom: 1 !important;
+  transform: none !important;
+}
+
+body.admin-route.admin-dark-theme,
+body.admin-route:has(.admin-dark-theme) {
+  background-color: #080C14;
 }
 
 @media (max-width: 768px) {
@@ -360,37 +363,5 @@ body.admin-route {
   color: #CBD5E1 !important;
 }
 
-@media (min-width: 768px) {
-  .admin-compact-scale {
-    zoom: var(--admin-scale, 0.8) !important;
-    width: calc(100% / var(--admin-scale, 0.8)) !important;
-    min-height: calc(100vh / var(--admin-scale, 0.8)) !important;
-  }
-
-  .admin-fixed-sidebar {
-    position: fixed !important;
-    top: 0px !important;
-    bottom: 0px !important;
-    left: 0px !important;
-    width: 18rem !important;
-    height: calc(100vh / var(--admin-scale, 0.8)) !important;
-    height: calc(100dvh / var(--admin-scale, 0.8)) !important;
-    min-height: calc(100vh / var(--admin-scale, 0.8)) !important;
-    max-height: calc(100vh / var(--admin-scale, 0.8)) !important;
-    z-index: 40 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-  }
-  .admin-main-offset {
-    margin-left: 18rem !important;
-    width: calc(100% - 18rem) !important;
-    min-width: 0 !important;
-    min-height: calc(100vh / var(--admin-scale, 0.8)) !important;
-    box-sizing: border-box !important;
-  }
-}
 
 

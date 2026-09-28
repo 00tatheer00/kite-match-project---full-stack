@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useContext } from 'react';
+import { useState, useContext } from 'react';
 import { Link, useLocation, useNavigate } from '@/components/RouterCompat';
 import { colors } from "../../theme";
 import NotificationCenter from "./NotificationCenter";
@@ -18,28 +18,6 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
   // If darkOverride is passed explicitly use it, otherwise use context
   const isDark = darkOverride !== undefined ? darkOverride : contextDark;
 
-  // Scale state: '80' (compact, default matching browser 80%) or '100' (standard)
-  const [scale, setScale] = useState('80');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('adminScale') || '80';
-      setScale(saved);
-      document.body.style.setProperty('--admin-scale', saved === '80' ? '0.8' : '1');
-      document.body.classList.toggle('admin-scale-80', saved === '80');
-    }
-  }, []);
-
-  const toggleScale = () => {
-    const next = scale === '80' ? '100' : '80';
-    setScale(next);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('adminScale', next);
-      document.body.style.setProperty('--admin-scale', next === '80' ? '0.8' : '1');
-      document.body.classList.toggle('admin-scale-80', next === '80');
-    }
-  };
-
   const links = [
     { to: "/admin/dashboard", label: "Executive Dashboard", badge: "LIVE" },
     { to: "/admin/products", label: "Products" },
@@ -56,11 +34,11 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
 
   return (
     <div
-      className={`min-h-screen flex flex-col md:flex-row transition-colors duration-200 text-base ${
+      className={`min-h-screen flex flex-col md:flex-row transition-colors duration-200 text-sm ${
         isDark
           ? "bg-[#080C14] text-slate-100 admin-dark-theme"
           : "bg-slate-50 text-slate-800"
-      } ${scale === '80' ? 'admin-compact-scale' : ''}`}
+      }`}
     >
       {/* ========================================================================= */}
       {/* MOBILE TOP BAR (Only visible on screens < md) */}
@@ -169,20 +147,6 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
 
             {/* Mobile Drawer Footer */}
             <div className="pt-5 border-t border-inherit space-y-3">
-              <button
-                type="button"
-                onClick={toggleScale}
-                className={`w-full text-left px-4 py-2.5 rounded-xl border transition-all font-semibold text-xs flex items-center justify-between ${
-                  isDark
-                    ? "border-[#1E293B] text-slate-300 hover:text-white hover:bg-[#161D2E]"
-                    : "border-slate-200 text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                <span>Display Scale</span>
-                <span className="px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-600 font-extrabold text-xs">
-                  {scale === '80' ? '80% Compact' : '100%'}
-                </span>
-              </button>
               <ThemeToggleBtn variant="sidebar" />
               <button
                 onClick={handleLogout}
@@ -201,32 +165,14 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
       )}
 
       {/* ========================================================================= */}
-      {/* ========================================================================= */}
-      {/* DESKTOP SIDEBAR (Strictly Fixed 288px Width, 100vh Full Height, No Scroll) */}
+      {/* DESKTOP SIDEBAR: Sticky, Flex Sibling, Never Overlaps Main View */}
       {/* ========================================================================= */}
       <aside
-        className={`admin-fixed-sidebar hidden md:flex flex-col justify-between border-r transition-colors duration-200 z-40 overflow-hidden no-scrollbar select-none ${
+        className={`hidden md:flex flex-col justify-between w-64 flex-shrink-0 sticky top-0 h-screen border-r transition-colors duration-200 z-30 select-none overflow-hidden no-scrollbar ${
           isDark
             ? "border-[#1E293B] bg-[#0B0F19]"
             : "border-slate-200 bg-white"
         }`}
-        style={{
-          position: "fixed",
-          top: "0px",
-          bottom: "0px",
-          left: "0px",
-          width: "18rem",
-          height: scale === '80' ? "calc(100vh / 0.8)" : "100vh",
-          minHeight: scale === '80' ? "calc(100vh / 0.8)" : "100vh",
-          maxHeight: scale === '80' ? "calc(100vh / 0.8)" : "100vh",
-          zIndex: 40,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          boxSizing: "border-box",
-          backgroundColor: isDark ? "#0B0F19" : "#ffffff",
-          borderRight: isDark ? "1px solid #1E293B" : "1px solid #e2e8f0",
-        }}
       >
         <div className="flex flex-col flex-1 min-h-0">
           {/* Brand Header */}
@@ -255,7 +201,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
             </p>
           </div>
 
-          {/* Navigation Menu (Strictly fits without scroll) */}
+          {/* Navigation Menu */}
           <nav className="p-3 space-y-1 flex-1 overflow-y-auto no-scrollbar">
             {links.map((link) => {
               const active = location.pathname === link.to;
@@ -302,18 +248,14 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
           </nav>
         </div>
 
-        {/* Sidebar Footer: PWA Install App Option, Theme Toggle & Logout */}
+        {/* Sidebar Footer */}
         <div
           className={`p-3 space-y-2 border-t flex-shrink-0 transition-colors ${
             isDark ? "border-[#1E293B]" : "border-slate-200"
           }`}
         >
-          {/* Option: Install App */}
           <InstallAppBtn variant="sidebar" />
-
-          {/* Theme Toggle Button inside sidebar */}
           <ThemeToggleBtn variant="sidebar" />
-
           <button
             onClick={handleLogout}
             className={`w-full text-left px-3.5 py-2 rounded-xl border transition-all font-semibold text-xs cursor-pointer flex items-center justify-between ${
@@ -329,23 +271,17 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
       </aside>
 
       {/* ========================================================================= */}
-      {/* MAIN CONTENT VIEW (Expansive Wide Layout, Normal Desktop Scale) */}
+      {/* MAIN CONTENT VIEW: Natural Flex Sibling, Zero Overlap, Perfect Fit */}
       {/* ========================================================================= */}
-      <main
-        className="admin-main-offset flex-1 flex flex-col min-w-0 md:ml-72 md:ml-[18rem]"
-        style={{
-          minHeight: scale === '80' ? "calc(100vh / 0.8)" : "100vh",
-        }}
-      >
+      <main className="flex-1 min-w-0 flex flex-col min-h-screen">
         {/* Desktop Top Header Bar */}
         <header
-          className={`hidden md:flex items-center justify-between px-6 sm:px-8 lg:px-10 py-4 border-b transition-colors duration-200 ${
+          className={`hidden md:flex items-center justify-between px-4 sm:px-6 py-3 border-b transition-colors duration-200 sticky top-0 z-20 backdrop-blur ${
             isDark
-              ? "border-[#1E293B] bg-[#0B0F19]/90 backdrop-blur sticky top-0 z-30"
-              : "border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-30 shadow-xs"
+              ? "border-[#1E293B] bg-[#0B0F19]/90"
+              : "border-slate-200 bg-white/90 shadow-xs"
           }`}
         >
-          {/* Quick Breadcrumb / Context */}
           <div className="flex items-center gap-3">
             <span
               className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${
@@ -361,24 +297,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
             </span>
           </div>
 
-          {/* Header Controls: Scale Switcher, Install App, Theme Toggle & Notification Bell */}
           <div className="flex items-center gap-3 sm:gap-4">
-            <button
-              type="button"
-              onClick={toggleScale}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-2 select-none ${
-                isDark
-                  ? "border-[#1E293B] bg-[#161D2E] text-slate-200 hover:text-white hover:border-sky-500/50"
-                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-sky-300 shadow-2xs"
-              }`}
-              title="Click to toggle display scale (80% Compact vs 100% Standard)"
-            >
-              <span className="text-[10px] uppercase font-black tracking-wider text-sky-500">Scale</span>
-              <span className="px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-600 font-extrabold text-xs">
-                {scale === '80' ? '80% Compact' : '100%'}
-              </span>
-            </button>
-            <div className={`h-6 w-px ${isDark ? "bg-[#1E293B]" : "bg-slate-200"}`}></div>
             <InstallAppBtn variant="header" />
             <div className={`h-6 w-px ${isDark ? "bg-[#1E293B]" : "bg-slate-200"}`}></div>
             <ThemeToggleBtn variant="header" />
@@ -387,8 +306,8 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
           </div>
         </header>
 
-        {/* Page Children Container - 100% responsive on mobile, tablet & large desktop */}
-        <div className="flex-1 p-3.5 sm:p-6 lg:p-8 min-w-0">
+        {/* Page Children Container */}
+        <div className="flex-1 p-4 sm:p-5 lg:p-6 min-w-0">
           <div className="w-full max-w-[1720px] mx-auto min-w-0">{children}</div>
         </div>
       </main>
