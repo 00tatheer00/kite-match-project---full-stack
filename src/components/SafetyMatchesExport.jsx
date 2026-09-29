@@ -210,9 +210,7 @@ const SafetyMatchesExport = () => {
             </picture>
           </SwiperSlide>
           <SwiperSlide>
-            <picture className="block w-full h-full">
-              <source media="(max-width: 640px)" srcSet={world_map_export_destinations_mobile?.src || world_map_export_destinations_mobile} />
-              <source media="(max-width: 1024px)" srcSet={world_map_export_destinations_mobile?.src || world_map_export_destinations_mobile} />
+            <div className="w-full h-full flex items-center justify-center bg-[#0F172A]">
               <img
                 src={world_map_export_destinations?.src || world_map_export_destinations}
                 alt="Global Export Map"
@@ -221,7 +219,7 @@ const SafetyMatchesExport = () => {
                 fetchPriority="high"
                 className="w-full h-full object-cover object-center p-2 sm:p-3 md:p-0"
               />
-            </picture>
+            </div>
           </SwiperSlide>
         </Swiper>
       </div>
@@ -532,22 +530,15 @@ const SafetyMatchesExport = () => {
 
           {/* Authentic Export Map */}
           <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-[#00AEEF]/20 mb-10 bg-[#0F172A]">
-            <picture>
-              <source media="(max-width: 640px)" srcSet={world_map_export_destinations_mobile?.src || world_map_export_destinations_mobile} />
-              <img
-                src={world_map_export_destinations?.src || world_map_export_destinations}
-                alt="Kite Group Worldwide Export Map"
-                loading="lazy"
-                decoding="async"
-                width="1920"
-                height="640"
-                className="w-full h-auto object-cover hover:scale-102 transition-transform duration-700"
-              />
-            </picture>
-            <div className="absolute top-4 left-4 bg-black/75 backdrop-blur-md text-white px-4 py-2 rounded-xl border border-white/20">
-              <p className="text-[10px] text-sky-400 font-bold uppercase tracking-wider">International Reach</p>
-              <p className="text-sm font-black">40+ Active Destination Markets</p>
-            </div>
+            <img
+              src={world_map_export_destinations?.src || world_map_export_destinations}
+              alt="Kite Group Worldwide Export Map"
+              loading="lazy"
+              decoding="async"
+              width="1920"
+              height="640"
+              className="w-full h-auto object-cover hover:scale-102 transition-transform duration-700"
+            />
           </div>
         </div>
 
