@@ -145,7 +145,7 @@ const SafetyMatchesExport = () => {
       tag: "Solid Continuous Band",
       description: "Uniform, smooth dark red-phosphorus friction strip covering the entire matchbox sidewall edge-to-edge for maximum striking surface area.",
       feature: "Full Coverage • Classic Reliability",
-      image: striking_surface_plain,
+      image: striking_surface_vip,
     },
     {
       id: "vip",
@@ -153,7 +153,7 @@ const SafetyMatchesExport = () => {
       tag: "Export Premium Standard",
       description: "Specialized export formulation with decorative border and dual-friction compound engineered specifically for luxury and hospitality matchboxes.",
       feature: "Reinforced Edge • Dual Compound",
-      image: striking_surface_vip,
+      image: striking_surface_plain,
     },
   ];
 
