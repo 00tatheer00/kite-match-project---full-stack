@@ -35,6 +35,11 @@ import hero from "../assets/Shippment-1920x640.jpeg";
 import heroMobile from "../assets/Shippment-640x640.jpeg";
 import shipment from "../assets/delivery.jpeg";
 
+import striking_surface_lines from "../assets/striking_surface_lines.png";
+import striking_surface_dots from "../assets/striking_surface_dots.png";
+import striking_surface_plain from "../assets/striking_surface_plain.png";
+import striking_surface_vip from "../assets/striking_surface_vip.png";
+
 const SafetyMatchesExport = () => {
   const safetyMatches = [
     { brand: "Simba", country: "Congo", image: simba },
@@ -124,7 +129,7 @@ const SafetyMatchesExport = () => {
       tag: "Linear Friction Grooves",
       description: "Evenly spaced parallel micro-ridges engineered for rapid, clean spark ignition with minimal phosphorus dust and extended box life.",
       feature: "Instant Spark • Zero Flaking",
-      patternType: "lines",
+      image: striking_surface_lines,
     },
     {
       id: "dots",
@@ -132,7 +137,7 @@ const SafetyMatchesExport = () => {
       tag: "Honeycomb Stipple Matrix",
       description: "High-density embossed dot-matrix friction pattern delivering superior grip traction and reliable damp-proof lighting in humid conditions.",
       feature: "High Traction • Damp Proof",
-      patternType: "dots",
+      image: striking_surface_dots,
     },
     {
       id: "plain",
@@ -140,7 +145,7 @@ const SafetyMatchesExport = () => {
       tag: "Solid Continuous Band",
       description: "Uniform, smooth dark red-phosphorus friction strip covering the entire matchbox sidewall edge-to-edge for maximum striking surface area.",
       feature: "Full Coverage • Classic Reliability",
-      patternType: "plain",
+      image: striking_surface_plain,
     },
     {
       id: "vip",
@@ -148,7 +153,7 @@ const SafetyMatchesExport = () => {
       tag: "Export Premium Standard",
       description: "Specialized export formulation with decorative border and dual-friction compound engineered specifically for luxury and hospitality matchboxes.",
       feature: "Reinforced Edge • Dual Compound",
-      patternType: "vip",
+      image: striking_surface_vip,
     },
   ];
 
@@ -318,51 +323,12 @@ const SafetyMatchesExport = () => {
                     </div>
 
                     {/* Simulated Matchbox Sidewall */}
-                    <div className="w-full bg-[#E8DCB8] rounded border border-[#C5B48D] p-1.5 shadow-sm">
-                      {/* Textured Friction Strip */}
-                      {surface.patternType === "lines" && (
-                        <div 
-                          className="w-full h-11 rounded border border-[#301306] shadow-inner relative overflow-hidden"
-                          style={{
-                            background: "repeating-linear-gradient(90deg, #4A1F0D 0px, #4A1F0D 3px, #6B3016 3px, #6B3016 6px)"
-                          }}
-                        >
-                          <div className="absolute inset-0 bg-black/10"></div>
-                        </div>
-                      )}
-
-                      {surface.patternType === "dots" && (
-                        <div 
-                          className="w-full h-11 rounded border border-[#301306] shadow-inner relative overflow-hidden bg-[#381607]"
-                          style={{
-                            backgroundImage: "radial-gradient(#D27D46 30%, transparent 31%)",
-                            backgroundSize: "6px 6px"
-                          }}
-                        >
-                          <div className="absolute inset-0 bg-black/10"></div>
-                        </div>
-                      )}
-
-                      {surface.patternType === "plain" && (
-                        <div 
-                          className="w-full h-11 rounded border border-[#301306] shadow-inner relative overflow-hidden bg-gradient-to-r from-[#4A1F0D] via-[#632B13] to-[#4A1F0D]"
-                        >
-                          <div className="absolute inset-0 bg-black/5"></div>
-                        </div>
-                      )}
-
-                      {surface.patternType === "vip" && (
-                        <div 
-                          className="w-full h-11 rounded border-2 border-[#ED028C] shadow-inner relative overflow-hidden"
-                          style={{
-                            background: "repeating-linear-gradient(45deg, #2D1005 0px, #2D1005 5px, #52220E 5px, #52220E 10px)"
-                          }}
-                        >
-                          <div className="absolute top-0 right-0 bg-[#ED028C] text-white text-[8px] font-bold px-1.5 py-0.2 rounded-bl">
-                            VIP
-                          </div>
-                        </div>
-                      )}
+                    <div className="w-full bg-[#E8DCB8] rounded border border-[#C5B48D] p-1.5 shadow-sm flex items-center justify-center overflow-hidden">
+                      <img
+                        src={surface.image?.src || surface.image}
+                        alt={surface.name}
+                        className="w-full h-11 object-fill rounded shadow-xs"
+                      />
                     </div>
                   </div>
 
