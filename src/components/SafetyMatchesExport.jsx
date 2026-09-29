@@ -183,49 +183,6 @@ const SafetyMatchesExport = () => {
     },
   ];
 
-  const exportDestinationsByRegion = [
-    {
-      region: "Middle East & Gulf",
-      color: "#00AEEF",
-      countries: [
-        { name: "Saudi Arabia", flag: "🇸🇦", brand: "Football Match", note: "High Volume" },
-        { name: "United Arab Emirates", flag: "🇦🇪", brand: "Al Felaij Match", note: "Gulf Hub" },
-        { name: "Lebanon", flag: "🇱🇧", brand: "Zebra Match", note: "Levant Market" },
-      ],
-    },
-    {
-      region: "Africa",
-      color: "#ED028C",
-      countries: [
-        { name: "Sudan", flag: "🇸🇩", brand: "Al Karaama & Al Moallam", note: "Major Partner" },
-        { name: "South Africa", flag: "🇿🇦", brand: "Zippy Match", note: "Southern Africa" },
-        { name: "DR Congo", flag: "🇨🇩", brand: "Simba Match", note: "Central Africa" },
-        { name: "Nigeria", flag: "🇳🇬", brand: "The Goose Match", note: "West Africa" },
-        { name: "Kenya", flag: "🇰🇪", brand: "Match Splints", note: "East Africa" },
-        { name: "Egypt", flag: "🇪🇬", brand: "Match Splints", note: "North Africa" },
-        { name: "Tanzania", flag: "🇹🇿", brand: "Match Supply", note: "East Africa" },
-        { name: "Ethiopia", flag: "🇪🇹", brand: "Industrial Splints", note: "Horn of Africa" },
-      ],
-    },
-    {
-      region: "Europe",
-      color: "#059669",
-      countries: [
-        { name: "Romania", flag: "🇷🇴", brand: "Wood Flowers & Magia Bunicii", note: "Eastern EU" },
-        { name: "Ukraine", flag: "🇺🇦", brand: "ReD MaC Match", note: "Black Sea" },
-        { name: "Hungary", flag: "🇭🇺", brand: "Industrial Splints", note: "Central Europe" },
-      ],
-    },
-    {
-      region: "Central Asia & Americas",
-      color: "#6366F1",
-      countries: [
-        { name: "Uzbekistan", flag: "🇺🇿", brand: "Ziynat Match", note: "Central Asia" },
-        { name: "Honduras", flag: "🇭🇳", brand: "Match Materials", note: "Latin America" },
-      ],
-    },
-  ];
-
   return (
     <section className="pt-5 pb-20 bg-gradient-to-b from-white to-[#F9F9F9] px-6">
       <div className="relative w-full! mb-10 min-h-[48vh] sm:min-h-[58vh] md:min-h-[68vh] lg:min-h-[100vh] bg-white ">
@@ -591,48 +548,6 @@ const SafetyMatchesExport = () => {
               <p className="text-[10px] text-sky-400 font-bold uppercase tracking-wider">International Reach</p>
               <p className="text-sm font-black">40+ Active Destination Markets</p>
             </div>
-          </div>
-
-          {/* Regional Country Sequence */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {exportDestinationsByRegion.map((regionGroup, rIdx) => (
-              <div
-                key={rIdx}
-                className="bg-white rounded-2xl p-5 border-2 border-[#E5E5E5] shadow-xs hover:shadow-md transition-all"
-              >
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#F0F0F0]">
-                  <h4 
-                    className="font-black text-sm uppercase tracking-wider"
-                    style={{ color: regionGroup.color }}
-                  >
-                    {regionGroup.region}
-                  </h4>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5F5F5] text-[#666666]">
-                    {regionGroup.countries.length} Destinations
-                  </span>
-                </div>
-
-                <div className="space-y-2.5">
-                  {regionGroup.countries.map((c, cIdx) => (
-                    <div
-                      key={cIdx}
-                      className="flex items-center justify-between p-2 rounded-lg bg-[#FAFAFA] hover:bg-[#F2F2F2] transition-colors"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="text-xl flex-shrink-0">{c.flag}</span>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#222222] truncate">{c.name}</p>
-                          <p className="text-[10px] text-[#777777] truncate">{c.brand}</p>
-                        </div>
-                      </div>
-                      <span className="text-[9px] font-semibold text-[#888888] bg-white px-1.5 py-0.5 rounded border border-[#E5E5E5] flex-shrink-0 ml-1">
-                        {c.note}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
 

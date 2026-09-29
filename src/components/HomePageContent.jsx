@@ -3,10 +3,10 @@
 import { lazy, Suspense } from "react";
 import { useInView } from "react-intersection-observer";
 import HeroCarousel from "./HeroCarousel";
+import BriefProductsSection from "./BriefProductsSection";
 import AboutSection from "./AboutSection";
 import BriefExport from "./BriefExport";
 
-const BriefProductsSection = lazy(() => import("./BriefProductsSection"));
 const BrandsShowcaseSection = lazy(() => import("./BrandsShowcaseSection"));
 const MatchMakingSection = lazy(() => import("./MatchMakingSection"));
 const CertificationsSlider = lazy(() => import("./CertificationsSlider"));
@@ -23,7 +23,7 @@ const SectionSkeleton = ({ minHeight = 280 }) => (
 const DeferredSection = ({ SectionComponent, minHeight }) => {
   const { ref, inView } = useInView({
     triggerOnce: true,
-    rootMargin: "320px 0px",
+    rootMargin: "800px 0px",
   });
 
   return (
@@ -42,8 +42,13 @@ const DeferredSection = ({ SectionComponent, minHeight }) => {
 const HomePageContent = () => {
   return (
     <>
+      {/* Semantic H1 for Top-Tier Search Engine Ranking (Mohsin Match Factory & Kite) */}
+      <h1 className="sr-only">
+        Mohsin Match Factory (Pvt.) Ltd. &amp; Kite Match — Best Match Factory in Pakistan &amp; Premier FMCG Manufacturer
+      </h1>
+
       <HeroCarousel />
-      <DeferredSection SectionComponent={BriefProductsSection} minHeight={520} />
+      <BriefProductsSection />
       <AboutSection />
       <BriefExport />
       <DeferredSection SectionComponent={BrandsShowcaseSection} minHeight={320} />

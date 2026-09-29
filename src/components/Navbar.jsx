@@ -23,35 +23,18 @@ const Navbar = () => {
 
   useEffect(() => {
     let isMounted = true;
-    let idleId;
-    let timeoutId;
-
-    const load = async () => {
-      try {
-        const data = await getProducts();
-        if (!isMounted) return;
-        setNavProducts(data.filter((p) => p.showInNavbar !== false));
-      } catch {
+    getProducts()
+      .then((data) => {
+        if (isMounted && Array.isArray(data)) {
+          setNavProducts(data.filter((p) => p.showInNavbar !== false));
+        }
+      })
+      .catch(() => {
         if (isMounted) setNavProducts([]);
-      }
-    };
-
-    const scheduleLoad = () => {
-      void load();
-    };
-
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(scheduleLoad, { timeout: 2500 });
-    } else {
-      timeoutId = window.setTimeout(scheduleLoad, 1200);
-    }
+      });
 
     return () => {
       isMounted = false;
-      if (idleId && typeof window !== "undefined" && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timeoutId) window.clearTimeout(timeoutId);
     };
   }, []);
 
@@ -118,33 +101,33 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-md z-50">
+    <nav className="bg-white shadow-md z-50 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center gap-4">
+        <div className="flex justify-between items-center gap-4 py-2.5 sm:py-3 md:py-3.5">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link to="/" className="flex items-center active:border-0">
+            <Link to="/" className="flex items-center gap-2 group active:border-0">
               <img
                 src={kiteLogo1?.src || kiteLogo1}
                 alt="Kite Brand logo icon"
                 decoding="async"
-                width="80"
-                height="80"
-                className="w-20! p-2 h-auto"
+                width="96"
+                height="96"
+                className="h-12 sm:h-14 md:h-16 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
               />
               <img
                 src={kiteLogo2?.src || kiteLogo2}
                 alt="Kite Brand wordmark"
                 decoding="async"
-                width="80"
-                height="80"
-                className="w-20! h-auto"
+                width="140"
+                height="65"
+                className="h-9 sm:h-11 md:h-13 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
               />
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center justify-end space-x-6 flex-1">
+          <div className="hidden md:flex items-center justify-end space-x-6 lg:space-x-8 flex-1">
             {navItems.map((item) => (
               <div
                 key={item.name}
@@ -156,7 +139,7 @@ const Navbar = () => {
               >
                 <Link
                   to={item.href}
-                  className={`text-base font-medium transition-colors duration-300 flex items-center gap-1 py-1 focus:outline-none ${
+                  className={`text-base lg:text-[17px] font-semibold transition-colors duration-200 flex items-center gap-1.5 py-2 px-1 focus:outline-none ${
                     isActive(item.href)
                       ? "text-primary"
                       : "text-text-primary hover:text-primary"
@@ -164,14 +147,14 @@ const Navbar = () => {
                 >
                   {item.name}
                   {(item.dropdown?.length || item.megaMenu?.length) && (
-                    <FaChevronDown className="text-xs" />
+                    <FaChevronDown className="text-xs transition-transform duration-200 group-hover:rotate-180" />
                   )}
                 </Link>
 
                 {/* Mega Menu */}
                 {item.megaMenu?.length > 0 && openDropdown === item.name && (
                   <div
-                    className="absolute left-1/2 transform -translate-x-1/2 mt-0 w-[min(92vw,900px)] bg-white rounded-lg shadow-xl border border-gray-200 overflow-visible z-50"
+                    className="absolute left-1/2 transform -translate-x-1/2 top-full mt-1 w-[min(92vw,900px)] bg-white rounded-lg shadow-xl border border-gray-200 overflow-visible z-50"
                     onMouseEnter={() => setOpenDropdown(item.name)}
                     onMouseLeave={() => setOpenDropdown(null)}
                   >
@@ -210,7 +193,7 @@ const Navbar = () => {
 
                 {/* Regular Dropdown Menu */}
                 {item.dropdown?.length > 0 && openDropdown === item.name && (
-                  <div className="absolute left-0 -mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-50">
+                  <div className="absolute left-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-50">
                     {item.dropdown.map((dropdownItem) => (
                       <Link
                         key={dropdownItem.name}
@@ -231,13 +214,13 @@ const Navbar = () => {
           </div>
 
           {/* Contact Button */}
-          <div className="hidden md:block flex-shrink-0">
+          <div className="hidden md:block flex-shrink-0 ml-2">
             <Link
               to="/contact"
-              className={`px-6 py-1.5 rounded-full font-medium transition-all duration-300 shadow-md focus:outline-none ${
+              className={`inline-flex items-center justify-center px-6 py-2.5 lg:px-7 lg:py-2.5 rounded-full text-base font-semibold transition-all duration-300 shadow-md hover:shadow-lg focus:outline-none ${
                 isActive("/contact")
                   ? "bg-primary-600 text-text-white shadow-lg scale-95"
-                  : "bg-primary text-text-white hover:bg-primary-600 hover:shadow-lg active:scale-95"
+                  : "bg-primary text-text-white hover:bg-primary-600 hover:scale-105 active:scale-95"
               }`}
             >
               Contact Us
@@ -248,15 +231,15 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-text-primary hover:text-primary transition-colors focus:outline-none"
+              className="text-text-primary hover:text-primary p-2 transition-colors focus:outline-none"
               aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-navigation"
             >
               {isMobileMenuOpen ? (
-                <FaTimes className="h-6 w-6" />
+                <FaTimes className="h-7 w-7" />
               ) : (
-                <FaBars className="h-6 w-6" />
+                <FaBars className="h-7 w-7" />
               )}
             </button>
           </div>

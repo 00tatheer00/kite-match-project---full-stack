@@ -177,9 +177,47 @@ export async function adminLogin(email, password) {
   return handleResponse(res);
 }
 
-export async function getProducts() {
-  const res = await fetch(`${API_BASE_URL}/products`);
-  return handleResponse(res);
+let productsCache = null;
+let productsCacheTime = 0;
+let productsInFlightPromise = null;
+const PRODUCTS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+export function invalidateProductsCache() {
+  productsCache = null;
+  productsCacheTime = 0;
+  productsInFlightPromise = null;
+}
+
+export async function getProducts(options = {}) {
+  const { forceRefresh = false } = options;
+  const now = Date.now();
+
+  if (!forceRefresh && productsCache && now - productsCacheTime < PRODUCTS_CACHE_TTL) {
+    return productsCache;
+  }
+
+  if (productsInFlightPromise && !forceRefresh) {
+    return productsInFlightPromise;
+  }
+
+  productsInFlightPromise = (async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/products`);
+      const data = await handleResponse(res);
+      if (Array.isArray(data)) {
+        productsCache = data;
+        productsCacheTime = Date.now();
+      }
+      return data;
+    } catch (err) {
+      if (productsCache) return productsCache;
+      throw err;
+    } finally {
+      productsInFlightPromise = null;
+    }
+  })();
+
+  return productsInFlightPromise;
 }
 
 function normalizeIdentifier(value) {
@@ -231,6 +269,7 @@ export async function adminGetProducts() {
 }
 
 export async function adminCreateProduct(data) {
+  invalidateProductsCache();
   const res = await fetch(`${API_BASE_URL}/admin/products`, {
     method: "POST",
     headers: { ...getAuthHeaders() },
@@ -240,6 +279,7 @@ export async function adminCreateProduct(data) {
 }
 
 export async function adminUpdateProduct(id, data) {
+  invalidateProductsCache();
   const res = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
     method: "PUT",
     headers: { ...getAuthHeaders() },
@@ -249,6 +289,7 @@ export async function adminUpdateProduct(id, data) {
 }
 
 export async function adminDeleteProduct(id) {
+  invalidateProductsCache();
   const res = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
     method: "DELETE",
     headers: { ...getAuthHeaders() },

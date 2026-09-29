@@ -52,16 +52,18 @@ export default function ClientShell({ children }) {
       </Suspense>
       <ScrollToTop />
       <Toaster position="top-right" />
-      <div className="min-h-screen bg-white app-page-compact">
+      <div className="min-h-screen bg-white flex flex-col">
         <Navbar />
-        <main id="main-content">
-          <Suspense fallback={<RouteLoadingFallback />}>
-            {children}
-          </Suspense>
-        </main>
+        <div className="flex-1 app-page-compact">
+          <main id="main-content">
+            <Suspense fallback={<RouteLoadingFallback />}>
+              {children}
+            </Suspense>
+          </main>
+          <Footer />
+        </div>
         <CartDrawer />
         <FloatingCartButton />
-        <Footer />
         <WhatsAppButton />
       </div>
     </CartProvider>

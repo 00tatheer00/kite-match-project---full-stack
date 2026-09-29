@@ -1,7 +1,5 @@
 'use client';
 
-import { motion } from "framer-motion";
-import { useInView } from "react-intersection-observer";
 import { FaFire, FaLayerGroup, FaArrowRight } from "react-icons/fa";
 import { Link } from '@/components/RouterCompat';
 import { useEffect, useState } from "react";
@@ -17,18 +15,14 @@ const getOrderValue = (product) => {
 };
 
 const BriefProductsSection = () => {
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  });
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-        const data = await getProducts();
+    let isMounted = true;
+    getProducts()
+      .then((data) => {
+        if (!isMounted || !Array.isArray(data)) return;
         const allProducts = data
           .filter((p) => p.showOnLanding !== false)
           .sort((a, b) => {
@@ -38,15 +32,19 @@ const BriefProductsSection = () => {
             const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
             return aTime - bTime;
           })
-          .slice(0, 5); // Take up to 5 products
+          .slice(0, 5);
         setFeaturedProducts(allProducts);
-      } catch {
-        setFeaturedProducts([]);
-      } finally {
-        setLoading(false);
-      }
+      })
+      .catch(() => {
+        if (isMounted) setFeaturedProducts([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
     };
-    load();
   }, []);
 
   const getIcon = (product) => {
@@ -55,18 +53,10 @@ const BriefProductsSection = () => {
   };
 
   return (
-    <section
-      ref={ref}
-      className="py-16 bg-gradient-to-b from-white to-[#F9F9F9]"
-    >
+    <section className="py-16 bg-gradient-to-b from-white to-[#F9F9F9]">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12">
           <h2 className="text-[#00AEEF] text-lg font-semibold mb-2 uppercase tracking-wide">
             Our Products
           </h2>
@@ -78,11 +68,11 @@ const BriefProductsSection = () => {
             Discover our range of premium FMCG products trusted by households
             and businesses across Pakistan and 40+ countries worldwide.
           </p>
-        </motion.div>
+        </div>
 
         {/* Products Grid */}
         <div className="mb-8">
-          {loading ? (
+          {loading && featuredProducts.length === 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {Array.from({ length: 5 }).map((_, index) => (
                 <div
@@ -153,12 +143,7 @@ const BriefProductsSection = () => {
         </div>
 
         {/* View All Products Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center"
-        >
+        <div className="text-center">
           <Link
             to="/products"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-[#00AEEF] to-[#0095CC] text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95"
@@ -166,7 +151,7 @@ const BriefProductsSection = () => {
             <span>View All Products</span>
             <FaArrowRight className="transform group-hover:translate-x-1 transition-transform" />
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
