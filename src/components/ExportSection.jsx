@@ -428,7 +428,7 @@ const ExportSection = () => {
                   Email Us
                 </a>
                 <a
-                  href="https://wa.me/+923008592829"
+                  href="https://wa.me/923008592829"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-[#ED028C] transition-all duration-300 active:scale-95"

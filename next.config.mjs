@@ -17,6 +17,21 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'kitepk.com',
+          },
+        ],
+        destination: 'https://www.kitepk.com/:path*',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

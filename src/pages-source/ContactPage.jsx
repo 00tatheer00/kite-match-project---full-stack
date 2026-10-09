@@ -82,7 +82,7 @@ const ContactPage = () => {
                     </p>
                     <p className="flex items-center">
                       <FaPhone className="mr-3 flex-shrink-0" />
-                      <span>Tel. No: +92-91-5815056, 5815057</span>
+                      <span>Tel. No: <a href="tel:+92915815056" className="text-white hover:underline">+92-91-5815056</a>, <a href="tel:+92915815057" className="text-white hover:underline">5815057</a></span>
                     </p>
                     <p className="flex items-center">
                       <FaEnvelope className="mr-3 flex-shrink-0" />
@@ -120,11 +120,11 @@ const ContactPage = () => {
                     </p>
                     <p className="flex items-center">
                       <FaPhone className="text-[#ED028C] mr-3 flex-shrink-0" />
-                      <span>Tel. No: +92-91-5817787, 5817795</span>
+                      <span>Tel. No: <a href="tel:+92915817787" className="hover:text-[#00AEEF] hover:underline">+92-91-5817787</a>, <a href="tel:+92915817795" className="hover:text-[#00AEEF] hover:underline">5817795</a></span>
                     </p>
                     <p className="flex items-center">
                       <FaPhone className="text-[#ED028C] mr-3 flex-shrink-0" />
-                      <span>Fax No: +92-91-5837648</span>
+                      <span>Fax No: <a href="tel:+92915837648" className="hover:text-[#00AEEF] hover:underline">+92-91-5837648</a></span>
                     </p>
                     <p className="flex items-center">
                       <FaEnvelope className="text-[#ED028C] mr-3 flex-shrink-0" />
@@ -163,7 +163,7 @@ const ContactPage = () => {
                     </p>
                     <p className="flex items-center">
                       <FaPhone className="text-[#ED028C] mr-3 flex-shrink-0" />
-                      <span>Tel. No: +92-42-37332711-12</span>
+                      <span>Tel. No: <a href="tel:+924237332711" className="hover:text-[#00AEEF] hover:underline">+92-42-37332711</a> / <a href="tel:+924237332712" className="hover:text-[#00AEEF] hover:underline">12</a></span>
                     </p>
                     <p className="flex items-center">
                       <FaEnvelope className="text-[#ED028C] mr-3 flex-shrink-0" />
@@ -202,7 +202,7 @@ const ContactPage = () => {
                     </p>
                     <p className="flex items-center">
                       <FaPhone className="text-[#ED028C] mr-3 flex-shrink-0" />
-                      <span>Tel. No: +92 91 5817416-17</span>
+                      <span>Tel. No: <a href="tel:+92915817416" className="hover:text-[#00AEEF] hover:underline">+92-91-5817416</a> / <a href="tel:+92915817417" className="hover:text-[#00AEEF] hover:underline">17</a></span>
                     </p>
                   </div>
                 </div>
@@ -379,7 +379,7 @@ const ContactPage = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="https://wa.me/+923018117666"
+              href="https://wa.me/923018117666"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-white text-[#00AEEF] px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"

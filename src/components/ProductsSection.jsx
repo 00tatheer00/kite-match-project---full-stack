@@ -16,13 +16,27 @@ const getOrderValue = (product) => {
   return 0;
 };
 
-const ProductsSection = () => {
+const ProductsSection = ({ initialProducts = [] }) => {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
   });
-  const [allProducts, setAllProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [allProducts, setAllProducts] = useState(() => {
+    if (initialProducts && initialProducts.length > 0) {
+      return initialProducts
+        .filter((p) => p.showInProductsPage !== false)
+        .sort((a, b) => {
+          const byOrder = getOrderValue(a) - getOrderValue(b);
+          if (byOrder !== 0) return byOrder;
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return aTime - bTime;
+        })
+        .slice(0, 5);
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(allProducts.length === 0);
 
   useEffect(() => {
     const load = async () => {
@@ -210,7 +224,7 @@ const ProductsSection = () => {
               Request Quote
             </Link>
             <a
-              href="https://wa.me/+923008592829"
+              href="https://wa.me/923008592829"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-[#00AEEF] transition-all duration-300 active:scale-95"

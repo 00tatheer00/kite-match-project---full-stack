@@ -21,12 +21,12 @@ import StructuredData from "../components/seo/StructuredData";
 import { SITE_URL, toAbsoluteUrl } from "../utils/seo";
 import { useCart } from "../context/CartContext";
 
-const ProductDetailPage = () => {
+const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState(initialProduct);
+  const [loading, setLoading] = useState(!initialProduct);
   const [selectedVariant, setSelectedVariant] = useState("");
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -910,7 +910,7 @@ const ProductDetailPage = () => {
                   Request Quote
                 </Link>
                 <a
-                  href="https://wa.me/+923008592829"
+                  href="https://wa.me/923008592829"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-[#00AEEF] transition-all duration-300 active:scale-95"

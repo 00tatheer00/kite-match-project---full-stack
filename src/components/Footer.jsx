@@ -80,6 +80,30 @@ const Footer = () => {
     },
   ];
 
+  const renderPhoneLinks = (phoneStr) => {
+    if (!phoneStr) return null;
+    const parts = phoneStr.split(",").map((p) => p.trim());
+    return parts.map((num, i) => {
+      let fullNum = num;
+      if (i > 0 && !num.startsWith("+") && parts[0].startsWith("+")) {
+        const prefixMatch = parts[0].match(/^(\+\d+\s*\d+\s*)/);
+        if (prefixMatch) fullNum = prefixMatch[1] + num;
+      }
+      const cleanDigits = fullNum.replace(/[^0-9+]/g, "");
+      return (
+        <span key={i}>
+          {i > 0 && <span className="text-white/40 mx-1">, </span>}
+          <a
+            href={`tel:${cleanDigits}`}
+            className="text-white/80 hover:text-[#00AEEF] transition-colors"
+          >
+            {num}
+          </a>
+        </span>
+      );
+    });
+  };
+
   return (
     <footer className="bg-[#222222] text-white">
       {/* Company Logos Section */}
@@ -221,12 +245,9 @@ const Footer = () => {
                       </li>
                       <li className="flex items-center">
                         <FaPhone className="text-[#00AEEF] mr-3 flex-shrink-0" />
-                        <a
-                          href={`tel:${info.phone.replace(/[^0-9+]/g, "")}`}
-                          className="text-white/80 hover:text-[#00AEEF] transition-colors"
-                        >
-                          {info.phone}
-                        </a>
+                        <div className="text-white/80">
+                          {renderPhoneLinks(info.phone)}
+                        </div>
                       </li>
                       <li className="flex items-center">
                         <FaEnvelope className="text-[#00AEEF] mr-3 flex-shrink-0" />
@@ -264,12 +285,9 @@ const Footer = () => {
                     </li>
                     <li className="flex items-center">
                       <FaPhone className="text-[#00AEEF] mr-2 flex-shrink-0 text-xs" />
-                      <a
-                        href={`tel:${info.phone.replace(/[^0-9+]/g, "")}`}
-                        className="text-white/80 hover:text-[#00AEEF] transition-colors"
-                      >
-                        {info.phone}
-                      </a>
+                      <div className="text-white/80">
+                        {renderPhoneLinks(info.phone)}
+                      </div>
                     </li>
                     {/* {info.fax && (
                         <li className="flex items-center">

@@ -3,7 +3,7 @@
 import PromotionsPackagesSection from '../components/PromotionsPackagesSection';
 import SeoHead from "../components/seo/SeoHead";
 
-const PromotionsPackagesPage = () => {
+const PromotionsPackagesPage = ({ initialPackages = [], initialProducts = [] }) => {
   return (
     <>
       <SeoHead
@@ -44,7 +44,7 @@ const PromotionsPackagesPage = () => {
           </div>
         </div> */}
         </div>
-        <PromotionsPackagesSection />
+        <PromotionsPackagesSection initialPackages={initialPackages} initialProducts={initialProducts} />
       </div>
     </>
   );

@@ -2,5 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /checkout
+Disallow: /order-success
 
-Sitemap: https://kitepk.com/sitemap.xml
+Sitemap: https://www.kitepk.com/sitemap.xml

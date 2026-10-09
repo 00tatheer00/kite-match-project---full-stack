@@ -20,16 +20,16 @@ import { useEffect, useState, useMemo } from "react";
 import { getPromotions, getProducts } from "../services/api";
 import { useCart } from "../context/CartContext";
 
-const PromotionsPackagesSection = () => {
+const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] }) => {
   const { addToCart, addPromotionToCart, openCart, cartItems } = useCart();
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.05,
   });
 
-  const [packages, setPackages] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [packages, setPackages] = useState(initialPackages || []);
+  const [products, setProducts] = useState(initialProducts || []);
+  const [loading, setLoading] = useState((!initialPackages || initialPackages.length === 0) && (!initialProducts || initialProducts.length === 0));
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [quantities, setQuantities] = useState({});

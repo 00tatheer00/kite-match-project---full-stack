@@ -4,7 +4,7 @@ import PwaRegister from "@/components/PwaRegister";
 import Script from "next/script";
 
 export const metadata = {
-  metadataBase: new URL("https://kitepk.com"),
+  metadataBase: new URL("https://www.kitepk.com"),
   title: {
     default: "Mohsin Match Factory & Kite | Best Match Factory in Pakistan",
     template: "%s | Mohsin Match Factory & Kite Brand",
@@ -40,19 +40,19 @@ export const metadata = {
   publisher: "Mohsin Match Factory (Pvt.) Ltd.",
   manifest: "/manifest.json",
   alternates: {
-    canonical: "https://kitepk.com",
+    canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "en_PK",
-    url: "https://kitepk.com",
+    url: "https://www.kitepk.com",
     siteName: "Mohsin Match Factory & Kite Brand Pakistan",
     title: "Mohsin Match Factory & Kite | Best Match Factory in Pakistan",
     description:
       "Pakistan's #1 best match factory and largest safety matches exporter since 1974. Mohsin Match Factory (Pvt.) Ltd. & Kite Brand.",
     images: [
       {
-        url: "https://kitepk.com/logo.png",
+        url: "https://www.kitepk.com/logo.png",
         width: 800,
         height: 600,
         alt: "Mohsin Match Factory & Kite Brand Pakistan",
@@ -64,7 +64,7 @@ export const metadata = {
     title: "Mohsin Match Factory & Kite | Best Match Factory in Pakistan",
     description:
       "Pakistan's #1 Safety Match Manufacturer & Largest Exporter to 40+ Countries since 1974.",
-    images: ["https://kitepk.com/logo.png"],
+    images: ["https://www.kitepk.com/logo.png"],
   },
   robots: {
     index: true,
@@ -100,7 +100,7 @@ const jsonLdStructuredData = {
   "@graph": [
     {
       "@type": ["Organization", "ManufacturingBusiness", "LocalBusiness"],
-      "@id": "https://kitepk.com/#organization",
+      "@id": "https://www.kitepk.com/#organization",
       name: "Mohsin Match Factory (Pvt.) Ltd.",
       alternateName: [
         "Mohsin Match Factory",
@@ -110,9 +110,9 @@ const jsonLdStructuredData = {
         "Mohsin Match Factory Peshawar",
         "Aziz Group Match Factory",
       ],
-      url: "https://kitepk.com",
-      logo: "https://kitepk.com/logo.png",
-      image: "https://kitepk.com/logo.png",
+      url: "https://www.kitepk.com",
+      logo: "https://www.kitepk.com/logo.png",
+      image: "https://www.kitepk.com/logo.png",
       description:
         "Mohsin Match Factory (Pvt.) Ltd. is the #1 best match factory in Pakistan and the largest exporter of safety matches, wooden splints, and FMCG products since 1974. Operating under Aziz Group of Industries in Industrial Estate Hayatabad, Peshawar, Pakistan.",
       address: {
@@ -164,17 +164,17 @@ const jsonLdStructuredData = {
     },
     {
       "@type": "WebSite",
-      "@id": "https://kitepk.com/#website",
-      url: "https://kitepk.com",
+      "@id": "https://www.kitepk.com/#website",
+      url: "https://www.kitepk.com",
       name: "Mohsin Match Factory & Kite Brand",
       description:
         "Official portal for Mohsin Match Factory & Kite Brand - Best Match Factory and FMCG Manufacturer in Pakistan",
       publisher: {
-        "@id": "https://kitepk.com/#organization",
+        "@id": "https://www.kitepk.com/#organization",
       },
       potentialAction: {
         "@type": "SearchAction",
-        target: "https://kitepk.com/products?search={search_term_string}",
+        target: "https://www.kitepk.com/products?search={search_term_string}",
         "query-input": "required name=search_term_string",
       },
     },
