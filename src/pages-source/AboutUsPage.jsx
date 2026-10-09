@@ -60,7 +60,7 @@ const AboutUsPage = () => {
     {
       year: "2025",
       event:
-        "Kite Glow Detergent Launch - Premium Detergent with Triple Enzyme Technology",
+        "Kite Glow Detergent Launch - Premium Detergent with Five Enzyme Technology",
     },
   ];
 

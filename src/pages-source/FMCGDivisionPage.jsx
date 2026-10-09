@@ -51,7 +51,7 @@ const FMCGDivisionPage = () => {
               <p className="text-lg text-[#666666] leading-relaxed mb-6">
                 Our{" "}
                 <strong className="text-[#00AEEF]">Kite Glow detergent</strong>,
-                launched in March 2025, features triple enzyme technology for
+                launched in March 2025, features five enzyme technology for
                 exceptional cleaning power and superior stain removal.{" "}
                 <strong className="text-[#ED028C]">Kite Dish Wash Bar</strong>
                 has rapidly captured market share with its premium lemon
@@ -126,7 +126,7 @@ const FMCGDivisionPage = () => {
               <div className="bg-gradient-to-br from-primary to-primary-600 rounded-xl shadow-lg p-8 text-text-white">
                 <h3 className="text-2xl font-bold mb-4">Kite Glow Detergent</h3>
                 <p className="text-lg text-text-white mb-4">
-                  Premium detergent with triple enzyme technology for
+                  Premium detergent with five enzyme technology for
                   exceptional cleaning, superior stain removal, and fabric care
                 </p>
                 <ul className="text-sm space-y-2">
@@ -211,7 +211,7 @@ const FMCGDivisionPage = () => {
                   <li className="flex items-start">
                     <span className="text-[#ED028C] mr-2 font-bold">▸</span>
                     <span>
-                      Triple enzyme technology in Kite Glow for superior stain
+                      Five enzyme technology in Kite Glow for superior stain
                       removal
                     </span>
                   </li>

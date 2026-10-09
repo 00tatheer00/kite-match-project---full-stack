@@ -26,7 +26,7 @@ const faqSchema = {
       name: "Which is the best washing powder in Pakistan for deep cleaning?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Kite Glow and Burq Action are recognized among Pakistan's top-performing washing powders. Formulated with European enzyme technology, they dissolve tough grease and dirt in both cold and warm water while preserving fabric color.",
+        text: "Kite Glow and Burq Action are recognized among Pakistan's top-performing washing powders. Formulated with European five-enzyme technology, they dissolve tough grease and dirt in both cold and warm water while preserving fabric color.",
       },
     },
     {

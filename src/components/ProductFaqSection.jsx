@@ -6,7 +6,7 @@ import { FaChevronDown, FaCheckCircle, FaStar, FaShieldAlt } from 'react-icons/f
 const faqs = [
   {
     q: "Which is the best washing powder in Pakistan for deep cleaning and tough stains?",
-    a: "Kite Glow and Burq Action are recognized among Pakistan's top-performing washing powders. Formulated with European enzyme technology, they dissolve tough grease and dirt in both cold and warm water while preserving fabric color and leaving a fresh floral fragrance.",
+    a: "Kite Glow and Burq Action are recognized among Pakistan's top-performing washing powders. Formulated with European five-enzyme technology, they dissolve tough grease and dirt in both cold and warm water while preserving fabric color and leaving a fresh floral fragrance.",
   },
   {
     q: "What makes Kite Dish Wash Bar unique in Pakistan?",

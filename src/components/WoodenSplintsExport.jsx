@@ -580,7 +580,7 @@ const WoodenSplintsExport = () => {
             <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full lg:w-auto">
               <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs text-center min-w-[140px]">
                 <div className="text-xl sm:text-2xl font-black text-[#00AEEF]">Kite Glow</div>
-                <div className="text-xs text-[#777777] mt-1">Triple Enzyme</div>
+                <div className="text-xs text-[#777777] mt-1">Five Enzyme</div>
               </div>
               <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs text-center min-w-[140px]">
                 <div className="text-xl sm:text-2xl font-black text-[#ED028C]">BURQ Action</div>

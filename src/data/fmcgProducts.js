@@ -26,7 +26,7 @@ export const detergentProducts = {
     name: 'Kite Glow',
     tier: 'Premium Brand',
     launchDate: 'March 2025',
-    features: 'Triple enzyme technology for exceptional cleaning power, superior stain removal, fabric care, and long-lasting freshness. Setting the standard for excellence in the detergent industry.',
+    features: 'Five enzyme technology for exceptional cleaning power, superior stain removal, fabric care, and long-lasting freshness. Setting the standard for excellence in the detergent industry.',
     benefits: [
       'Exceptional cleaning power',
       'Superior stain removal',
@@ -139,7 +139,7 @@ export const productCategories = [
     title: 'Detergent Products',
     slug: 'detergent-products',
     products: [
-      { name: 'Kite Glow', slug: 'kite-glow', description: 'Triple enzyme technology' },
+      { name: 'Kite Glow', slug: 'kite-glow', description: 'Five enzyme technology' },
       { name: 'BURQ Action', slug: 'burq-action', description: 'Color protection' },
       { name: 'Vero Detergent', slug: 'vero', description: 'Economy bulk detergent' },
     ],

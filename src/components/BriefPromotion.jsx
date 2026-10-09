@@ -23,7 +23,7 @@ const BriefPromotion = () => {
             <h3 className="text-2xl font-bold mb-3">Premium Quality</h3>
             <p className="text-black">
               Kite Matches meeting international safety standards. Kite Glow
-              Detergent with Triple enzymes Formula.
+              Detergent with Five Enzyme Formula.
             </p>
           </div>
 
