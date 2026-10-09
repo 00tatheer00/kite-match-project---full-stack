@@ -11,7 +11,10 @@ import {
   FaShieldAlt, 
   FaTag, 
   FaSearch, 
-  FaCheck 
+  FaCheck,
+  FaWhatsapp,
+  FaPhoneAlt,
+  FaClock
 } from "react-icons/fa";
 import { useEffect, useState, useMemo } from "react";
 import { getPromotions, getProducts } from "../services/api";
@@ -215,18 +218,41 @@ const PromotionsPackagesSection = () => {
           className="text-center mb-10"
         >
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-[#EAF8FE] border border-[#00AEEF]/20 text-[#0095CC] px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-4 shadow-sm">
-            <FaBoxOpen className="text-sm text-[#00AEEF]" />
-            <span>Official Factory Direct Store • Nationwide Delivery</span>
+          <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-4 shadow-xs">
+            <FaClock className="text-sm text-amber-600" />
+            <span>Digital Store Service • Coming Soon</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#222222] tracking-tight mb-4">
-            Online <span className="text-[#00AEEF]">Order</span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#222222] tracking-tight mb-4 flex items-center justify-center gap-3 flex-wrap">
+            <span>Online <span className="text-[#00AEEF]">Order</span></span>
+            <span className="text-xs sm:text-sm font-extrabold uppercase px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 tracking-wide">
+              Coming Soon
+            </span>
           </h1>
 
-          <p className="text-[#666666] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Order every single SKU and special value pack directly from Kite Match &amp; Detergent Factory. Guaranteed genuine products at factory prices with cash on delivery.
+          <p className="text-[#666666] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-6">
+            Hamari direct online shopping cart aur automated checkout service jald live ho rahi hai. Filhal aap factory rates par hamara catalog browse kar sakte hain aur orders directly WhatsApp ya Phone helpline ke zariye book karwa sakte hain.
           </p>
+
+          {/* Quick Order Actions Banner */}
+          <div className="flex flex-wrap items-center justify-center gap-3 max-w-lg mx-auto mb-8">
+            <a
+              href="https://wa.me/923018117666?text=Hello%20Kite%2C%20I%20would%20like%20to%20inquire%20and%20place%20an%20order."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#25D366] hover:bg-[#128C7E] text-white px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
+            >
+              <FaWhatsapp className="text-base" />
+              <span>Order via WhatsApp (0301 8117666)</span>
+            </a>
+            <a
+              href="tel:+923018117666"
+              className="bg-white hover:bg-gray-50 text-[#222222] border border-gray-300 px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xs transition-all"
+            >
+              <FaPhoneAlt className="text-xs text-[#00AEEF]" />
+              <span>Helpline: 0301 8117666</span>
+            </a>
+          </div>
 
           {/* Trust Highlights */}
           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
@@ -435,51 +461,28 @@ const PromotionsPackagesSection = () => {
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-3 w-full sm:w-auto">
-                            {/* Quantity Stepper */}
-                            <div className="inline-flex items-center border border-[#D5D5D5] rounded-lg bg-white overflow-hidden shadow-xs">
-                              <button
-                                type="button"
-                                onClick={() => handleQtyChange(pkgKey, -1)}
-                                disabled={getItemQty(pkgKey) <= 1}
-                                className="w-9 h-10 flex items-center justify-center text-[#555555] hover:bg-[#F2F2F2] disabled:opacity-30 text-base font-bold transition-colors"
-                              >
-                                −
-                              </button>
-                              <span className="w-10 text-center text-xs font-bold text-[#222222]">
-                                {getItemQty(pkgKey)}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => handleQtyChange(pkgKey, 1)}
-                                className="w-9 h-10 flex items-center justify-center text-[#555555] hover:bg-[#F2F2F2] text-base font-bold transition-colors"
-                              >
-                                +
-                              </button>
-                            </div>
-
-                            {/* Add to Cart Button */}
+                          <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                            {/* Disabled Coming Soon Button */}
                             <button
                               type="button"
-                              onClick={() => handleBuyPromotion(pkg)}
-                              className={`flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-bold text-xs sm:text-sm text-white flex items-center justify-center gap-2 shadow-md transition-all duration-200 active:scale-95 ${
-                                isJustAdded
-                                  ? "bg-emerald-600 shadow-emerald-600/30"
-                                  : "bg-[#ED028C] hover:bg-[#D4027D] shadow-[#ED028C]/25"
-                              }`}
+                              disabled
+                              className="px-4 py-2.5 rounded-lg font-bold text-xs sm:text-sm text-gray-500 bg-gray-200 border border-gray-300 cursor-not-allowed flex items-center gap-2"
+                              title="Online ordering will be available soon"
                             >
-                              {isJustAdded ? (
-                                <>
-                                  <FaCheck className="text-xs" />
-                                  <span>Added to Cart!</span>
-                                </>
-                              ) : (
-                                <>
-                                  <FaShoppingCart className="text-xs" />
-                                  <span>Add Package to Cart</span>
-                                </>
-                              )}
+                              <FaClock className="text-xs text-amber-600" />
+                              <span>Coming Soon</span>
                             </button>
+
+                            {/* Order via WhatsApp */}
+                            <a
+                              href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to order the promotional deal: ${pkg.title}`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-5 py-2.5 rounded-lg font-bold text-xs sm:text-sm text-white bg-[#25D366] hover:bg-[#128C7E] flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
+                            >
+                              <FaWhatsapp className="text-sm" />
+                              <span>Order on WhatsApp</span>
+                            </a>
                           </div>
                         </div>
                       </div>
@@ -597,50 +600,28 @@ const PromotionsPackagesSection = () => {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        {/* Quantity Stepper */}
-                        <div className="inline-flex items-center border border-[#D5D5D5] rounded-md bg-white overflow-hidden flex-shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => handleQtyChange(skuKey, -1)}
-                            disabled={qty <= 1}
-                            className="w-7 h-8 flex items-center justify-center text-[#555555] hover:bg-[#F2F2F2] disabled:opacity-30 text-sm font-bold transition-colors"
-                          >
-                            −
-                          </button>
-                          <span className="w-7 text-center text-xs font-bold text-[#222222]">
-                            {qty}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleQtyChange(skuKey, 1)}
-                            className="w-7 h-8 flex items-center justify-center text-[#555555] hover:bg-[#F2F2F2] text-sm font-bold transition-colors"
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        {/* Add to Cart button */}
+                        {/* Coming Soon Disabled Button */}
                         <button
                           type="button"
-                          onClick={() => handleBuySku(sku.product, sku.variant, sku.brandName)}
-                          className={`flex-1 py-2 px-3 rounded-md font-bold text-xs text-white flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 shadow-sm ${
-                            isJustAdded
-                              ? "bg-emerald-600 shadow-emerald-600/30"
-                              : "bg-[#00AEEF] hover:bg-[#0095CC] shadow-[#00AEEF]/20"
-                          }`}
+                          disabled
+                          className="flex-1 py-2 px-2.5 rounded-md font-bold text-xs text-gray-500 bg-gray-200 border border-gray-300 cursor-not-allowed flex items-center justify-center gap-1.5"
+                          title="Online ordering will be available soon"
                         >
-                          {isJustAdded ? (
-                            <>
-                              <FaCheck className="text-[10px]" />
-                              <span>Added</span>
-                            </>
-                          ) : (
-                            <>
-                              <FaShoppingCart className="text-[10px]" />
-                              <span>Order</span>
-                            </>
-                          )}
+                          <FaClock className="text-[10px] text-amber-600" />
+                          <span>Coming Soon</span>
                         </button>
+
+                        {/* WhatsApp order link */}
+                        <a
+                          href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to order: ${sku.brandName} - ${sku.variant.name}`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="py-2 px-3 rounded-md font-bold text-xs text-white bg-[#25D366] hover:bg-[#128C7E] flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+                          title="Order via WhatsApp"
+                        >
+                          <FaWhatsapp className="text-xs" />
+                          <span>WhatsApp</span>
+                        </a>
                       </div>
                     </div>
                   </motion.div>

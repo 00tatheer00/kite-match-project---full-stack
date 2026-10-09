@@ -71,6 +71,7 @@ const Navbar = () => {
     {
       name: "Online Order",
       href: "/online-order",
+      badge: "Coming Soon",
     },
     // {
     //   name: 'Divisions',
@@ -145,7 +146,12 @@ const Navbar = () => {
                       : "text-text-primary hover:text-primary"
                   }`}
                 >
-                  {item.name}
+                  <span>{item.name}</span>
+                  {item.badge && (
+                    <span className="text-[10px] font-bold tracking-tight px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 shadow-xs">
+                      {item.badge}
+                    </span>
+                  )}
                   {(item.dropdown?.length || item.megaMenu?.length) && (
                     <FaChevronDown className="text-xs transition-transform duration-200 group-hover:rotate-180" />
                   )}
@@ -257,7 +263,7 @@ const Navbar = () => {
               <div key={item.name}>
                 <Link
                   to={item.href}
-                  className={`block px-3 py-1 rounded-lg font-medium transition-all duration-200 focus:outline-none ${
+                  className={`flex items-center justify-between px-3 py-1.5 rounded-lg font-medium transition-all duration-200 focus:outline-none ${
                     isActive(item.href)
                       ? "text-primary bg-gray-100"
                       : "text-text-primary hover:text-primary hover:bg-gray-100"
@@ -267,7 +273,12 @@ const Navbar = () => {
                     setIsMobileMenuOpen(false)
                   }
                 >
-                  {item.name}
+                  <span>{item.name}</span>
+                  {item.badge && (
+                    <span className="text-[10px] font-bold tracking-tight px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
                 {item.megaMenu?.length > 0 && (
                   <div className="pl-4 space-y-2 mt-2">

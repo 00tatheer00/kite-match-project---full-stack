@@ -106,12 +106,23 @@ const CartDrawer = () => {
                 Rs. {cartTotal.toLocaleString()}
               </span>
             </div>
-            <button 
-              onClick={handleCheckout}
-              className="w-full py-3.5 rounded-full text-white font-semibold flex items-center justify-center gap-2 bg-gradient-to-r from-[#00AEEF] to-[#0095CC] hover:shadow-lg transition-all"
-            >
-              Proceed to Checkout
-            </button>
+            <div className="space-y-2">
+              <button 
+                type="button"
+                disabled
+                className="w-full py-3.5 rounded-full text-gray-500 font-semibold flex items-center justify-center gap-2 bg-gray-200 border border-gray-300 cursor-not-allowed"
+              >
+                Online Checkout Coming Soon
+              </button>
+              <a
+                href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I have ${cartItems.length} items in my cart worth Rs. ${cartTotal.toLocaleString()} and would like to place this order.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 rounded-full text-white font-semibold flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] transition-all shadow-md text-sm"
+              >
+                Order Cart via WhatsApp
+              </a>
+            </div>
           </div>
         )}
       </div>

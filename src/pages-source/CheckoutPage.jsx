@@ -252,6 +252,31 @@ const CheckoutPage = () => {
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white border border-[#E0E0E0] rounded-2xl p-6">
           <h1 className="text-2xl font-bold text-[#222222] mb-5">Checkout</h1>
+          <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-3">
+            <span className="text-xl">⚠️</span>
+            <div>
+              <h3 className="text-sm font-bold text-amber-900">Online Checkout Coming Soon</h3>
+              <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
+                Direct online checkout is currently undergoing an upgrade and is temporarily disabled. Please place your order or inquiry directly via WhatsApp or Phone helpline.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <a
+                  href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to place an order for: ${checkoutData?.title || "products"}.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#25D366] hover:bg-[#128C7E] text-white text-xs font-bold rounded-lg transition-colors shadow-xs"
+                >
+                  Order via WhatsApp (0301 8117666)
+                </a>
+                <a
+                  href="tel:+923018117666"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-700 border border-gray-300 text-xs font-bold rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Helpline: 0301 8117666
+                </a>
+              </div>
+            </div>
+          </div>
           {error && <p className="text-red-600 text-sm mb-4 bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
           <form
             onSubmit={handleSubmit}
@@ -380,14 +405,22 @@ const CheckoutPage = () => {
               </label>
             </div>
 
-            <div className="md:col-span-2 mt-4">
+            <div className="md:col-span-2 mt-4 space-y-2">
               <button
-                type="submit"
-                disabled={submitting || (isCartCheckout && (!checkoutData || checkoutData.items.length === 0))}
-                className="w-full px-5 py-3.5 rounded-lg text-white font-bold bg-gradient-to-r from-[#00AEEF] to-[#0095CC] disabled:opacity-60 hover:shadow-lg transition-all"
+                type="button"
+                disabled
+                className="w-full px-5 py-3.5 rounded-lg text-gray-500 font-bold bg-gray-200 border border-gray-300 cursor-not-allowed"
               >
-                Review Order →
+                Online Checkout Coming Soon
               </button>
+              <a
+                href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I want to confirm my order for: ${checkoutData?.title || "selected items"}.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full px-5 py-3.5 rounded-lg text-white font-bold bg-[#25D366] hover:bg-[#128C7E] flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all text-sm"
+              >
+                Order via WhatsApp Instead
+              </a>
             </div>
           </form>
         </div>

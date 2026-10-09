@@ -560,7 +560,7 @@ const WoodenSplintsExport = () => {
                   to="/online-order"
                   className="bg-[#ED028C] hover:bg-[#D4027D] text-white px-6 py-3 rounded-full text-sm font-bold shadow-md shadow-[#ED028C]/25 transition-all duration-300 hover:scale-105 active:scale-95"
                 >
-                  Order Detergents Online
+                  Order Detergents Online (Coming Soon)
                 </Link>
                 <Link
                   to="/fmcg-division"

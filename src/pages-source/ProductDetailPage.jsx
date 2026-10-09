@@ -12,6 +12,8 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaShoppingCart,
+  FaWhatsapp,
+  FaClock,
 } from "react-icons/fa";
 import { getProduct } from "../services/api";
 import SeoHead from "../components/seo/SeoHead";
@@ -659,14 +661,26 @@ const ProductDetailPage = () => {
                         </button>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleMainAddToCart}
-                      className="flex-1 sm:flex-none sm:w-auto px-7 py-3 rounded-full text-white font-semibold bg-gradient-to-r from-[#00AEEF] to-[#0095CC] hover:shadow-lg hover:shadow-[#00AEEF]/30 transition-all flex items-center justify-center gap-2"
-                    >
-                      <FaShoppingCart />
-                      Add to Cart
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                      <button
+                        type="button"
+                        disabled
+                        className="px-6 py-3 rounded-full text-gray-500 font-semibold bg-gray-200 border border-gray-300 cursor-not-allowed flex items-center justify-center gap-2"
+                        title="Online ordering will be available soon"
+                      >
+                        <FaClock className="text-sm text-amber-600" />
+                        <span>Online Order Coming Soon</span>
+                      </button>
+                      <a
+                        href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to inquire about ordering ${product.title} (${selectedVariant || "General"}).`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-6 py-3 rounded-full text-white font-semibold bg-[#25D366] hover:bg-[#128C7E] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                      >
+                        <FaWhatsapp className="text-lg" />
+                        <span>Order via WhatsApp</span>
+                      </a>
+                    </div>
                   </div>
                 )}
               </Motion.div>
@@ -794,14 +808,26 @@ const ProductDetailPage = () => {
                                       className="w-10 h-10 flex items-center justify-center hover:bg-gray-100"
                                     >+</button>
                                   </div>
-                                  <button
-                                    onClick={() => handleBrandVariantAddToCart(brand, bIdx)}
-                                    disabled={addingToCart}
-                                    className="px-6 py-3 bg-[#00AEEF] text-white rounded-lg font-bold hover:bg-[#0095CC] transition-colors flex items-center gap-2 shadow-md disabled:opacity-70"
-                                  >
-                                    <FaShoppingCart />
-                                    <span>{addingToCart ? "Adding..." : "Add"}</span>
-                                  </button>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      disabled
+                                      className="px-4 py-2.5 bg-gray-200 text-gray-500 border border-gray-300 rounded-lg font-bold cursor-not-allowed flex items-center gap-1.5 shadow-xs text-xs"
+                                      title="Online ordering will be available soon"
+                                    >
+                                      <FaClock className="text-xs text-amber-600" />
+                                      <span>Coming Soon</span>
+                                    </button>
+                                    <a
+                                      href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to order ${brand.name} matches (${brandSelectedVariants[bIdx] || "Regular"}).`)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="px-4 py-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-lg font-bold flex items-center gap-1.5 shadow-sm text-xs transition-colors"
+                                    >
+                                      <FaWhatsapp className="text-sm" />
+                                      <span>WhatsApp</span>
+                                    </a>
+                                  </div>
                                 </div>
                               </div>
                             </div>
