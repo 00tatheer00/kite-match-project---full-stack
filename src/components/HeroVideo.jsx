@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 const HeroVideo = () => {
   const videoRef = useRef(null);
 
-  // Guarantee autoplay across all browsers (including iOS Safari / Low-Power Mode)
+  // Guarantee seamless autoplay across all browsers and devices
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -27,8 +27,12 @@ const HeroVideo = () => {
       aria-label="Kite Brand Motion Video Banner"
       className="relative w-full overflow-hidden bg-black"
     >
-      {/* Exact 16:9 aspect ratio matching the 1920x1080 video dimensions */}
-      <div className="relative w-full aspect-[16/9] overflow-hidden">
+      {/* 
+        Fits strictly within the single screen (above the fold) without vertical overflow:
+        - Mobile: natural 16:9 aspect ratio or max-h bounded
+        - Tablet/Desktop: exactly fits the remaining screen height (100dvh - navbar)
+      */}
+      <div className="relative w-full aspect-video sm:aspect-auto sm:h-[calc(100dvh-80px)] md:h-[calc(100dvh-92px)] max-h-[calc(100dvh-70px)] sm:max-h-[calc(100dvh-80px)] md:max-h-[calc(100dvh-92px)] overflow-hidden">
         <video
           ref={videoRef}
           autoPlay
@@ -38,11 +42,10 @@ const HeroVideo = () => {
           preload="auto"
           poster="/videos/kite-motion-poster.jpg"
           aria-label="Kite Motion Banner"
-          className="w-full h-full object-cover block"
+          className="w-full h-full object-cover object-center block"
         >
-          {/* Full original pristine quality master video (14.5 Mbps, 1080p, faststart) */}
+          {/* Pristine original high-bitrate master video */}
           <source src="/videos/Kite Motion Banner.mp4" type="video/mp4" />
-          {/* Fallback source */}
           <source src="/videos/kite-motion-banner.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
