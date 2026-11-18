@@ -2,7 +2,7 @@
 
 import { lazy, Suspense } from "react";
 import { useInView } from "react-intersection-observer";
-import HeroCarousel from "./HeroCarousel";
+import HeroVideo from "./HeroVideo";
 import BriefProductsSection from "./BriefProductsSection";
 import AboutSection from "./AboutSection";
 import BriefExport from "./BriefExport";
@@ -47,7 +47,7 @@ const HomePageContent = () => {
         Mohsin Match Factory (Pvt.) Ltd. &amp; Kite Match — Best Match Factory in Pakistan &amp; Premier FMCG Manufacturer
       </h1>
 
-      <HeroCarousel />
+      <HeroVideo />
       <BriefProductsSection />
       <AboutSection />
       <BriefExport />
