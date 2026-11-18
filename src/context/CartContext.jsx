@@ -17,7 +17,23 @@ export const CartProvider = ({ children }) => {
     try {
       const saved = localStorage.getItem('kite_cart');
       if (saved) {
-        setCartItems(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const normalized = parsed.map((item) => {
+            if (item.itemType === 'promotion') {
+              if (item.promotionId === 'pkg-kite-smart-starter') {
+                return {
+                  ...item,
+                  promotionTitle: 'Kite Affordable for All',
+                  price: 400,
+                  shippingCost: 200,
+                };
+              }
+            }
+            return item;
+          });
+          setCartItems(normalized);
+        }
       }
     } catch (err) {
       console.error('Failed to load cart from localStorage', err);
@@ -62,7 +78,7 @@ export const CartProvider = ({ children }) => {
           price: variant.price || 0,
           quantity,
           image: product.image,
-          shippingCost: product.shippingCost
+          shippingCost: product.shippingCost !== undefined && product.shippingCost !== null ? Number(product.shippingCost) : 150
         }
       ];
     });
@@ -98,7 +114,7 @@ export const CartProvider = ({ children }) => {
           price: price || 0,
           quantity,
           image: promotion.image,
-          shippingCost: promotion.shippingCost
+          shippingCost: promotion.shippingCost !== undefined && promotion.shippingCost !== null ? Number(promotion.shippingCost) : 200
         }
       ];
     });

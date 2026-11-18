@@ -147,6 +147,9 @@ function buildPromotionFormData(data = {}) {
     "image",
     "totalQuantity",
     "totalPrice",
+    "originalPrice",
+    "discount",
+    "shippingCost",
     "displayOrder",
     "isActive",
   ];

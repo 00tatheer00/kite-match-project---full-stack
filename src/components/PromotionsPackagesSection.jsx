@@ -12,7 +12,6 @@ import {
   FaTag, 
   FaSearch, 
   FaCheck,
-  FaWhatsapp,
   FaPhoneAlt,
   FaClock
 } from "react-icons/fa";
@@ -231,27 +230,19 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
           </h1>
 
           <p className="text-[#666666] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-6">
-            Factory rates par hamara catalog browse karein, items ko direct Cart me add kar ke online order place karein ya direct WhatsApp / Helpline ke zariye book karwayen.
+            Factory rates par hamara catalog browse karein, items ko direct Cart mein add karein aur online order place karein. Nationwide Cash on Delivery available hai!
           </p>
 
-          {/* Quick Order Actions Banner */}
+          {/* Customer Helpline & Support Banner */}
           <div className="flex flex-wrap items-center justify-center gap-3 max-w-lg mx-auto mb-8">
-            <a
-              href="https://wa.me/923018117666?text=Hello%20Kite%2C%20I%20would%20like%20to%20inquire%20and%20place%20an%20order."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-[#25D366] hover:bg-[#128C7E] text-white px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
-            >
-              <FaWhatsapp className="text-base" />
-              <span>Order via WhatsApp (0301 8117666)</span>
-            </a>
-            <a
-              href="tel:+923018117666"
-              className="bg-white hover:bg-gray-50 text-[#222222] border border-gray-300 px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xs transition-all"
-            >
+            <div className="bg-white text-[#222222] border border-gray-200 px-5 py-2.5 rounded-full font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-xs">
               <FaPhoneAlt className="text-xs text-[#00AEEF]" />
-              <span>Helpline: 0301 8117666</span>
-            </a>
+              <span>Customer Helpline: 0301 8117666</span>
+            </div>
+            <div className="bg-[#EAF8FE] text-[#00AEEF] px-4 py-2.5 rounded-full font-semibold text-xs sm:text-sm flex items-center gap-1.5 border border-[#00AEEF]/20">
+              <FaTruck className="text-xs" />
+              <span>Nationwide Cash on Delivery</span>
+            </div>
           </div>
 
           {/* Trust Highlights */}
@@ -453,12 +444,27 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                         {/* Price & Add to Cart Action */}
                         <div className="pt-6 border-t border-[#EAEAEA] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                           <div>
-                            <p className="text-xs text-[#777777]">
+                            <p className="text-xs text-[#777777] mb-1">
                               Total Quantity: <strong className="text-[#222222]">{totals.totalQuantity} items</strong>
                             </p>
-                            <p className="text-2xl sm:text-3xl font-black text-[#00AEEF]">
-                              {formatPrice(totals.totalPrice)}
-                            </p>
+                            <div className="flex flex-wrap items-baseline gap-2 mb-1">
+                              {pkg.originalPrice && (
+                                <span className="text-sm font-semibold text-gray-400 line-through">
+                                  Original Price: {formatPrice(pkg.originalPrice)}
+                                </span>
+                              )}
+                              {(pkg.discount || (pkg.originalPrice && totals.totalPrice && pkg.originalPrice > totals.totalPrice)) && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs">
+                                  You Save: {formatPrice(pkg.discount || (pkg.originalPrice - totals.totalPrice))}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Final Price:</span>
+                              <p className="text-2xl sm:text-3xl font-black text-[#00AEEF]">
+                                {formatPrice(totals.totalPrice)}
+                              </p>
+                            </div>
                           </div>
 
                           <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
@@ -489,7 +495,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                             <button
                               type="button"
                               onClick={() => handleBuyPromotion(pkg)}
-                              className={`px-4 py-2.5 rounded-lg font-bold text-xs sm:text-sm text-white flex items-center gap-2 transition-all shadow-sm cursor-pointer ${
+                              className={`px-6 py-2.5 rounded-lg font-bold text-xs sm:text-sm text-white flex items-center gap-2 transition-all shadow-sm cursor-pointer ${
                                 isJustAdded
                                   ? "bg-emerald-600 hover:bg-emerald-700"
                                   : "bg-[#00AEEF] hover:bg-[#0095CC] active:scale-95"
@@ -497,19 +503,8 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                               title="Add package to cart"
                             >
                               <FaShoppingCart className="text-xs" />
-                              <span>{isJustAdded ? "Added!" : "Add to Cart"}</span>
+                              <span>{isJustAdded ? "Added to Cart!" : "Add to Cart"}</span>
                             </button>
-
-                            {/* Order via WhatsApp */}
-                            <a
-                              href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to order the promotional deal: ${pkg.title}`)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-5 py-2.5 rounded-lg font-bold text-xs sm:text-sm text-white bg-[#25D366] hover:bg-[#128C7E] flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
-                            >
-                              <FaWhatsapp className="text-sm" />
-                              <span>Order on WhatsApp</span>
-                            </a>
                           </div>
                         </div>
                       </div>
@@ -626,33 +621,21 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center">
                         {/* Add to Cart Button */}
                         <button
                           type="button"
                           onClick={() => handleBuySku(sku.product, sku.variant, sku.brandName)}
-                          className={`flex-1 py-2 px-2.5 rounded-md font-bold text-xs text-white flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer ${
+                          className={`w-full py-2.5 px-3 rounded-lg font-bold text-xs text-white flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer ${
                             isJustAdded
                               ? "bg-emerald-600 hover:bg-emerald-700"
                               : "bg-[#00AEEF] hover:bg-[#0095CC] active:scale-95"
                           }`}
                           title="Add SKU to cart"
                         >
-                          <FaShoppingCart className="text-[10px]" />
-                          <span>{isJustAdded ? "Added!" : "Add to Cart"}</span>
+                          <FaShoppingCart className="text-xs" />
+                          <span>{isJustAdded ? "Added to Cart!" : "Add to Cart"}</span>
                         </button>
-
-                        {/* WhatsApp order link */}
-                        <a
-                          href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to order: ${sku.brandName} - ${sku.variant.name}`)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="py-2 px-3 rounded-md font-bold text-xs text-white bg-[#25D366] hover:bg-[#128C7E] flex items-center justify-center gap-1.5 shadow-xs transition-colors"
-                          title="Order via WhatsApp"
-                        >
-                          <FaWhatsapp className="text-xs" />
-                          <span>WhatsApp</span>
-                        </a>
                       </div>
                     </div>
                   </motion.div>

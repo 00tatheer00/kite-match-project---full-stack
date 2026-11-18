@@ -114,14 +114,6 @@ const CartDrawer = () => {
               >
                 Proceed to Checkout
               </button>
-              <a
-                href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I have ${cartItems.length} items in my cart worth Rs. ${cartTotal.toLocaleString()} and would like to place this order.`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 rounded-full text-white font-semibold flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] transition-all shadow-md text-sm"
-              >
-                Order Cart via WhatsApp
-              </a>
             </div>
           </div>
         )}

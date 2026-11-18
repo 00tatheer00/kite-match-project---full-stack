@@ -22,6 +22,8 @@ const emptyForm = {
   items: [{ product: "", quantity: 1, price: "" }],
   totalQuantity: 0,
   totalPrice: 0,
+  originalPrice: "",
+  discount: "",
   shippingCost: "",
   displayOrder: 0,
   isActive: true,
@@ -127,6 +129,8 @@ const AdminPromotionsPage = () => {
       items: cleanedItems,
       totalQuantity,
       totalPrice,
+      originalPrice: form.originalPrice === "" || form.originalPrice == null ? null : Number(form.originalPrice),
+      discount: form.discount === "" || form.discount == null ? null : Number(form.discount),
       shippingCost: form.shippingCost === "" || form.shippingCost == null ? null : Number(form.shippingCost),
       displayOrder: Number(form.displayOrder) || 0,
       isActive: form.isActive,
@@ -165,11 +169,25 @@ const AdminPromotionsPage = () => {
         : [{ product: "", quantity: 1, price: "" }],
       totalQuantity: p.totalQuantity ?? 0,
       totalPrice: p.totalPrice ?? 0,
+      originalPrice: p.originalPrice ?? "",
+      discount: p.discount ?? "",
       shippingCost: p.shippingCost ?? "",
       displayOrder: p.displayOrder ?? 0,
       isActive: p.isActive ?? true,
     });
     setPromotionImages([]);
+  };
+
+  const handleToggleActive = async (p) => {
+    try {
+      await adminUpdatePromotion(p.id, {
+        ...p,
+        isActive: !p.isActive,
+      });
+      await load();
+    } catch (err) {
+      setError(err.message || "Failed to update status");
+    }
   };
 
   const handleDelete = async (id) => {
@@ -234,59 +252,102 @@ const AdminPromotionsPage = () => {
                     <tr className={`border-b text-xs font-bold uppercase tracking-wider ${
                       isDark ? "border-[#1E293B] text-slate-300" : "border-slate-200 text-slate-700"
                     }`}>
-                      <th className="text-left py-3 pr-4">ID</th>
-                      <th className="text-left py-3 pr-4">Title</th>
+                      <th className="text-left py-3 pr-3">Image</th>
+                      <th className="text-left py-3 pr-4">Promotion</th>
                       <th className="text-left py-3 pr-4">Category</th>
-                      <th className="text-left py-3 pr-4">Total Qty</th>
-                      <th className="text-left py-3 pr-4">Total Price</th>
-                      <th className="text-left py-3 pr-4">Updated</th>
+                      <th className="text-left py-3 pr-4">Items / Qty</th>
+                      <th className="text-left py-3 pr-4">Pricing &amp; Discount</th>
+                      <th className="text-left py-3 pr-4">Shipping</th>
+                      <th className="text-center py-3 px-3">Status</th>
                       <th className="text-right py-3 pl-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody className={isDark ? "divide-y divide-[#1E293B]/60 text-slate-200" : "divide-y divide-slate-100 text-slate-800"}>
-                    {promos.map((p) => (
-                      <tr key={p.id} className={`transition-colors ${isDark ? "hover:bg-[#161D2E]" : "hover:bg-slate-50"}`}>
-                        <td className={`py-3 pr-4 font-mono text-xs font-semibold ${isDark ? "text-sky-400" : "text-sky-600"}`}>{p.id}</td>
-                        <td className="py-3 pr-4 font-medium">{p.title}</td>
-                        <td className="py-3 pr-4">{p.category}</td>
-                        <td className="py-3 pr-4">{p.totalQuantity ?? "-"}</td>
-                        <td className="py-3 pr-4 font-semibold">
-                          {p.totalPrice != null ? `Rs. ${p.totalPrice}` : "-"}
-                        </td>
-                        <td className={`py-3 pr-4 text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                          {p.updatedAt
-                            ? new Date(p.updatedAt).toLocaleString()
-                            : "-"}
-                        </td>
-                        <td className="py-3 pl-4 text-right space-x-2">
-                          <button
-                            onClick={() => handleEdit(p)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                              isDark
-                                ? "border-[#1E293B] bg-[#161D2E] text-sky-400 hover:bg-[#1E293B]"
-                                : "border-slate-200 text-slate-700 hover:bg-slate-100"
-                            }`}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(p.id)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                              isDark
-                                ? "border-red-900/40 bg-red-950/20 text-red-400 hover:bg-red-900/40"
-                                : "border-red-200 text-red-600 hover:bg-red-50"
-                            }`}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {promos.map((p) => {
+                      const saveAmount = p.discount != null ? p.discount : (p.originalPrice && p.totalPrice ? p.originalPrice - p.totalPrice : null);
+                      return (
+                        <tr key={p.id} className={`transition-colors ${isDark ? "hover:bg-[#161D2E]" : "hover:bg-slate-50"}`}>
+                          <td className="py-3 pr-3">
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-slate-200 flex-shrink-0 flex items-center justify-center">
+                              {p.image ? (
+                                <img src={p.image?.src || p.image} alt={p.title} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-[10px] text-gray-400">No Img</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 pr-4">
+                            <p className="font-semibold text-sm leading-snug">{p.title}</p>
+                            <span className={`font-mono text-xs ${isDark ? "text-sky-400" : "text-sky-600"}`}>{p.id}</span>
+                          </td>
+                          <td className="py-3 pr-4">{p.category}</td>
+                          <td className="py-3 pr-4">
+                            <p className="font-medium">{p.totalQuantity ?? "-"} pcs</p>
+                            <p className="text-xs text-gray-500">({p.items?.length || 0} unique items)</p>
+                          </td>
+                          <td className="py-3 pr-4">
+                            <div className="flex flex-col gap-0.5">
+                              {p.originalPrice && (
+                                <span className="line-through text-xs text-gray-400 font-medium">Rs. {p.originalPrice}</span>
+                              )}
+                              <span className="font-bold text-sm text-[#00AEEF]">
+                                {p.totalPrice != null ? `Rs. ${p.totalPrice}` : "-"}
+                              </span>
+                              {saveAmount != null && saveAmount > 0 && (
+                                <span className="text-[11px] font-bold text-emerald-600">Save Rs. {saveAmount}</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 pr-4 font-semibold text-xs">
+                            {p.shippingCost === 0 ? (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">Free</span>
+                            ) : p.shippingCost != null ? (
+                              `Rs. ${p.shippingCost}`
+                            ) : (
+                              <span className="text-gray-400">Default</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleActive(p)}
+                              title={p.isActive ? "Click to Deactivate" : "Click to Activate"}
+                              className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 ${
+                                p.isActive
+                                  ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-300"
+                                  : "bg-gray-200 text-gray-600 hover:bg-gray-300 border border-gray-300"
+                              }`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${p.isActive ? "bg-emerald-600 animate-pulse" : "bg-gray-400"}`}></span>
+                              <span>{p.isActive ? "Active" : "Inactive"}</span>
+                            </button>
+                          </td>
+                          <td className="py-3 pl-4 text-right space-x-2 whitespace-nowrap">
+                            <button
+                              onClick={() => handleEdit(p)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                                isDark
+                                  ? "border-[#1E293B] bg-[#161D2E] text-sky-400 hover:bg-[#1E293B]"
+                                  : "border-slate-200 text-slate-700 hover:bg-slate-100"
+                              }`}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(p.id)}
+                              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50 cursor-pointer"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                     {promos.length === 0 && (
                       <tr>
                         <td
                           className={`py-8 text-center text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}
-                          colSpan={7}
+                          colSpan={8}
                         >
                           No promotions yet. Click &quot;+ Add New Promotion&quot; above to add one.
                         </td>
@@ -297,56 +358,84 @@ const AdminPromotionsPage = () => {
               </div>
 
               <div className="md:hidden space-y-4">
-                {promos.map((p) => (
-                  <div
-                    key={p.id}
-                    className={`border rounded-xl p-4 ${
-                      isDark ? "border-[#1E293B] bg-[#161D2E]" : "border-slate-200 bg-slate-50"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>{p.title}</p>
-                        <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                          {p.category || "-"}
-                        </p>
+                {promos.map((p) => {
+                  const saveAmount = p.discount != null ? p.discount : (p.originalPrice && p.totalPrice ? p.originalPrice - p.totalPrice : null);
+                  return (
+                    <div
+                      key={p.id}
+                      className={`border rounded-xl p-4 ${
+                        isDark ? "border-[#1E293B] bg-[#161D2E]" : "border-slate-200 bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 border border-slate-200 flex-shrink-0">
+                          {p.image ? (
+                            <img src={p.image?.src || p.image} alt={p.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-[10px] text-gray-400 p-2 block">No Img</span>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>{p.title}</p>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleActive(p)}
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                p.isActive
+                                  ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                  : "bg-gray-200 text-gray-600 border border-gray-300"
+                              }`}
+                            >
+                              {p.isActive ? "Active" : "Inactive"}
+                            </button>
+                          </div>
+                          <span className={`text-xs font-mono block ${isDark ? "text-sky-400" : "text-sky-600"}`}>
+                            {p.id} • {p.category || "-"}
+                          </span>
+                        </div>
                       </div>
-                      <span className={`text-xs font-mono ${isDark ? "text-sky-400" : "text-sky-600"}`}>
-                        {p.id}
-                      </span>
+
+                      <div className={`mt-3 text-xs space-y-1 pt-3 border-t ${isDark ? "border-[#1E293B] text-slate-400" : "border-slate-200 text-slate-600"}`}>
+                        <div className="flex justify-between">
+                          <span>Items &amp; Quantity:</span>
+                          <span className="font-semibold">{p.totalQuantity ?? "-"} pcs ({p.items?.length || 0} items)</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Price:</span>
+                          <span className="font-bold text-[#00AEEF]">
+                            {p.originalPrice && <span className="line-through text-gray-400 text-xs font-normal mr-1.5">Rs. {p.originalPrice}</span>}
+                            Rs. {p.totalPrice != null ? p.totalPrice : "-"}
+                            {saveAmount != null && saveAmount > 0 && <span className="text-emerald-600 text-[11px] ml-1.5">(Save Rs. {saveAmount})</span>}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Shipping:</span>
+                          <span className="font-semibold">
+                            {p.shippingCost === 0 ? "FREE" : p.shippingCost != null ? `Rs. ${p.shippingCost}` : "Default"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap gap-2 pt-2 border-t border-dashed border-gray-200">
+                        <button
+                          onClick={() => handleEdit(p)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+                            isDark ? "border-[#1E293B] bg-[#161D2E] text-sky-400" : "border-slate-200 text-slate-700"
+                          }`}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p.id)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                    <div className={`mt-3 text-xs space-y-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      <span className="block">
-                        Total Qty: {p.totalQuantity ?? "-"}
-                      </span>
-                      <span className="block">
-                        Total Price: {p.totalPrice != null ? p.totalPrice : "-"}
-                      </span>
-                      <span className="block">
-                        Updated:{" "}
-                        {p.updatedAt
-                          ? new Date(p.updatedAt).toLocaleString()
-                          : "-"}
-                      </span>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <button
-                        onClick={() => handleEdit(p)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${
-                          isDark ? "border-[#1E293B] bg-[#161D2E] text-sky-400" : "border-slate-200 text-slate-700"
-                        }`}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {promos.length === 0 && (
                   <p className={`text-center text-sm py-6 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                     No promotions yet. Click &quot;+ Add New Promotion&quot; above to add one.
@@ -462,6 +551,30 @@ const AdminPromotionsPage = () => {
                 <p className="text-xs text-[#666666] mt-1">
                   Upload one or many. First image is used as primary.
                 </p>
+              </div>
+              <div>
+                <label className="block mb-1.5 font-medium">Original / MRP Price (Rs)</label>
+                <input
+                  name="originalPrice"
+                  type="number"
+                  min="0"
+                  placeholder="e.g. 470"
+                  value={form.originalPrice}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                />
+              </div>
+              <div>
+                <label className="block mb-1.5 font-medium">Discount / Save Amount (Rs)</label>
+                <input
+                  name="discount"
+                  type="number"
+                  min="0"
+                  placeholder="e.g. 70"
+                  value={form.discount}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                />
               </div>
               <div>
                 <label className="block mb-1.5 font-medium">Shipping Cost (Rs)</label>

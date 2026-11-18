@@ -12,7 +12,6 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaShoppingCart,
-  FaWhatsapp,
   FaClock,
 } from "react-icons/fa";
 import { getProduct } from "../services/api";
@@ -666,21 +665,12 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                         type="button"
                         onClick={handleMainAddToCart}
                         disabled={addingToCart}
-                        className="px-6 py-3 rounded-full text-white font-semibold bg-[#00AEEF] hover:bg-[#0095CC] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                        className="px-8 py-3 rounded-full text-white font-semibold bg-[#00AEEF] hover:bg-[#0095CC] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
                         title="Add to shopping cart"
                       >
                         <FaShoppingCart className="text-base" />
                         <span>{addingToCart ? "Added to Cart!" : "Add to Cart"}</span>
                       </button>
-                      <a
-                        href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to inquire about ordering ${product.title} (${selectedVariant || "General"}).`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-6 py-3 rounded-full text-white font-semibold bg-[#25D366] hover:bg-[#128C7E] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
-                      >
-                        <FaWhatsapp className="text-lg" />
-                        <span>Order via WhatsApp</span>
-                      </a>
                     </div>
                   </div>
                 )}
@@ -814,21 +804,12 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                                       type="button"
                                       onClick={() => handleBrandVariantAddToCart(brand, bIdx)}
                                       disabled={addingToCart}
-                                      className="px-4 py-2.5 bg-[#00AEEF] hover:bg-[#0095CC] text-white rounded-lg font-bold flex items-center gap-1.5 shadow-sm text-xs transition-colors active:scale-95 cursor-pointer"
+                                      className="px-5 py-2.5 bg-[#00AEEF] hover:bg-[#0095CC] text-white rounded-lg font-bold flex items-center gap-1.5 shadow-sm text-xs transition-colors active:scale-95 cursor-pointer"
                                       title="Add to shopping cart"
                                     >
                                       <FaShoppingCart className="text-xs" />
                                       <span>Add to Cart</span>
                                     </button>
-                                    <a
-                                      href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to order ${brand.name} matches (${brandSelectedVariants[bIdx] || "Regular"}).`)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="px-4 py-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-lg font-bold flex items-center gap-1.5 shadow-sm text-xs transition-colors"
-                                    >
-                                      <FaWhatsapp className="text-sm" />
-                                      <span>WhatsApp</span>
-                                    </a>
                                   </div>
                                 </div>
                               </div>

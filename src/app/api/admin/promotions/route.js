@@ -82,6 +82,9 @@ export async function parsePromotionRequest(request) {
     items,
     totalQuantity: items.length ? totalQuantityFromItems : toNumber(body.totalQuantity, 0),
     totalPrice: items.length ? totalPriceFromItems : toNumber(body.totalPrice, 0),
+    originalPrice: body.originalPrice === "" || body.originalPrice == null ? null : toNumber(body.originalPrice, 0),
+    discount: body.discount === "" || body.discount == null ? null : toNumber(body.discount, 0),
+    shippingCost: body.shippingCost === "" || body.shippingCost == null ? null : toNumber(body.shippingCost, 0),
     displayOrder: toNumber(body.displayOrder, 0),
     isActive: toBoolean(body.isActive, true),
   };

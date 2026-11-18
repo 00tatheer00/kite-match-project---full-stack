@@ -82,20 +82,22 @@ const CheckoutPage = () => {
   }, []);
 
   const applicableShippingCost = useMemo(() => {
-    if (!settings) return 0;
     let maxCost = -1;
     if (isCartCheckout && checkoutData && checkoutData.items.length > 0) {
       for (const item of checkoutData.items) {
-        if (item.shippingCost !== null && item.shippingCost !== undefined) {
-          if (item.shippingCost > maxCost) maxCost = item.shippingCost;
+        if (item.shippingCost !== null && item.shippingCost !== undefined && item.shippingCost !== "") {
+          const cost = Number(item.shippingCost);
+          if (!isNaN(cost) && cost > maxCost) maxCost = cost;
         }
       }
     } else if (!isCartCheckout && orderContext) {
-      if (orderContext.shippingCost !== null && orderContext.shippingCost !== undefined) {
-        maxCost = orderContext.shippingCost;
+      if (orderContext.shippingCost !== null && orderContext.shippingCost !== undefined && orderContext.shippingCost !== "") {
+        const cost = Number(orderContext.shippingCost);
+        if (!isNaN(cost)) maxCost = cost;
       }
     }
-    return maxCost >= 0 ? maxCost : (settings.defaultShippingCost ?? 150);
+    if (maxCost >= 0) return maxCost;
+    return settings?.defaultShippingCost ?? 200;
   }, [settings, isCartCheckout, checkoutData, orderContext]);
 
   const grandTotal = useMemo(() => {
@@ -197,7 +199,8 @@ const CheckoutPage = () => {
             brandName: item.brandName,
             selectedVariant: item.selectedVariant,
             quantity: item.quantity,
-            price: item.price
+            price: item.price,
+            shippingCost: item.shippingCost
           }))
         };
       } else {
@@ -257,17 +260,9 @@ const CheckoutPage = () => {
             <div className="flex-1">
               <h3 className="text-sm font-bold text-sky-950">Cash on Delivery (COD) Available Nationwide</h3>
               <p className="text-xs text-sky-800 mt-0.5 leading-relaxed">
-                Apna shipping address dain aur order place karein. Payment delivery ke waqt li jaye gi. Agar aap chahein to direct WhatsApp par bhi order place kar sakte hain.
+                Apna shipping address dain aur order place karein. Payment delivery ke waqt li jaye gi.
               </p>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                <a
-                  href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to place an order for: ${checkoutData?.title || "products"}.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#25D366] hover:bg-[#128C7E] text-white text-xs font-bold rounded-lg transition-colors shadow-xs"
-                >
-                  Order via WhatsApp (0301 8117666)
-                </a>
+              <div className="mt-3 flex items-center gap-3">
                 <a
                   href="tel:+923018117666"
                   className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-700 border border-gray-300 text-xs font-bold rounded-lg hover:bg-gray-50 transition-colors"
@@ -413,14 +408,6 @@ const CheckoutPage = () => {
               >
                 {submitting ? "Placing Order..." : "Place Order (Cash on Delivery)"}
               </button>
-              <a
-                href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I want to confirm my order for: ${checkoutData?.title || "selected items"}.`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full px-5 py-3.5 rounded-lg text-white font-bold bg-[#25D366] hover:bg-[#128C7E] flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all text-sm"
-              >
-                Order via WhatsApp Instead
-              </a>
             </div>
           </form>
         </div>

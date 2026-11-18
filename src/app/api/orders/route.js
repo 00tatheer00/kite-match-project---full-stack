@@ -3,10 +3,45 @@ import { connectToDatabase } from '@/lib/db';
 import Order from '@/lib/models/Order';
 import Product from '@/lib/models/Product';
 import PromotionPackage from '@/lib/models/PromotionPackage';
+import Settings from '@/lib/models/Settings';
 import { sendOrderEmail } from '@/lib/email';
 import { pusher } from '@/lib/pusher';
+import { getProductById, getPromotionById, getSettings, createOrder as saveInStore } from '@/lib/store';
 
 const PHONE_REGEX = /^(?:\+92|92|0)3\d{9}$/;
+
+async function fetchPromotionRecord(id) {
+  try {
+    const promo = await PromotionPackage.findOne({ id }).lean();
+    if (promo) return promo;
+  } catch {}
+  try {
+    return getPromotionById(id);
+  } catch {}
+  return null;
+}
+
+async function fetchProductRecord(id) {
+  try {
+    const prod = await Product.findOne({ id }).lean();
+    if (prod) return prod;
+  } catch {}
+  try {
+    return getProductById(id);
+  } catch {}
+  return null;
+}
+
+async function fetchSettingsRecord() {
+  try {
+    const s = await Settings.findOne().lean();
+    if (s) return s;
+  } catch {}
+  try {
+    return getSettings();
+  } catch {}
+  return { defaultShippingCost: 150 };
+}
 
 export async function POST(request) {
   let body;
@@ -33,8 +68,6 @@ export async function POST(request) {
       note,
       paymentMethod,
       items,
-      totalAmount,
-      shippingCost,
     } = body;
 
     if (!['product', 'promotion', 'cart'].includes(type)) {
@@ -68,36 +101,111 @@ export async function POST(request) {
     }
 
     let productOrPromotion = null;
+    let computedSubtotal = 0;
+    let computedShippingCost = 0;
+    let validatedItems = items;
+
+    const settingsData = await fetchSettingsRecord();
+    const defaultShipping = Number(settingsData?.defaultShippingCost) || 150;
+
     if (type === 'product') {
       if (!productId) {
         return NextResponse.json({ message: 'productId is required for product orders' }, { status: 400 });
       }
-      productOrPromotion = await Product.findOne({ id: productId }).lean();
+      productOrPromotion = await fetchProductRecord(productId);
       if (!productOrPromotion) {
         return NextResponse.json({ message: 'Product not found' }, { status: 404 });
       }
+
+      let unitPrice = 0;
+      if (selectedSkuOrSize && Array.isArray(productOrPromotion.variants)) {
+        const variant = productOrPromotion.variants.find((v) => v.name === selectedSkuOrSize);
+        unitPrice = variant?.price || 0;
+      }
+      if (!unitPrice && Array.isArray(productOrPromotion.variants) && productOrPromotion.variants.length > 0) {
+        unitPrice = productOrPromotion.variants[0].price || 0;
+      }
+      computedSubtotal = unitPrice * parsedQuantity;
+      computedShippingCost = productOrPromotion.shippingCost !== null && productOrPromotion.shippingCost !== undefined
+        ? Number(productOrPromotion.shippingCost)
+        : defaultShipping;
     } else if (type === 'promotion') {
       if (!promotionId) {
         return NextResponse.json({ message: 'promotionId is required for promotion orders' }, { status: 400 });
       }
-      productOrPromotion = await PromotionPackage.findOne({ id: promotionId }).lean();
+      productOrPromotion = await fetchPromotionRecord(promotionId);
       if (!productOrPromotion) {
         return NextResponse.json({ message: 'Promotion not found' }, { status: 404 });
       }
+
+      const unitPrice = Number(productOrPromotion.totalPrice) || 0;
+      computedSubtotal = unitPrice * parsedQuantity;
+      computedShippingCost = productOrPromotion.shippingCost !== null && productOrPromotion.shippingCost !== undefined
+        ? Number(productOrPromotion.shippingCost)
+        : 200;
+    } else if (type === 'cart') {
+      let maxItemShipping = -1;
+      let calculatedCartTotal = 0;
+
+      validatedItems = await Promise.all(items.map(async (item) => {
+        const qty = Math.max(1, Math.min(1000, Number(item.quantity) || 1));
+        let itemPrice = Number(item.price) || 0;
+        let itemShipping = item.shippingCost !== null && item.shippingCost !== undefined ? Number(item.shippingCost) : null;
+
+        if (item.itemType === 'promotion') {
+          const promo = await fetchPromotionRecord(item.promotionId);
+          if (promo) {
+            itemPrice = Number(promo.totalPrice) || itemPrice;
+            if (promo.shippingCost !== null && promo.shippingCost !== undefined) {
+              itemShipping = Number(promo.shippingCost);
+            }
+          }
+        } else if (item.productId) {
+          const prod = await fetchProductRecord(item.productId);
+          if (prod && Array.isArray(prod.variants) && item.selectedVariant) {
+            const variant = prod.variants.find((v) => v.name === item.selectedVariant);
+            if (variant?.price) itemPrice = Number(variant.price);
+          }
+          if (prod && prod.shippingCost !== null && prod.shippingCost !== undefined) {
+            itemShipping = Number(prod.shippingCost);
+          }
+        }
+
+        if (itemShipping !== null && !isNaN(itemShipping)) {
+          if (itemShipping > maxItemShipping) maxItemShipping = itemShipping;
+        }
+
+        calculatedCartTotal += itemPrice * qty;
+
+        return {
+          ...item,
+          quantity: qty,
+          price: itemPrice,
+          shippingCost: itemShipping,
+        };
+      }));
+
+      computedSubtotal = calculatedCartTotal;
+      computedShippingCost = maxItemShipping >= 0 ? maxItemShipping : 200;
     }
 
-    // Generate sequential order number (KT-001, KT-002, ...)
-    const orderCount = await Order.countDocuments();
-    const orderNumber = `KT-${String(orderCount + 1).padStart(3, '0')}`;
+    const finalTotalAmount = computedSubtotal + computedShippingCost;
 
-    const order = await Order.create({
+    // Generate sequential order number (KT-001, KT-002, ...)
+    let orderNumber = `KT-${Date.now().toString().slice(-4)}`;
+    try {
+      const orderCount = await Order.countDocuments();
+      orderNumber = `KT-${String(orderCount + 1).padStart(3, '0')}`;
+    } catch {}
+
+    const orderPayload = {
       orderNumber,
       type,
       productId: type === 'product' ? productId : undefined,
       promotionId: type === 'promotion' ? promotionId : undefined,
       selectedSkuOrSize,
       quantity: parsedQuantity,
-      items: type === 'cart' ? items : undefined,
+      items: type === 'cart' ? validatedItems : undefined,
       customerName: normalizedCustomerName,
       phone: normalizedPhone,
       email,
@@ -105,13 +213,20 @@ export async function POST(request) {
       city: normalizedCity,
       note,
       paymentMethod,
-      totalAmount,
-      shippingCost,
-    });
+      totalAmount: finalTotalAmount,
+      shippingCost: computedShippingCost,
+    };
 
-    // Also save in local store
+    let order;
     try {
-      const { createOrder: saveInStore } = await import('@/lib/store');
+      order = await Order.create(orderPayload);
+    } catch (orderDbErr) {
+      console.warn('MongoDB Order.create failed, falling back to local store:', orderDbErr.message);
+      order = saveInStore(orderPayload);
+    }
+
+    // Always ensure order is mirrored to local store
+    try {
       saveInStore(order.toObject ? order.toObject() : order);
     } catch {}
 
@@ -133,36 +248,7 @@ export async function POST(request) {
 
     return NextResponse.json(order, { status: 201 });
   } catch (err) {
-    console.warn('Local order creation failed, checking store or remote fallback:', err.message);
-
-    // Save directly to local persistent store so order is not lost
-    try {
-      if (body) {
-        const { createOrder: saveInStore } = await import('@/lib/store');
-        const storedOrder = saveInStore(body);
-        if (storedOrder) {
-          // Also try remote fallback asynchronously
-          import('@/lib/api-fallback').then(({ postRemoteFallback }) => {
-            postRemoteFallback('/orders', body).catch(() => {});
-          });
-          return NextResponse.json(storedOrder, { status: 201 });
-        }
-      }
-    } catch (storeErr) {
-      console.warn('Store save failed:', storeErr.message);
-    }
-
-    try {
-      const { postRemoteFallback } = await import('@/lib/api-fallback');
-      if (body) {
-        const remoteOrder = await postRemoteFallback('/orders', body);
-        if (remoteOrder) {
-          return NextResponse.json(remoteOrder, { status: 201 });
-        }
-      }
-    } catch (fallbackErr) {
-      console.error('Remote fallback also failed for /api/orders:', fallbackErr.message);
-    }
-    return NextResponse.json({ message: 'Failed to create order' }, { status: 500 });
+    console.error('Order creation error:', err);
+    return NextResponse.json({ message: err.message || 'Failed to create order' }, { status: 500 });
   }
 }

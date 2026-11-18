@@ -620,9 +620,9 @@
     {
       "_id": "673b5a100000000000000001",
       "id": "pkg-kite-smart-starter",
-      "title": "Kite Smart Starter (For Students)",
+      "title": "Kite Affordable for All",
       "category": "Starter Bundle",
-      "description": "Affordable starter pack featuring 1kg Kite Glow Detergent and 2 Kite Long Bars (190g). High quality daily essentials at student-friendly pricing.",
+      "description": "Affordable bundle pack featuring 1kg Kite Glow Detergent and 2 Kite Long Bars (190g). High quality daily essentials for everyone.",
       "image": "/packages-image/kite-smart-starter.jpeg",
       "images": [
         "/packages-image/kite-smart-starter.jpeg"
@@ -645,7 +645,9 @@
       "displayOrder": 1,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T09:00:00.000Z"
+      "updatedAt": "2026-11-18T16:28:54.114Z",
+      "originalPrice": 470,
+      "discount": 70
     },
     {
       "_id": "673b5a100000000000000002",
@@ -680,7 +682,9 @@
       "displayOrder": 2,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T09:00:00.000Z"
+      "updatedAt": "2026-11-18T16:28:54.115Z",
+      "originalPrice": 990,
+      "discount": 110
     },
     {
       "_id": "673b5a100000000000000003",
@@ -710,7 +714,9 @@
       "displayOrder": 3,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T09:00:00.000Z"
+      "updatedAt": "2026-11-18T16:28:54.115Z",
+      "originalPrice": 1118,
+      "discount": 168
     },
     {
       "_id": "673b5a100000000000000004",
@@ -745,7 +751,9 @@
       "displayOrder": 4,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T09:00:00.000Z"
+      "updatedAt": "2026-11-18T16:28:54.115Z",
+      "originalPrice": 1150,
+      "discount": 170
     },
     {
       "_id": "673b5a100000000000000005",
@@ -775,7 +783,9 @@
       "displayOrder": 5,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T09:00:00.000Z"
+      "updatedAt": "2026-11-18T16:28:54.115Z",
+      "originalPrice": 1480,
+      "discount": 200
     },
     {
       "_id": "673b5a100000000000000006",
@@ -805,7 +815,9 @@
       "displayOrder": 6,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T09:00:00.000Z"
+      "updatedAt": "2026-11-18T16:28:54.115Z",
+      "originalPrice": 1677,
+      "discount": 227
     },
     {
       "_id": "673b5a100000000000000007",
@@ -840,7 +852,9 @@
       "displayOrder": 7,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T09:00:00.000Z"
+      "updatedAt": "2026-11-18T16:28:54.115Z",
+      "originalPrice": 2350,
+      "discount": 100
     },
     {
       "_id": "673b5a100000000000000008",
@@ -875,7 +889,9 @@
       "displayOrder": 8,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T09:00:00.000Z"
+      "updatedAt": "2026-11-18T16:28:54.115Z",
+      "originalPrice": 2470,
+      "discount": 70
     },
     {
       "_id": "673b5a100000000000000009",
@@ -910,7 +926,9 @@
       "displayOrder": 9,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T09:00:00.000Z"
+      "updatedAt": "2026-11-18T16:28:54.115Z",
+      "originalPrice": 3000,
+      "discount": 50
     }
   ],
   "orders": [
