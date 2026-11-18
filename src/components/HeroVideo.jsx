@@ -28,7 +28,7 @@ const HeroVideo = () => {
       className="relative w-full overflow-hidden bg-black"
     >
       {/* Banner-sized video: fills width, capped height so products section peeks in */}
-      <div className="relative w-full overflow-hidden h-[80vh]">
+      <div className="relative w-full overflow-hidden h-[100vh]">
         <video
           ref={videoRef}
           autoPlay
