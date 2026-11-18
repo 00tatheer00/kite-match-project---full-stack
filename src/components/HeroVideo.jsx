@@ -27,12 +27,8 @@ const HeroVideo = () => {
       aria-label="Kite Brand Motion Video Banner"
       className="relative w-full overflow-hidden bg-black"
     >
-      {/* 
-        Fits strictly within the single screen (above the fold) without vertical overflow:
-        - Mobile: natural 16:9 aspect ratio or max-h bounded
-        - Tablet/Desktop: exactly fits the remaining screen height (100dvh - navbar)
-      */}
-      <div className="relative w-full aspect-video sm:aspect-auto sm:h-[calc(100dvh-80px)] md:h-[calc(100dvh-92px)] max-h-[calc(100dvh-70px)] sm:max-h-[calc(100dvh-80px)] md:max-h-[calc(100dvh-92px)] overflow-hidden">
+      {/* Banner-sized video: fills width, capped height so products section peeks in */}
+      <div className="relative w-full overflow-hidden max-h-[55vh] sm:max-h-[60vh] md:max-h-[65vh]">
         <video
           ref={videoRef}
           autoPlay
