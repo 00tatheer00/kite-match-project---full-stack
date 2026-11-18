@@ -109,10 +109,10 @@ const CartDrawer = () => {
             <div className="space-y-2">
               <button 
                 type="button"
-                disabled
-                className="w-full py-3.5 rounded-full text-gray-500 font-semibold flex items-center justify-center gap-2 bg-gray-200 border border-gray-300 cursor-not-allowed"
+                onClick={handleCheckout}
+                className="w-full py-3.5 rounded-full text-white font-semibold flex items-center justify-center gap-2 bg-[#00AEEF] hover:bg-[#0095CC] transition-all shadow-md text-sm active:scale-98 cursor-pointer"
               >
-                Online Checkout Coming Soon
+                Proceed to Checkout
               </button>
               <a
                 href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I have ${cartItems.length} items in my cart worth Rs. ${cartTotal.toLocaleString()} and would like to place this order.`)}`}

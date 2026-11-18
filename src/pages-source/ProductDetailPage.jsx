@@ -664,12 +664,13 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                       <button
                         type="button"
-                        disabled
-                        className="px-6 py-3 rounded-full text-gray-500 font-semibold bg-gray-200 border border-gray-300 cursor-not-allowed flex items-center justify-center gap-2"
-                        title="Online ordering will be available soon"
+                        onClick={handleMainAddToCart}
+                        disabled={addingToCart}
+                        className="px-6 py-3 rounded-full text-white font-semibold bg-[#00AEEF] hover:bg-[#0095CC] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                        title="Add to shopping cart"
                       >
-                        <FaClock className="text-sm text-amber-600" />
-                        <span>Online Order Coming Soon</span>
+                        <FaShoppingCart className="text-base" />
+                        <span>{addingToCart ? "Added to Cart!" : "Add to Cart"}</span>
                       </button>
                       <a
                         href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to inquire about ordering ${product.title} (${selectedVariant || "General"}).`)}`}
@@ -811,12 +812,13 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                                   <div className="flex items-center gap-2">
                                     <button
                                       type="button"
-                                      disabled
-                                      className="px-4 py-2.5 bg-gray-200 text-gray-500 border border-gray-300 rounded-lg font-bold cursor-not-allowed flex items-center gap-1.5 shadow-xs text-xs"
-                                      title="Online ordering will be available soon"
+                                      onClick={() => handleBrandVariantAddToCart(brand, bIdx)}
+                                      disabled={addingToCart}
+                                      className="px-4 py-2.5 bg-[#00AEEF] hover:bg-[#0095CC] text-white rounded-lg font-bold flex items-center gap-1.5 shadow-sm text-xs transition-colors active:scale-95 cursor-pointer"
+                                      title="Add to shopping cart"
                                     >
-                                      <FaClock className="text-xs text-amber-600" />
-                                      <span>Coming Soon</span>
+                                      <FaShoppingCart className="text-xs" />
+                                      <span>Add to Cart</span>
                                     </button>
                                     <a
                                       href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I would like to order ${brand.name} matches (${brandSelectedVariants[bIdx] || "Regular"}).`)}`}

@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from '@/components/RouterCompat';
-import { FaBars, FaTimes, FaChevronDown } from "react-icons/fa";
+import { FaBars, FaTimes, FaChevronDown, FaShoppingCart } from "react-icons/fa";
+import { useCart } from "../context/CartContext";
 import kiteLogo1 from "../assets/kite_part1.png";
 import kiteLogo2 from "../assets/kite_part2.png";
 import { getProducts } from "../services/api";
@@ -13,6 +14,8 @@ const Navbar = () => {
   const [expandedMobileCategories, setExpandedMobileCategories] = useState({});
   const [navProducts, setNavProducts] = useState([]);
   const location = useLocation();
+  const { cartItems, openCart } = useCart();
+  const cartCount = cartItems?.reduce((total, item) => total + (item.quantity || 1), 0) || 0;
 
   const toggleMobileCategory = (categoryTitle) => {
     setExpandedMobileCategories((prev) => ({
@@ -71,7 +74,6 @@ const Navbar = () => {
     {
       name: "Online Order",
       href: "/online-order",
-      badge: "Coming Soon",
     },
     // {
     //   name: 'Divisions',
@@ -219,8 +221,23 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Contact Button */}
-          <div className="hidden md:block flex-shrink-0 ml-2">
+          {/* Desktop Cart & Contact */}
+          <div className="hidden md:flex items-center gap-3 flex-shrink-0 ml-2">
+            <button
+              type="button"
+              onClick={openCart}
+              className="relative p-2.5 rounded-full text-text-primary hover:text-primary hover:bg-gray-100 transition-all cursor-pointer group"
+              aria-label="Open Shopping Cart"
+              title="Shopping Cart"
+            >
+              <FaShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-primary transition-colors" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#ED028C] text-white text-[11px] font-bold min-w-5 h-5 px-1 flex items-center justify-center rounded-full shadow-sm animate-scale-in">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+
             <Link
               to="/contact"
               className={`inline-flex items-center justify-center px-6 py-2.5 lg:px-7 lg:py-2.5 rounded-full text-base font-semibold transition-all duration-300 shadow-md hover:shadow-lg focus:outline-none ${
@@ -233,8 +250,22 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          {/* Mobile Cart & Menu Buttons */}
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              type="button"
+              onClick={openCart}
+              className="relative p-2 text-text-primary hover:text-primary transition-colors cursor-pointer"
+              aria-label="Open Shopping Cart"
+            >
+              <FaShoppingCart className="h-6 w-6 text-gray-700" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#ED028C] text-white text-[10px] font-bold min-w-4 h-4 px-1 flex items-center justify-center rounded-full shadow-xs">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-text-primary hover:text-primary p-2 transition-colors focus:outline-none"

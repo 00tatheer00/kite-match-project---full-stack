@@ -252,12 +252,12 @@ const CheckoutPage = () => {
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white border border-[#E0E0E0] rounded-2xl p-6">
           <h1 className="text-2xl font-bold text-[#222222] mb-5">Checkout</h1>
-          <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-3">
-            <span className="text-xl">⚠️</span>
-            <div>
-              <h3 className="text-sm font-bold text-amber-900">Online Checkout Coming Soon</h3>
-              <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
-                Direct online checkout is currently undergoing an upgrade and is temporarily disabled. Please place your order or inquiry directly via WhatsApp or Phone helpline.
+          <div className="mb-6 p-4 rounded-xl bg-sky-50 border border-sky-200 flex items-start gap-3">
+            <span className="text-xl">🚚</span>
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-sky-950">Cash on Delivery (COD) Available Nationwide</h3>
+              <p className="text-xs text-sky-800 mt-0.5 leading-relaxed">
+                Apna shipping address dain aur order place karein. Payment delivery ke waqt li jaye gi. Agar aap chahein to direct WhatsApp par bhi order place kar sakte hain.
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <a
@@ -407,11 +407,11 @@ const CheckoutPage = () => {
 
             <div className="md:col-span-2 mt-4 space-y-2">
               <button
-                type="button"
-                disabled
-                className="w-full px-5 py-3.5 rounded-lg text-gray-500 font-bold bg-gray-200 border border-gray-300 cursor-not-allowed"
+                type="submit"
+                disabled={submitting}
+                className="w-full px-5 py-3.5 rounded-lg text-white font-bold bg-[#00AEEF] hover:bg-[#0095CC] flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all text-sm disabled:opacity-50 cursor-pointer"
               >
-                Online Checkout Coming Soon
+                {submitting ? "Placing Order..." : "Place Order (Cash on Delivery)"}
               </button>
               <a
                 href={`https://wa.me/923018117666?text=${encodeURIComponent(`Hello Kite, I want to confirm my order for: ${checkoutData?.title || "selected items"}.`)}`}
