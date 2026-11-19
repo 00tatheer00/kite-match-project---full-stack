@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 
+// Disable command buffering so disconnected queries fail fast immediately without 10s timeout
+mongoose.set('bufferCommands', false);
+
 let cached = global.mongoose;
 
 if (!cached) {

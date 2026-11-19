@@ -6,6 +6,15 @@ import { fetchRemoteFallback } from '@/lib/api-fallback';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+const PRODUCT_ALIASES = {
+  tanga: 'safety-matches',
+  'tanga-matches': 'safety-matches',
+  'kite-matches': 'safety-matches',
+  olympia: 'safety-matches',
+  party: 'safety-matches',
+  bird: 'safety-matches',
+};
+
 function normalizeIdentifier(value) {
   return String(value || '')
     .trim()
@@ -22,20 +31,22 @@ export async function GET(request, context) {
   }
 
   const normalizedRequested = normalizeIdentifier(requested);
+  const targetId = PRODUCT_ALIASES[requested] || PRODUCT_ALIASES[normalizedRequested] || requested;
+  const targetNormalized = normalizeIdentifier(targetId);
 
   try {
     await connectToDatabase();
     let product = await Product.findOne({
-      $or: [{ id: requested }, { slug: requested }, { _id: requested }],
+      $or: [{ id: targetId }, { id: requested }, { slug: targetId }, { slug: requested }, { _id: targetId }, { _id: requested }],
     }).lean();
 
     if (!product) {
       const candidates = await Product.find().lean();
       product =
         candidates.find((item) => {
-          const idMatch = normalizeIdentifier(item.id) === normalizedRequested;
-          const slugMatch = normalizeIdentifier(item.slug) === normalizedRequested;
-          const titleMatch = normalizeIdentifier(item.title) === normalizedRequested;
+          const idMatch = normalizeIdentifier(item.id) === targetNormalized || normalizeIdentifier(item.id) === normalizedRequested;
+          const slugMatch = normalizeIdentifier(item.slug) === targetNormalized || normalizeIdentifier(item.slug) === normalizedRequested;
+          const titleMatch = normalizeIdentifier(item.title) === targetNormalized || normalizeIdentifier(item.title) === normalizedRequested;
           return idMatch || slugMatch || titleMatch;
         }) || null;
     }
@@ -50,14 +61,14 @@ export async function GET(request, context) {
   // Check persistent store
   try {
     const { getAllProducts, getProductById } = await import('@/lib/store');
-    let product = getProductById(requested);
+    let product = getProductById(targetId) || getProductById(requested);
     if (!product) {
       const storeProducts = getAllProducts();
       product =
         storeProducts.find((item) => {
-          const idMatch = normalizeIdentifier(item.id) === normalizedRequested;
-          const slugMatch = normalizeIdentifier(item.slug) === normalizedRequested;
-          const titleMatch = normalizeIdentifier(item.title) === normalizedRequested;
+          const idMatch = normalizeIdentifier(item.id) === targetNormalized || normalizeIdentifier(item.id) === normalizedRequested;
+          const slugMatch = normalizeIdentifier(item.slug) === targetNormalized || normalizeIdentifier(item.slug) === normalizedRequested;
+          const titleMatch = normalizeIdentifier(item.title) === targetNormalized || normalizeIdentifier(item.title) === normalizedRequested;
           return idMatch || slugMatch || titleMatch;
         }) || null;
     }

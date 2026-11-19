@@ -58,7 +58,7 @@ export async function POST(request) {
       console.warn('Database connection skipped for order processing:', dbErr.message);
     }
 
-    const {
+    let {
       type,
       productId,
       promotionId,
@@ -73,6 +73,22 @@ export async function POST(request) {
       paymentMethod,
       items,
     } = body;
+
+    // Normalize type and customer fields (supports nested customer object or top-level)
+    type = type || (Array.isArray(items) && items.length > 0 ? 'cart' : (productId ? 'product' : (promotionId ? 'promotion' : null)));
+    customerName = customerName || body.customer?.name;
+    phone = phone || body.customer?.phone;
+    email = email || body.customer?.email;
+    address = address || body.customer?.address;
+    city = city || body.customer?.city;
+
+    // Normalize paymentMethod (case-insensitive)
+    if (typeof paymentMethod === 'string') {
+      const pmLower = paymentMethod.trim().toLowerCase();
+      if (pmLower === 'cod') paymentMethod = 'COD';
+      else if (pmLower === 'easypaisa') paymentMethod = 'Easypaisa';
+      else if (pmLower === 'jazzcash') paymentMethod = 'JazzCash';
+    }
 
     if (!['product', 'promotion', 'cart'].includes(type)) {
       return NextResponse.json({ message: 'Invalid order type' }, { status: 400 });
@@ -168,8 +184,12 @@ export async function POST(request) {
         let itemPrice = Number(item.price) || 0;
         let itemShipping = defaultShipping;
 
-        if (item.itemType === 'promotion') {
-          const promo = await fetchPromotionRecord(item.promotionId);
+        const isPromo = item.itemType === 'promotion' || item.isPackage || Boolean(item.promotionId);
+        const promoLookupId = item.promotionId || item.id;
+        const prodLookupId = item.productId || item.id;
+
+        if (isPromo && promoLookupId) {
+          const promo = await fetchPromotionRecord(promoLookupId);
           if (promo) {
             itemPrice = Number(promo.totalPrice) || itemPrice;
             const isFreeShippingBundle = freeShippingBundles.includes(promo.id);
@@ -181,8 +201,8 @@ export async function POST(request) {
                 : 200;
             }
           }
-        } else if (item.productId) {
-          const prod = await fetchProductRecord(item.productId);
+        } else if (prodLookupId) {
+          const prod = await fetchProductRecord(prodLookupId);
           if (prod && Array.isArray(prod.variants) && item.selectedVariant) {
             const variant = prod.variants.find((v) => v.name === item.selectedVariant);
             if (variant?.price) itemPrice = Number(variant.price);
@@ -244,22 +264,27 @@ export async function POST(request) {
     };
 
     let order;
+    let isStoreSaved = false;
     try {
       const { default: mongoose } = await import('mongoose');
       if (mongoose.connection && mongoose.connection.readyState === 1) {
         order = await Order.create(orderPayload);
       } else {
         order = saveInStore(orderPayload);
+        isStoreSaved = true;
       }
     } catch (orderDbErr) {
       console.warn('MongoDB Order.create failed, falling back to local store:', orderDbErr.message);
       order = saveInStore(orderPayload);
+      isStoreSaved = true;
     }
 
-    // Always ensure order is mirrored to local store
-    try {
-      saveInStore(order.toObject ? order.toObject() : order);
-    } catch {}
+    // Mirror to local store if not already saved there
+    if (!isStoreSaved) {
+      try {
+        saveInStore(order.toObject ? order.toObject() : order);
+      } catch {}
+    }
 
     // Fire-and-forget email notification
     sendOrderEmail(order.toObject ? order.toObject() : order, productOrPromotion).catch((err) => {

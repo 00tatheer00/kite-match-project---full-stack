@@ -12,26 +12,37 @@ export async function GET(request, context) {
   }
 
   try {
-    await connectToDatabase();
-    let order = null;
-    if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      order = await Order.findById(id).lean();
-    }
-    if (!order) {
-      order = await Order.findOne({ orderNumber: id }).lean();
+    try {
+      await connectToDatabase();
+      let order = null;
+      if (id.match(/^[0-9a-fA-F]{24}$/)) {
+        order = await Order.findById(id).lean();
+      }
+      if (!order) {
+        order = await Order.findOne({ orderNumber: id }).lean();
+      }
+
+      if (order) {
+        return NextResponse.json(order);
+      }
+    } catch (dbErr) {
+      // Database offline or query error
     }
 
-    if (!order) {
-      return NextResponse.json({ message: 'Order not found' }, { status: 404 });
-    }
+    try {
+      const { getOrderById } = await import('@/lib/store');
+      const storeOrder = getOrderById(id);
+      if (storeOrder) {
+        return NextResponse.json(storeOrder);
+      }
+    } catch {}
 
-    return NextResponse.json(order);
-  } catch (err) {
-    console.warn('Local database unavailable for /api/orders/[id], attempting fallback:', err.message);
     const remoteOrder = await fetchRemoteFallback(`/orders/${id}`);
     if (remoteOrder) {
       return NextResponse.json(remoteOrder);
     }
+    return NextResponse.json({ message: 'Order not found' }, { status: 404 });
+  } catch (err) {
     return NextResponse.json({ message: 'Order not found' }, { status: 404 });
   }
 }

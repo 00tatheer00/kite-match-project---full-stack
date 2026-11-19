@@ -27,12 +27,33 @@ export async function PATCH(request, context) {
       return NextResponse.json({ message: 'Invalid status' }, { status: 400 });
     }
 
-    await connectToDatabase();
-    const order = await Order.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
+    let order = null;
+    try {
+      await connectToDatabase();
+      if (id.match(/^[0-9a-fA-F]{24}$/)) {
+        order = await Order.findByIdAndUpdate(
+          id,
+          { status },
+          { new: true }
+        );
+      }
+      if (!order) {
+        order = await Order.findOneAndUpdate(
+          { orderNumber: id },
+          { status },
+          { new: true }
+        );
+      }
+    } catch (dbErr) {
+      // Mongo offline
+    }
+
+    if (!order) {
+      try {
+        const { updateOrderStatus } = await import('@/lib/store');
+        order = updateOrderStatus(id, status);
+      } catch {}
+    }
 
     if (!order) {
       return NextResponse.json({ message: 'Order not found' }, { status: 404 });

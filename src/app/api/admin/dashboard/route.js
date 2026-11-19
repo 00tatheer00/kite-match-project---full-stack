@@ -86,6 +86,9 @@ export async function GET(request) {
     const countries = analytics.countries || {};
 
     return NextResponse.json({
+      productCount: products.length,
+      orderCount: totalOrders,
+      promotionsCount: totalPromotions,
       overview: {
         totalOrders,
         pendingOrders,

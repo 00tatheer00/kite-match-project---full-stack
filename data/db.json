@@ -682,7 +682,7 @@
       "displayOrder": 2,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-19T13:24:38.957Z",
+      "updatedAt": "2026-11-18T16:28:54.115Z",
       "originalPrice": 990,
       "discount": 110
     },
@@ -1122,23 +1122,23 @@
     "bannerLink": "/online-order"
   },
   "analytics": {
-    "totalVisitors": 1429,
-    "todayVisitors": 48,
-    "totalPageviews": 3893,
+    "totalVisitors": 1430,
+    "todayVisitors": 49,
+    "totalPageviews": 3894,
     "sources": {
-      "whatsapp": 643,
+      "whatsapp": 644,
       "direct": 412,
       "facebook": 214,
       "instagram": 120,
       "google": 40
     },
     "devices": {
-      "mobile": 1172,
+      "mobile": 1173,
       "desktop": 228,
       "tablet": 29
     },
     "cities": {
-      "Lahore, PK": 542,
+      "Lahore, PK": 543,
       "Karachi, PK": 400,
       "Islamabad / RWP, PK": 228,
       "Peshawar, PK": 142,
@@ -1147,17 +1147,26 @@
       "Rawalpindi, PK": 1
     },
     "countries": {
-      "PK": 1385,
+      "PK": 1386,
       "AE": 44
     },
     "topPages": {
       "/": 1840,
       "/products": 891,
       "/promotions-packages": 620,
-      "/online-order": 312,
+      "/online-order": 313,
       "/fmcg-division": 230
     },
     "recentVisits": [
+      {
+        "id": "v_1795101409328_q5k2",
+        "timestamp": "2026-11-19T15:16:49.328Z",
+        "path": "/online-order",
+        "source": "whatsapp",
+        "device": "mobile",
+        "city": "Lahore, PK",
+        "country": "PK"
+      },
       {
         "id": "v_1795086178414_d9ql",
         "timestamp": "2026-11-19T11:02:58.414Z",
@@ -1222,6 +1231,6 @@
         "country": "PK"
       }
     ],
-    "lastUpdated": "2026-11-19T11:02:58.414Z"
+    "lastUpdated": "2026-11-19T15:16:49.328Z"
   }
 }

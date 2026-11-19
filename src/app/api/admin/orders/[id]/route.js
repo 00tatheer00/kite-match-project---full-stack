@@ -19,7 +19,13 @@ export async function GET(request, context) {
 
     try {
       await connectToDatabase();
-      const order = await Order.findById(id).lean();
+      let order = null;
+      if (id.match(/^[0-9a-fA-F]{24}$/)) {
+        order = await Order.findById(id).lean();
+      }
+      if (!order) {
+        order = await Order.findOne({ orderNumber: id }).lean();
+      }
       if (order) {
         return NextResponse.json(order);
       }

@@ -23,31 +23,50 @@ function loadInitialData() {
     }
   }
 
-  // 2. Check writable tmp directory (serverless container cache)
+  // 2. Read bundled db.json (source of truth from codebase)
+  ensureDataDir();
+  let dbData = null;
+  let dbMtime = 0;
+  if (fs.existsSync(DB_PATH)) {
+    try {
+      dbMtime = fs.statSync(DB_PATH).mtimeMs;
+      const raw = fs.readFileSync(DB_PATH, 'utf-8');
+      dbData = JSON.parse(raw);
+    } catch (e) {
+      console.warn('Failed to parse db.json:', e.message);
+    }
+  }
+
+  // 3. Read writable tmp directory (serverless container cache)
+  let tmpData = null;
+  let tmpMtime = 0;
   if (fs.existsSync(TMP_DB_PATH)) {
     try {
+      tmpMtime = fs.statSync(TMP_DB_PATH).mtimeMs;
       const raw = fs.readFileSync(TMP_DB_PATH, 'utf-8');
-      const data = JSON.parse(raw);
-      if (data && Array.isArray(data.products) && Array.isArray(data.promotions)) {
-        global.__kite_db_cache = data;
-        return data;
-      }
+      tmpData = JSON.parse(raw);
     } catch {}
   }
 
-  // 3. Fallback to bundled data/db.json
-  ensureDataDir();
-  if (fs.existsSync(DB_PATH)) {
-    try {
-      const raw = fs.readFileSync(DB_PATH, 'utf-8');
-      const data = JSON.parse(raw);
-      if (data && Array.isArray(data.products) && data.products.length > 0) {
-        global.__kite_db_cache = data;
-        return data;
-      }
-    } catch (e) {
-      console.warn('Failed to parse db.json, using fallback:', e.message);
+  // If bundled DB_PATH exists and is newer than TMP_DB_PATH (or tmp is missing/invalid)
+  if (dbData && Array.isArray(dbData.products) && dbData.products.length > 0) {
+    if (!tmpData || dbMtime >= tmpMtime) {
+      global.__kite_db_cache = dbData;
+      try {
+        fs.writeFileSync(TMP_DB_PATH, JSON.stringify(dbData, null, 2), 'utf-8');
+      } catch {}
+      return dbData;
     }
+  }
+
+  if (tmpData && Array.isArray(tmpData.products) && Array.isArray(tmpData.promotions)) {
+    global.__kite_db_cache = tmpData;
+    return tmpData;
+  }
+
+  if (dbData && Array.isArray(dbData.products) && dbData.products.length > 0) {
+    global.__kite_db_cache = dbData;
+    return dbData;
   }
 
   // 4. Fallback to seed cache
@@ -146,9 +165,16 @@ export function updateProduct(id, payload) {
   }
 
   const existing = db.products[idx];
+  const cleanPayload = {};
+  for (const [k, v] of Object.entries(payload || {})) {
+    if (v !== undefined) {
+      cleanPayload[k] = v;
+    }
+  }
+
   const updated = {
     ...existing,
-    ...payload,
+    ...cleanPayload,
     id: existing.id,
     _id: existing._id,
     updatedAt: new Date().toISOString(),
@@ -213,9 +239,16 @@ export function updatePromotion(id, payload) {
   }
 
   const existing = db.promotions[idx];
+  const cleanPayload = {};
+  for (const [k, v] of Object.entries(payload || {})) {
+    if (v !== undefined) {
+      cleanPayload[k] = v;
+    }
+  }
+
   const updated = {
     ...existing,
-    ...payload,
+    ...cleanPayload,
     id: existing.id,
     _id: existing._id,
     updatedAt: new Date().toISOString(),
@@ -482,5 +515,5 @@ export function recordVisitorEvent(payload = {}) {
 
   analytics.lastUpdated = new Date().toISOString();
   saveDb(db);
-  return { ok: true, totalVisitors: analytics.totalVisitors };
+  return { ok: true, success: true, totalVisitors: analytics.totalVisitors };
 }

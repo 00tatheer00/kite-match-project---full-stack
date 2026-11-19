@@ -5,6 +5,9 @@ import { verifyAdminAuth } from '@/lib/auth';
 import { fetchRemoteFallback } from '@/lib/api-fallback';
 import { uploadImageBuffer } from '@/lib/cloudinary';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const DEFAULT_SETTINGS = {
   defaultShippingCost: 200,
   smallPackageShippingCost: 200,
@@ -23,25 +26,27 @@ const DEFAULT_SETTINGS = {
 // GET /api/settings (public for checkout & frontend)
 export async function GET() {
   try {
-    await connectToDatabase();
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = await Settings.create(DEFAULT_SETTINGS);
+    const conn = await connectToDatabase();
+    if (conn) {
+      let settings = await Settings.findOne();
+      if (!settings) {
+        settings = await Settings.create(DEFAULT_SETTINGS);
+      }
+      return NextResponse.json(settings);
     }
-    return NextResponse.json(settings);
   } catch (error) {
-    console.warn('Local database unavailable, falling back to remote API for /api/settings:', error.message);
-    const remoteData = await fetchRemoteFallback('/settings');
-    if (remoteData) {
-      return NextResponse.json(remoteData);
-    }
-    try {
-      const { getSettings } = await import('@/lib/store');
-      return NextResponse.json(getSettings());
-    } catch {
-      return NextResponse.json(DEFAULT_SETTINGS);
-    }
+    // Database offline
   }
+
+  try {
+    const { getSettings } = await import('@/lib/store');
+    const storeSettings = getSettings();
+    if (storeSettings) {
+      return NextResponse.json({ ...DEFAULT_SETTINGS, ...storeSettings });
+    }
+  } catch {}
+
+  return NextResponse.json(DEFAULT_SETTINGS);
 }
 
 // PUT /api/settings (admin only)
@@ -97,22 +102,29 @@ export async function PUT(request) {
       console.warn('Could not update local store:', e.message);
     }
 
-    await connectToDatabase();
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = new Settings({ ...DEFAULT_SETTINGS, ...payload });
-    } else {
-      Object.assign(settings, payload);
+    try {
+      const conn = await connectToDatabase();
+      if (conn) {
+        let settings = await Settings.findOne();
+        if (!settings) {
+          settings = new Settings({ ...DEFAULT_SETTINGS, ...payload });
+        } else {
+          Object.assign(settings, payload);
+        }
+        await settings.save();
+        return NextResponse.json(settings);
+      }
+    } catch (dbErr) {
+      console.warn('Could not persist settings to MongoDB:', dbErr.message);
     }
-    await settings.save();
-    return NextResponse.json(settings);
-  } catch (error) {
-    console.warn('PUT /api/settings failed in DB, attempting store fallback:', error.message);
+
     try {
       const { getSettings } = await import('@/lib/store');
-      return NextResponse.json(getSettings());
+      return NextResponse.json({ ...DEFAULT_SETTINGS, ...getSettings() });
     } catch {
-      return NextResponse.json({ message: error.message }, { status: 500 });
+      return NextResponse.json({ ...DEFAULT_SETTINGS, ...payload });
     }
+  } catch (error) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
