@@ -18,7 +18,8 @@ export async function GET(request) {
     // Auto-sync check
     const count = await PromotionPackage.countDocuments();
     const starter = await PromotionPackage.findOne({ id: 'pkg-kite-smart-starter' });
-    if (count < 9 || !starter) {
+    const starterStoreImage = storePromos.find((p) => p.id === 'pkg-kite-smart-starter')?.image;
+    if (count < 9 || !starter || (starterStoreImage && starter.image !== starterStoreImage)) {
       if (storePromos && storePromos.length > 0) {
         for (const p of storePromos) {
           await PromotionPackage.findOneAndUpdate(

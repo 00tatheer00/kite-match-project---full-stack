@@ -386,7 +386,11 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                         <div className="relative aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-[#F5F5F5] to-[#EEEEEE] border border-[#E5E5E5]">
                           {pkg.image ? (
                             <img
-                              src={pkg.image?.src || pkg.image}
+                              src={
+                                pkg.id === 'pkg-kite-smart-starter' && String(pkg.image?.src || pkg.image).includes('kite-smart-starter.jpeg')
+                                  ? '/packages-image/kite-smart-starter-v2.jpeg'
+                                  : pkg.image?.src || pkg.image
+                              }
                               alt={pkg.title}
                               loading="lazy"
                               decoding="async"
