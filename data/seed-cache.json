@@ -652,7 +652,7 @@
     {
       "_id": "673b5a100000000000000002",
       "id": "pkg-glow-saver-pack",
-      "title": "Glow Saver Pack",
+      "title": "Kite Glow Saver Pack",
       "category": "Glow Bundle",
       "description": "Complete household essentials pack including 1x 2kg Kite Glow Detergent, 1x 50 pieces Kite Large Safety Matches, and 2x Kite Super Bar (190g).",
       "image": "/packages-image/glow-saver-pack.jpeg",
@@ -682,7 +682,7 @@
       "displayOrder": 2,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-19T16:43:00.000Z",
+      "updatedAt": "2026-11-19T13:24:38.965Z",
       "originalPrice": 990,
       "discount": 110
     },

@@ -28,6 +28,14 @@ export async function GET(request) {
           { upsert: true, new: true }
         );
       }
+    } else {
+      const glowSaver = await PromotionPackage.findOne({ id: 'pkg-glow-saver-pack' });
+      if (glowSaver && glowSaver.title !== 'Kite Glow Saver Pack') {
+        await PromotionPackage.findOneAndUpdate(
+          { id: 'pkg-glow-saver-pack' },
+          { $set: { title: 'Kite Glow Saver Pack' } }
+        );
+      }
     }
 
     const query = onlyActive ? { isActive: true } : {};
