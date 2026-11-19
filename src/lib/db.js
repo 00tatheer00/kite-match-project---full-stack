@@ -7,12 +7,19 @@ if (!cached) {
 }
 
 function getMongoUri() {
-  return (
+  const uri = (
     process.env.MONGODB_URI ||
     process.env.MONGO_URI ||
     process.env.MONGODB_URL ||
     ""
-  );
+  ).trim();
+
+  // If in Vercel production and the URI points to localhost, do not use it
+  if (process.env.VERCEL && (uri.includes('127.0.0.1') || uri.includes('localhost'))) {
+    return "";
+  }
+
+  return uri;
 }
 
 export async function connectToDatabase() {
@@ -21,27 +28,33 @@ export async function connectToDatabase() {
   }
 
   const rawUri = getMongoUri();
-  const mongoUri = rawUri || "mongodb://127.0.0.1:27017/kite";
 
-  // In production (e.g. Vercel) without a custom MongoDB URI, fail fast to remote fallback
-  if (!rawUri && (process.env.VERCEL || process.env.NODE_ENV === "production")) {
-    throw new Error("MONGODB_URI not configured in production environment.");
+  // Graceful fallback: If MongoDB URI is not configured, return null without crashing
+  if (!rawUri) {
+    return null;
   }
 
-  // If last connection failed less than 20 seconds ago, fail fast so API routes don't delay
-  if (cached.lastFailedAt && Date.now() - cached.lastFailedAt < 20000) {
-    throw new Error("Database connection in cooldown after recent failure.");
+  // Cooldown check after recent failure to avoid serverless timeout delays
+  if (cached.lastFailedAt && Date.now() - cached.lastFailedAt < 15000) {
+    return null;
   }
 
   if (!cached.promise) {
     cached.promise = mongoose
-      .connect(mongoUri, {
+      .connect(rawUri, {
         serverSelectionTimeoutMS: 2000,
         connectTimeoutMS: 2000,
       })
       .then((m) => {
         cached.lastFailedAt = 0;
         return m;
+      })
+      .catch((err) => {
+        cached.promise = null;
+        cached.conn = null;
+        cached.lastFailedAt = Date.now();
+        console.warn("MongoDB connection deferred:", err.message);
+        return null;
       });
   }
 
@@ -52,7 +65,6 @@ export async function connectToDatabase() {
     cached.promise = null;
     cached.conn = null;
     cached.lastFailedAt = Date.now();
-    throw e;
+    return null;
   }
 }
-

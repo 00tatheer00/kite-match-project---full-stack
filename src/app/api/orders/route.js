@@ -52,7 +52,11 @@ export async function POST(request) {
   }
 
   try {
-    await connectToDatabase();
+    try {
+      await connectToDatabase();
+    } catch (dbErr) {
+      console.warn('Database connection skipped for order processing:', dbErr.message);
+    }
 
     const {
       type,
@@ -241,7 +245,12 @@ export async function POST(request) {
 
     let order;
     try {
-      order = await Order.create(orderPayload);
+      const { default: mongoose } = await import('mongoose');
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        order = await Order.create(orderPayload);
+      } else {
+        order = saveInStore(orderPayload);
+      }
     } catch (orderDbErr) {
       console.warn('MongoDB Order.create failed, falling back to local store:', orderDbErr.message);
       order = saveInStore(orderPayload);

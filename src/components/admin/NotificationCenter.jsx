@@ -65,8 +65,11 @@ const NotificationCenter = ({ dark = false }) => {
     });
 
     return () => {
-      channel.unbind_all();
-      channel.unsubscribe();
+      try {
+        channel.unbind_all();
+        channel.unsubscribe();
+        pusher.disconnect();
+      } catch {}
     };
   }, []);
 
