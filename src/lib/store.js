@@ -65,8 +65,7 @@ function saveDb(data) {
   }
 }
 
-// ─── Products CRUD ──────────────────────────────────────────
-
+// Products
 export function getAllProducts() {
   const db = getDb();
   return db.products || [];
@@ -133,8 +132,7 @@ export function deleteProduct(id) {
   return false;
 }
 
-// ─── Promotions CRUD ────────────────────────────────────────
-
+// Promotions
 export function getAllPromotions() {
   const db = getDb();
   return db.promotions || [];
@@ -201,8 +199,7 @@ export function deletePromotion(id) {
   return false;
 }
 
-// ─── Orders CRUD ────────────────────────────────────────────
-
+// Orders
 export function getAllOrders() {
   const db = getDb();
   return db.orders || [];
@@ -251,11 +248,10 @@ export function updateOrderStatus(id, status) {
   return db.orders[idx];
 }
 
-// ─── Settings ───────────────────────────────────────────────
-
+// Settings
 export function getSettings() {
   const db = getDb();
-  return db.settings || { defaultShippingCost: 150 };
+  return db.settings || { defaultShippingCost: 200 };
 }
 
 export function updateSettings(payload) {
@@ -265,7 +261,7 @@ export function updateSettings(payload) {
   return db.settings;
 }
 
-// ─── Visitor Traffic & Analytics (Meeting Point 6) ───────────
+// --- Visitor Traffic & Analytics ---
 
 export function getAnalyticsSummary() {
   const db = getDb();

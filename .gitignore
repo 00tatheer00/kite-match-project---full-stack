@@ -22,6 +22,10 @@
 /dist-hostinger
 *.zip
 
+# AI & Agent artifacts
+AGENTS.md
+CLAUDE.md
+
 # misc
 .DS_Store
 *.pem

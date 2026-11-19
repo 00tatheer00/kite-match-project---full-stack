@@ -100,7 +100,7 @@ const CheckoutPage = () => {
             itemShip = item.shippingCost !== null && item.shippingCost !== undefined ? Number(item.shippingCost) : 200;
           }
         } else {
-          // Regular products NEVER receive free shipping automatically even if price > Rs. 2,000
+          // Products use standard delivery fee
           itemShip = item.shippingCost !== null && item.shippingCost !== undefined ? Number(item.shippingCost) : defaultShip;
         }
 
@@ -117,7 +117,7 @@ const CheckoutPage = () => {
         if (freeBundles.includes(promoId)) return 0;
         return orderContext.shippingCost !== null && orderContext.shippingCost !== undefined ? Number(orderContext.shippingCost) : 200;
       }
-      // Single product orders NEVER receive free shipping automatically
+      // Single product delivery fee calculation
       return orderContext.shippingCost !== null && orderContext.shippingCost !== undefined ? Number(orderContext.shippingCost) : defaultShip;
     }
     return defaultShip;

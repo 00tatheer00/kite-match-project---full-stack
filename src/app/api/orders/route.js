@@ -129,7 +129,7 @@ export async function POST(request) {
         unitPrice = productOrPromotion.variants[0].price || 0;
       }
       computedSubtotal = unitPrice * parsedQuantity;
-      // Products NEVER qualify for free shipping automatically, even if price > Rs. 2,000
+      // Products use configured or default delivery fee
       computedShippingCost = productOrPromotion.shippingCost !== null && productOrPromotion.shippingCost !== undefined
         ? Number(productOrPromotion.shippingCost)
         : defaultShipping;
@@ -145,7 +145,7 @@ export async function POST(request) {
       const unitPrice = Number(productOrPromotion.totalPrice) || 0;
       computedSubtotal = unitPrice * parsedQuantity;
       
-      // Free shipping applies ONLY to the three specific premium bundles specified by client
+      // Free shipping bundle check
       const isFreeShippingBundle = freeShippingBundles.includes(productOrPromotion.id);
       if (isFreeShippingBundle) {
         computedShippingCost = 0;
@@ -183,7 +183,7 @@ export async function POST(request) {
             const variant = prod.variants.find((v) => v.name === item.selectedVariant);
             if (variant?.price) itemPrice = Number(variant.price);
           }
-          // Products NEVER get free shipping automatically based on price
+          // Product delivery calculation
           itemShipping = prod && prod.shippingCost !== null && prod.shippingCost !== undefined
             ? Number(prod.shippingCost)
             : defaultShipping;
@@ -207,7 +207,7 @@ export async function POST(request) {
       }));
 
       computedSubtotal = calculatedCartTotal;
-      // Only free if all items qualify for free shipping (the 3 specific bundles)
+      // Cart delivery calculation
       computedShippingCost = anyItemRequiresShipping ? maxApplicableShipping : 0;
     }
 
