@@ -100,9 +100,25 @@ const AdminProductsPage = () => {
     try {
       setLoading(true);
       setError("");
-      const data = await adminGetProducts();
-      setProducts(data);
+      let data = await adminGetProducts();
+      if (!Array.isArray(data) || data.length === 0) {
+        const { getProducts } = await import("../services/api");
+        const fallback = await getProducts();
+        if (Array.isArray(fallback) && fallback.length > 0) {
+          data = fallback;
+        }
+      }
+      setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
+      try {
+        const { getProducts } = await import("../services/api");
+        const fallback = await getProducts();
+        if (Array.isArray(fallback) && fallback.length > 0) {
+          setProducts(fallback);
+          setError("");
+          return;
+        }
+      } catch {}
       setError(err.message || "Failed to load products");
     } finally {
       setLoading(false);

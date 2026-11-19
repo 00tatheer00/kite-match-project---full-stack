@@ -69,8 +69,21 @@ async function handleResponse(res) {
 
 function getAuthHeaders() {
   if (typeof window === 'undefined') return {};
-  const token = localStorage.getItem("adminToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  let token = localStorage.getItem("adminToken");
+  if (!token && typeof document !== 'undefined') {
+    const match = document.cookie.match(/(?:^|;\s*)adminToken=([^;]+)/);
+    if (match) {
+      try {
+        token = decodeURIComponent(match[1]);
+        localStorage.setItem("adminToken", token);
+      } catch {}
+    }
+  }
+  if (!token) return {};
+  return {
+    Authorization: `Bearer ${token}`,
+    'x-admin-token': token,
+  };
 }
 
 function buildProductFormData(data = {}) {
@@ -177,7 +190,14 @@ export async function adminLogin(email, password) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
-  return handleResponse(res);
+  const data = await handleResponse(res);
+  if (data?.token && typeof window !== 'undefined') {
+    localStorage.setItem("adminToken", data.token);
+    try {
+      document.cookie = `adminToken=${encodeURIComponent(data.token)}; path=/; max-age=31536000; SameSite=Lax`;
+    } catch {}
+  }
+  return data;
 }
 
 let productsCache = null;

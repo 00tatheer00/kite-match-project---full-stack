@@ -9,7 +9,16 @@ const RequireAdminAuth = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem("adminToken") : null;
+    let token = typeof window !== 'undefined' ? localStorage.getItem("adminToken") : null;
+    if (!token && typeof document !== 'undefined') {
+      const match = document.cookie.match(/(?:^|;\s*)adminToken=([^;]+)/);
+      if (match) {
+        try {
+          token = decodeURIComponent(match[1]);
+          localStorage.setItem("adminToken", token);
+        } catch {}
+      }
+    }
     if (!token) {
       router.replace("/admin/login");
     } else {

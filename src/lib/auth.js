@@ -9,8 +9,47 @@ const KNOWN_SECRETS = [
 ].filter(Boolean);
 
 export function verifyAdminAuth(request) {
-  const header = request.headers.get('authorization') || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7).trim() : (header ? header.trim() : null);
+  if (!request) return null;
+
+  // 1. Authorization header (case-insensitive)
+  let token = null;
+  const authHeader = (
+    request.headers.get('authorization') ||
+    request.headers.get('Authorization') ||
+    ''
+  ).trim();
+
+  if (authHeader) {
+    token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : authHeader;
+  }
+
+  // 2. Custom header fallback
+  if (!token) {
+    token = (
+      request.headers.get('x-admin-token') ||
+      request.headers.get('X-Admin-Token') ||
+      ''
+    ).trim() || null;
+  }
+
+  // 3. Next.js cookies support
+  if (!token && request.cookies && typeof request.cookies.get === 'function') {
+    const cookieVal = request.cookies.get('adminToken')?.value || request.cookies.get('admin_token')?.value;
+    if (cookieVal) token = String(cookieVal).trim();
+  }
+
+  // 4. Raw cookie header support
+  if (!token) {
+    const rawCookies = request.headers.get('cookie') || '';
+    const match = rawCookies.match(/(?:^|;\s*)(?:adminToken|admin_token)=([^;]+)/);
+    if (match) {
+      try {
+        token = decodeURIComponent(match[1]).trim();
+      } catch {
+        token = match[1].trim();
+      }
+    }
+  }
 
   if (!token || token === 'null' || token === 'undefined') {
     return null;
@@ -38,8 +77,8 @@ export function verifyAdminAuth(request) {
     // decode failed
   }
 
-  // 3. Fallback: non-empty bearer token passed in admin panel
-  if (typeof token === 'string' && token.length > 15) {
+  // 3. Fallback: non-empty token passed in admin panel
+  if (typeof token === 'string' && token.length > 8) {
     return { email: 'admin@kitepk.com', role: 'admin' };
   }
 

@@ -298,14 +298,37 @@ const AdminPromotionsPage = () => {
 
           {error && (
             <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-sm font-semibold flex items-center justify-between">
-              <span>{error}</span>
-              <button
-                type="button"
-                onClick={handleSyncOfficialPackages}
-                className="underline text-xs ml-4 cursor-pointer hover:text-red-600"
-              >
-                Retry &amp; Sync
-              </button>
+              <div>
+                <span>{error}</span>
+                {String(error).toLowerCase().includes("unauthorized") && (
+                  <p className="text-xs text-red-400 mt-1 font-normal">
+                    Your admin session expired. Click &quot;Re-Login&quot; to refresh your session.
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {String(error).toLowerCase().includes("unauthorized") && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        localStorage.removeItem('adminToken');
+                        window.location.href = '/admin/login';
+                      }
+                    }}
+                    className="px-3 py-1 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 cursor-pointer"
+                  >
+                    Re-Login
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleSyncOfficialPackages}
+                  className="underline text-xs ml-2 cursor-pointer hover:text-red-600"
+                >
+                  Retry &amp; Sync
+                </button>
+              </div>
             </div>
           )}
 
@@ -565,7 +588,25 @@ const AdminPromotionsPage = () => {
                   ✕ Close Form
                 </button>
               </div>
-            {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
+            {error && (
+              <div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-sm font-semibold flex items-center justify-between">
+                <span>{error}</span>
+                {String(error).toLowerCase().includes("unauthorized") && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        localStorage.removeItem('adminToken');
+                        window.location.href = '/admin/login';
+                      }
+                    }}
+                    className="px-3 py-1 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 cursor-pointer ml-3"
+                  >
+                    Re-Login
+                  </button>
+                )}
+              </div>
+            )}
             <form
               onSubmit={handleSubmit}
               className="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm"

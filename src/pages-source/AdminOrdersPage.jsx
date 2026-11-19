@@ -40,7 +40,7 @@ const AdminOrdersPage = () => {
       setLoading(true);
       setError("");
       const data = await adminGetOrders();
-      setOrders(data);
+      setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message || "Failed to load orders");
     } finally {

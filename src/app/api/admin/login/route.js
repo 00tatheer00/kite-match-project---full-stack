@@ -43,7 +43,14 @@ export async function POST(request) {
         JWT_SECRET,
         { expiresIn: '365d' }
       );
-      return NextResponse.json({ token, success: true, email: rawEmail });
+      const res = NextResponse.json({ token, success: true, email: rawEmail });
+      res.cookies.set('adminToken', token, {
+        path: '/',
+        maxAge: 365 * 24 * 60 * 60,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      });
+      return res;
     }
 
     // Try remote fallback to live backend
