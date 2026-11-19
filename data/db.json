@@ -1108,7 +1108,18 @@
     }
   ],
   "settings": {
-    "defaultShippingCost": 150
+    "defaultShippingCost": 200,
+    "smallPackageShippingCost": 200,
+    "freeShippingBundleIds": [
+      "pkg-glow-family-pack",
+      "pkg-glow-bachat-mega",
+      "pkg-vero-family-pack"
+    ],
+    "bannerType": "video",
+    "bannerImage": "",
+    "bannerMobileImage": "",
+    "bannerTitle": "Kite Brand Pakistan",
+    "bannerLink": "/online-order"
   },
   "analytics": {
     "totalVisitors": 0,

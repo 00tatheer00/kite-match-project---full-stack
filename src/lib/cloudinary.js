@@ -1,5 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import sharp from "sharp";
+import fs from "fs";
+import path from "path";
 
 const CLOUDINARY_CLOUD_NAME = (process.env.CLOUDINARY_CLOUD_NAME || "").trim();
 const CLOUDINARY_API_KEY = (process.env.CLOUDINARY_API_KEY || "").trim();
@@ -79,12 +81,6 @@ async function optimizeImageFileToWebp(fileInput) {
 }
 
 export async function uploadImageBuffer(file, options = {}) {
-  if (!isConfigured) {
-    throw new Error(
-      "Cloudinary is not configured. Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET to environment variables.",
-    );
-  }
-
   const optimizedFile = await optimizeImageFileToWebp(file);
   const folder = options.folder || "kite/products";
   const filename = String(optimizedFile.originalname || "image")
@@ -93,6 +89,21 @@ export async function uploadImageBuffer(file, options = {}) {
     .replace(/-+/g, "-")
     .replace(/^-+|-+$/g, "")
     .toLowerCase();
+  const uniqueName = `${Date.now()}-${filename}.webp`;
+
+  if (!isConfigured) {
+    try {
+      const folderSanitized = folder.replace(/[^a-zA-Z0-9-_/]/g, "");
+      const publicDir = path.join(process.cwd(), "public", "uploads", folderSanitized);
+      fs.mkdirSync(publicDir, { recursive: true });
+      const targetPath = path.join(publicDir, uniqueName);
+      fs.writeFileSync(targetPath, optimizedFile.buffer);
+      return `/uploads/${folderSanitized}/${uniqueName}`;
+    } catch (localErr) {
+      console.warn("Could not save to local filesystem, returning data URI:", localErr.message);
+      return `data:image/webp;base64,${optimizedFile.buffer.toString("base64")}`;
+    }
+  }
 
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -100,7 +111,7 @@ export async function uploadImageBuffer(file, options = {}) {
         folder,
         resource_type: "image",
         format: "webp",
-        public_id: filename ? `${Date.now()}-${filename}` : undefined,
+        public_id: `${Date.now()}-${filename}`,
       },
       (err, result) => {
         if (err) return reject(err);

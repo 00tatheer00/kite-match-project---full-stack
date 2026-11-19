@@ -82,22 +82,45 @@ const CheckoutPage = () => {
   }, []);
 
   const applicableShippingCost = useMemo(() => {
-    let maxCost = -1;
+    const freeBundles = Array.isArray(settings?.freeShippingBundleIds) && settings.freeShippingBundleIds.length > 0
+      ? settings.freeShippingBundleIds
+      : ['pkg-glow-family-pack', 'pkg-glow-bachat-mega', 'pkg-vero-family-pack'];
+    const defaultShip = Number(settings?.defaultShippingCost) || 200;
+
     if (isCartCheckout && checkoutData && checkoutData.items.length > 0) {
+      let anyItemRequiresShipping = false;
+      let maxCost = 0;
+
       for (const item of checkoutData.items) {
-        if (item.shippingCost !== null && item.shippingCost !== undefined && item.shippingCost !== "") {
-          const cost = Number(item.shippingCost);
-          if (!isNaN(cost) && cost > maxCost) maxCost = cost;
+        let itemShip = defaultShip;
+        if (item.itemType === 'promotion') {
+          if (freeBundles.includes(item.promotionId)) {
+            itemShip = 0;
+          } else {
+            itemShip = item.shippingCost !== null && item.shippingCost !== undefined ? Number(item.shippingCost) : 200;
+          }
+        } else {
+          // Regular products NEVER receive free shipping automatically even if price > Rs. 2,000
+          itemShip = item.shippingCost !== null && item.shippingCost !== undefined ? Number(item.shippingCost) : defaultShip;
+        }
+
+        if (itemShip > 0) {
+          anyItemRequiresShipping = true;
+          if (itemShip > maxCost) maxCost = itemShip;
         }
       }
+
+      return anyItemRequiresShipping ? maxCost : 0;
     } else if (!isCartCheckout && orderContext) {
-      if (orderContext.shippingCost !== null && orderContext.shippingCost !== undefined && orderContext.shippingCost !== "") {
-        const cost = Number(orderContext.shippingCost);
-        if (!isNaN(cost)) maxCost = cost;
+      if (orderContext.itemType === 'promotion' || orderContext.isPromotion) {
+        const promoId = orderContext.promotionId || orderContext.id;
+        if (freeBundles.includes(promoId)) return 0;
+        return orderContext.shippingCost !== null && orderContext.shippingCost !== undefined ? Number(orderContext.shippingCost) : 200;
       }
+      // Single product orders NEVER receive free shipping automatically
+      return orderContext.shippingCost !== null && orderContext.shippingCost !== undefined ? Number(orderContext.shippingCost) : defaultShip;
     }
-    if (maxCost >= 0) return maxCost;
-    return settings?.defaultShippingCost ?? 200;
+    return defaultShip;
   }, [settings, isCartCheckout, checkoutData, orderContext]);
 
   const grandTotal = useMemo(() => {

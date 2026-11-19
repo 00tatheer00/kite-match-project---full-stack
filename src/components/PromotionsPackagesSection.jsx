@@ -459,11 +459,22 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-baseline gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Final Price:</span>
                               <p className="text-2xl sm:text-3xl font-black text-[#00AEEF]">
                                 {formatPrice(totals.totalPrice)}
                               </p>
+                              {pkg.shippingCost === 0 ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                  <FaTruck className="text-[10px]" />
+                                  <span>Free Delivery</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+                                  <FaTruck className="text-[10px] text-gray-500" />
+                                  <span>Delivery: Rs. {pkg.shippingCost || 200}</span>
+                                </span>
+                              )}
                             </div>
                           </div>
 

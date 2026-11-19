@@ -78,7 +78,7 @@ export const CartProvider = ({ children }) => {
           price: variant.price || 0,
           quantity,
           image: product.image,
-          shippingCost: product.shippingCost !== undefined && product.shippingCost !== null ? Number(product.shippingCost) : 150
+          shippingCost: product.shippingCost !== undefined && product.shippingCost !== null ? Number(product.shippingCost) : 200
         }
       ];
     });

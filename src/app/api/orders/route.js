@@ -106,7 +106,10 @@ export async function POST(request) {
     let validatedItems = items;
 
     const settingsData = await fetchSettingsRecord();
-    const defaultShipping = Number(settingsData?.defaultShippingCost) || 150;
+    const defaultShipping = Number(settingsData?.defaultShippingCost) || 200;
+    const freeShippingBundles = Array.isArray(settingsData?.freeShippingBundleIds) && settingsData.freeShippingBundleIds.length > 0
+      ? settingsData.freeShippingBundleIds
+      : ['pkg-glow-family-pack', 'pkg-glow-bachat-mega', 'pkg-vero-family-pack'];
 
     if (type === 'product') {
       if (!productId) {
@@ -126,6 +129,7 @@ export async function POST(request) {
         unitPrice = productOrPromotion.variants[0].price || 0;
       }
       computedSubtotal = unitPrice * parsedQuantity;
+      // Products NEVER qualify for free shipping automatically, even if price > Rs. 2,000
       computedShippingCost = productOrPromotion.shippingCost !== null && productOrPromotion.shippingCost !== undefined
         ? Number(productOrPromotion.shippingCost)
         : defaultShipping;
@@ -140,24 +144,37 @@ export async function POST(request) {
 
       const unitPrice = Number(productOrPromotion.totalPrice) || 0;
       computedSubtotal = unitPrice * parsedQuantity;
-      computedShippingCost = productOrPromotion.shippingCost !== null && productOrPromotion.shippingCost !== undefined
-        ? Number(productOrPromotion.shippingCost)
-        : 200;
+      
+      // Free shipping applies ONLY to the three specific premium bundles specified by client
+      const isFreeShippingBundle = freeShippingBundles.includes(productOrPromotion.id);
+      if (isFreeShippingBundle) {
+        computedShippingCost = 0;
+      } else {
+        computedShippingCost = productOrPromotion.shippingCost !== null && productOrPromotion.shippingCost !== undefined
+          ? Number(productOrPromotion.shippingCost)
+          : 200;
+      }
     } else if (type === 'cart') {
-      let maxItemShipping = -1;
+      let anyItemRequiresShipping = false;
+      let maxApplicableShipping = 0;
       let calculatedCartTotal = 0;
 
       validatedItems = await Promise.all(items.map(async (item) => {
         const qty = Math.max(1, Math.min(1000, Number(item.quantity) || 1));
         let itemPrice = Number(item.price) || 0;
-        let itemShipping = item.shippingCost !== null && item.shippingCost !== undefined ? Number(item.shippingCost) : null;
+        let itemShipping = defaultShipping;
 
         if (item.itemType === 'promotion') {
           const promo = await fetchPromotionRecord(item.promotionId);
           if (promo) {
             itemPrice = Number(promo.totalPrice) || itemPrice;
-            if (promo.shippingCost !== null && promo.shippingCost !== undefined) {
-              itemShipping = Number(promo.shippingCost);
+            const isFreeShippingBundle = freeShippingBundles.includes(promo.id);
+            if (isFreeShippingBundle) {
+              itemShipping = 0;
+            } else {
+              itemShipping = promo.shippingCost !== null && promo.shippingCost !== undefined
+                ? Number(promo.shippingCost)
+                : 200;
             }
           }
         } else if (item.productId) {
@@ -166,13 +183,17 @@ export async function POST(request) {
             const variant = prod.variants.find((v) => v.name === item.selectedVariant);
             if (variant?.price) itemPrice = Number(variant.price);
           }
-          if (prod && prod.shippingCost !== null && prod.shippingCost !== undefined) {
-            itemShipping = Number(prod.shippingCost);
-          }
+          // Products NEVER get free shipping automatically based on price
+          itemShipping = prod && prod.shippingCost !== null && prod.shippingCost !== undefined
+            ? Number(prod.shippingCost)
+            : defaultShipping;
         }
 
-        if (itemShipping !== null && !isNaN(itemShipping)) {
-          if (itemShipping > maxItemShipping) maxItemShipping = itemShipping;
+        if (itemShipping > 0) {
+          anyItemRequiresShipping = true;
+          if (itemShipping > maxApplicableShipping) {
+            maxApplicableShipping = itemShipping;
+          }
         }
 
         calculatedCartTotal += itemPrice * qty;
@@ -186,7 +207,8 @@ export async function POST(request) {
       }));
 
       computedSubtotal = calculatedCartTotal;
-      computedShippingCost = maxItemShipping >= 0 ? maxItemShipping : 200;
+      // Only free if all items qualify for free shipping (the 3 specific bundles)
+      computedShippingCost = anyItemRequiresShipping ? maxApplicableShipping : 0;
     }
 
     const finalTotalAmount = computedSubtotal + computedShippingCost;

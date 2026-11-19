@@ -3,14 +3,30 @@ import { connectToDatabase } from '@/lib/db';
 import Settings from '@/lib/models/Settings';
 import { verifyAdminAuth } from '@/lib/auth';
 import { fetchRemoteFallback } from '@/lib/api-fallback';
+import { uploadImageBuffer } from '@/lib/cloudinary';
 
-// GET /api/settings (public for checkout)
+const DEFAULT_SETTINGS = {
+  defaultShippingCost: 200,
+  smallPackageShippingCost: 200,
+  freeShippingBundleIds: [
+    'pkg-glow-family-pack',
+    'pkg-glow-bachat-mega',
+    'pkg-vero-family-pack',
+  ],
+  bannerType: 'video', // 'image' or 'video'
+  bannerImage: '',
+  bannerMobileImage: '',
+  bannerTitle: 'Kite Brand Pakistan',
+  bannerLink: '/online-order',
+};
+
+// GET /api/settings (public for checkout & frontend)
 export async function GET() {
   try {
     await connectToDatabase();
     let settings = await Settings.findOne();
     if (!settings) {
-      settings = await Settings.create({ defaultShippingCost: 150 });
+      settings = await Settings.create(DEFAULT_SETTINGS);
     }
     return NextResponse.json(settings);
   } catch (error) {
@@ -19,8 +35,12 @@ export async function GET() {
     if (remoteData) {
       return NextResponse.json(remoteData);
     }
-    // Return sensible fallback settings rather than 500
-    return NextResponse.json({ defaultShippingCost: 150, freeShippingThreshold: 2000 });
+    try {
+      const { getSettings } = await import('@/lib/store');
+      return NextResponse.json(getSettings());
+    } catch {
+      return NextResponse.json(DEFAULT_SETTINGS);
+    }
   }
 }
 
@@ -32,42 +52,67 @@ export async function PUT(request) {
   }
 
   try {
+    const contentType = request.headers.get('content-type') || '';
+    let payload = {};
+
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      for (const [key, value] of formData.entries()) {
+        if (value && typeof value === 'object' && typeof value.arrayBuffer === 'function' && value.size > 0) {
+          if (key === 'bannerImageFile') {
+            payload.bannerImage = await uploadImageBuffer(value, { folder: 'kite/banners' });
+          } else if (key === 'bannerMobileImageFile') {
+            payload.bannerMobileImage = await uploadImageBuffer(value, { folder: 'kite/banners' });
+          }
+        } else {
+          payload[key] = value;
+        }
+      }
+      if (typeof payload.freeShippingBundleIds === 'string') {
+        try {
+          payload.freeShippingBundleIds = JSON.parse(payload.freeShippingBundleIds);
+        } catch {
+          payload.freeShippingBundleIds = payload.freeShippingBundleIds
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean);
+        }
+      }
+    } else {
+      payload = await request.json();
+    }
+
+    if (payload.defaultShippingCost !== undefined) {
+      payload.defaultShippingCost = Number(payload.defaultShippingCost) || 200;
+    }
+    if (payload.smallPackageShippingCost !== undefined) {
+      payload.smallPackageShippingCost = Number(payload.smallPackageShippingCost) || 200;
+    }
+
+    // Always update store file (db.json) for persistence across reloads
+    try {
+      const { updateSettings } = await import('@/lib/store');
+      updateSettings(payload);
+    } catch (e) {
+      console.warn('Could not update local store:', e.message);
+    }
+
     await connectToDatabase();
-    const body = await request.json();
     let settings = await Settings.findOne();
     if (!settings) {
-      settings = new Settings(body);
+      settings = new Settings({ ...DEFAULT_SETTINGS, ...payload });
     } else {
-      Object.assign(settings, body);
+      Object.assign(settings, payload);
     }
     await settings.save();
     return NextResponse.json(settings);
   } catch (error) {
-    console.warn('Local database unavailable, updating store and remote fallback for PUT /api/settings:', error.message);
+    console.warn('PUT /api/settings failed in DB, attempting store fallback:', error.message);
     try {
-      const body = await request.clone().json().catch(() => null);
-      if (body) {
-        const { updateSettings } = await import('@/lib/store');
-        const updated = updateSettings(body);
-        return NextResponse.json(updated);
-      }
-    } catch {}
-
-    try {
-      const { forwardRemoteRequest } = await import('@/lib/api-fallback');
-      const auth = request.headers.get('authorization') || '';
-      const body = await request.clone().json().catch(() => null);
-      const res = await forwardRemoteRequest('/settings', {
-        method: 'PUT',
-        headers: auth ? { Authorization: auth } : {},
-        body,
-      });
-      if (res.ok && res.data) {
-        return NextResponse.json(res.data);
-      }
-    } catch (e) {
-      console.error('Remote settings fallback failed:', e);
+      const { getSettings } = await import('@/lib/store');
+      return NextResponse.json(getSettings());
+    } catch {
+      return NextResponse.json({ message: error.message }, { status: 500 });
     }
-    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

@@ -336,10 +336,15 @@ export async function getSettings() {
 }
 
 export async function adminUpdateSettings(data) {
+  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+  const headers = { ...getAuthHeaders() };
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
   const res = await fetch(`${API_BASE_URL}/settings`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-    body: JSON.stringify(data),
+    headers,
+    body: isFormData ? data : JSON.stringify(data),
   });
   return handleResponse(res);
 }
