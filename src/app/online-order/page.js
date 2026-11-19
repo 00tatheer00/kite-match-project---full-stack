@@ -1,6 +1,9 @@
 import PromotionsPackagesPage from "@/pages-source/PromotionsPackagesPage";
 import { fetchServerProducts, fetchServerPromotions } from "@/lib/server-products";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata = {
   title: "Order Online | Kite Detergent & Matches Price List Pakistan",
   description:
