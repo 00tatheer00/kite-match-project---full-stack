@@ -645,7 +645,7 @@
       "displayOrder": 1,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T16:28:54.126Z",
+      "updatedAt": "2026-11-19T16:43:00.000Z",
       "originalPrice": 470,
       "discount": 70
     },
@@ -682,7 +682,7 @@
       "displayOrder": 2,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T16:28:54.126Z",
+      "updatedAt": "2026-11-19T16:43:00.000Z",
       "originalPrice": 990,
       "discount": 110
     },
@@ -714,7 +714,7 @@
       "displayOrder": 3,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T16:28:54.126Z",
+      "updatedAt": "2026-11-19T16:43:00.000Z",
       "originalPrice": 1118,
       "discount": 168
     },
@@ -751,7 +751,7 @@
       "displayOrder": 4,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T16:28:54.126Z",
+      "updatedAt": "2026-11-19T16:43:00.000Z",
       "originalPrice": 1150,
       "discount": 170
     },
@@ -783,7 +783,7 @@
       "displayOrder": 5,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T16:28:54.126Z",
+      "updatedAt": "2026-11-19T16:43:00.000Z",
       "originalPrice": 1480,
       "discount": 200
     },
@@ -815,7 +815,7 @@
       "displayOrder": 6,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T16:28:54.126Z",
+      "updatedAt": "2026-11-19T16:43:00.000Z",
       "originalPrice": 1677,
       "discount": 227
     },
@@ -852,7 +852,7 @@
       "displayOrder": 7,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T16:28:54.126Z",
+      "updatedAt": "2026-11-19T16:43:00.000Z",
       "originalPrice": 2350,
       "discount": 100
     },
@@ -889,7 +889,7 @@
       "displayOrder": 8,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T16:28:54.126Z",
+      "updatedAt": "2026-11-19T16:43:00.000Z",
       "originalPrice": 2470,
       "discount": 70
     },
@@ -926,7 +926,7 @@
       "displayOrder": 9,
       "isActive": true,
       "createdAt": "2026-11-18T09:00:00.000Z",
-      "updatedAt": "2026-11-18T16:28:54.126Z",
+      "updatedAt": "2026-11-19T16:43:00.000Z",
       "originalPrice": 3000,
       "discount": 50
     }
