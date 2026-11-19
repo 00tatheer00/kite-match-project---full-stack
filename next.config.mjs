@@ -35,6 +35,15 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: '/packages-image/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
         source: '/:all*(svg|jpg|jpeg|png|webp|avif|ico|woff|woff2)',
         headers: [
           {

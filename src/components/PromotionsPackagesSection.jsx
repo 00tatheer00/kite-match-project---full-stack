@@ -387,12 +387,12 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                           {pkg.image ? (
                             <img
                               src={
-                                pkg.id === 'pkg-kite-smart-starter' && String(pkg.image?.src || pkg.image).includes('kite-smart-starter.jpeg')
-                                  ? '/packages-image/kite-smart-starter-v2.jpeg'
+                                index === 0 || pkg.id === 'pkg-kite-smart-starter'
+                                  ? '/packages-image/kite-smart-starter-v3.jpeg'
                                   : pkg.image?.src || pkg.image
                               }
                               alt={pkg.title}
-                              loading="lazy"
+                              loading="eager"
                               decoding="async"
                               className="w-full h-full object-cover"
                             />
