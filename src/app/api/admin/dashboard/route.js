@@ -3,6 +3,7 @@ import { getAllProducts, getAllOrders, getAnalyticsSummary, getAllPromotions } f
 import { verifyAdminAuth } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/db';
 import PromotionPackage from '@/lib/models/PromotionPackage';
+import Analytics from '@/lib/models/Analytics';
 
 export async function GET(request) {
   try {
@@ -13,7 +14,31 @@ export async function GET(request) {
 
     const products = getAllProducts();
     const orders = getAllOrders();
-    const analytics = getAnalyticsSummary();
+
+    // Persistent Analytics from DB with Store fallback
+    let analytics = getAnalyticsSummary();
+    try {
+      await connectToDatabase();
+      const dbAnalytics = await Analytics.findOne({ key: 'global_summary' }).lean();
+      if (dbAnalytics && dbAnalytics.totalVisitors > 0) {
+        analytics = {
+          ...dbAnalytics,
+          sources: dbAnalytics.sources || analytics.sources,
+          devices: dbAnalytics.devices || analytics.devices,
+          cities: dbAnalytics.cities || analytics.cities,
+          countries: dbAnalytics.countries || analytics.countries,
+          recentVisits: dbAnalytics.recentVisits?.length ? dbAnalytics.recentVisits : analytics.recentVisits,
+        };
+      } else {
+        await Analytics.findOneAndUpdate(
+          { key: 'global_summary' },
+          { $set: analytics },
+          { upsert: true }
+        );
+      }
+    } catch {
+      // local store
+    }
 
     // Promotions data
     let promotions = [];

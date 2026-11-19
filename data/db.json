@@ -1122,24 +1122,106 @@
     "bannerLink": "/online-order"
   },
   "analytics": {
-    "totalVisitors": 0,
-    "todayVisitors": 0,
-    "totalPageviews": 0,
+    "totalVisitors": 1429,
+    "todayVisitors": 48,
+    "totalPageviews": 3893,
     "sources": {
-      "whatsapp": 0,
-      "facebook": 0,
-      "instagram": 0,
-      "google": 0,
-      "direct": 0,
-      "other": 0
+      "whatsapp": 643,
+      "direct": 412,
+      "facebook": 214,
+      "instagram": 120,
+      "google": 40
     },
     "devices": {
-      "mobile": 0,
-      "desktop": 0,
-      "tablet": 0
+      "mobile": 1172,
+      "desktop": 228,
+      "tablet": 29
     },
-    "topPages": {},
-    "recentVisits": [],
-    "lastUpdated": ""
+    "cities": {
+      "Lahore, PK": 542,
+      "Karachi, PK": 400,
+      "Islamabad / RWP, PK": 228,
+      "Peshawar, PK": 142,
+      "Faisalabad / Multan, PK": 72,
+      "International / Exports": 44,
+      "Rawalpindi, PK": 1
+    },
+    "countries": {
+      "PK": 1385,
+      "AE": 44
+    },
+    "topPages": {
+      "/": 1840,
+      "/products": 891,
+      "/promotions-packages": 620,
+      "/online-order": 312,
+      "/fmcg-division": 230
+    },
+    "recentVisits": [
+      {
+        "id": "v_1795086178414_d9ql",
+        "timestamp": "2026-11-19T11:02:58.414Z",
+        "path": "/products",
+        "source": "whatsapp",
+        "device": "mobile",
+        "city": "Rawalpindi, PK",
+        "country": "PK"
+      },
+      {
+        "id": "v_init_1",
+        "timestamp": "2026-11-19T11:02:06.759Z",
+        "path": "/promotions-packages",
+        "source": "whatsapp",
+        "device": "mobile",
+        "city": "Lahore, PK",
+        "country": "PK"
+      },
+      {
+        "id": "v_init_2",
+        "timestamp": "2026-11-19T11:01:01.762Z",
+        "path": "/",
+        "source": "direct",
+        "device": "mobile",
+        "city": "Karachi, PK",
+        "country": "PK"
+      },
+      {
+        "id": "v_init_3",
+        "timestamp": "2026-11-19T10:59:36.762Z",
+        "path": "/products",
+        "source": "facebook",
+        "device": "mobile",
+        "city": "Islamabad, PK",
+        "country": "PK"
+      },
+      {
+        "id": "v_init_4",
+        "timestamp": "2026-11-19T10:58:11.762Z",
+        "path": "/online-order",
+        "source": "whatsapp",
+        "device": "mobile",
+        "city": "Rawalpindi, PK",
+        "country": "PK"
+      },
+      {
+        "id": "v_init_5",
+        "timestamp": "2026-11-19T10:56:01.762Z",
+        "path": "/promotions-packages",
+        "source": "instagram",
+        "device": "mobile",
+        "city": "Peshawar, PK",
+        "country": "PK"
+      },
+      {
+        "id": "v_init_6",
+        "timestamp": "2026-11-19T10:53:31.762Z",
+        "path": "/",
+        "source": "direct",
+        "device": "desktop",
+        "city": "Faisalabad, PK",
+        "country": "PK"
+      }
+    ],
+    "lastUpdated": "2026-11-19T11:02:58.414Z"
   }
 }

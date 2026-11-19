@@ -78,29 +78,65 @@ export default function VisitorTracker() {
       tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     } catch {}
 
-    const payload = {
-      path: pathname || '/',
-      source: detectedSource,
-      referrer: referrer ? referrer.slice(0, 200) : '',
-      device,
-      timeZone: tz,
-      timestamp: new Date().toISOString(),
-      screen: `${window.innerWidth}x${window.innerHeight}`,
+    // Check cached city in sessionStorage to prevent repeated external lookups
+    let cachedCity = '';
+    let cachedCountry = 'PK';
+    try {
+      cachedCity = sessionStorage.getItem('kite_geo_city') || '';
+      cachedCountry = sessionStorage.getItem('kite_geo_country') || 'PK';
+    } catch {}
+
+    const sendTrackingData = (cityToUse, countryToUse) => {
+      const payload = {
+        path: pathname || '/',
+        source: detectedSource,
+        referrer: referrer ? referrer.slice(0, 200) : '',
+        device,
+        timeZone: tz,
+        city: cityToUse || '',
+        country: countryToUse || 'PK',
+        timestamp: new Date().toISOString(),
+        screen: `${window.innerWidth}x${window.innerHeight}`,
+      };
+
+      try {
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/api/analytics/track', JSON.stringify(payload));
+        } else {
+          fetch('/api/analytics/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            keepalive: true,
+          }).catch(() => {});
+        }
+      } catch {
+        // Ignore background analytics failures
+      }
     };
 
-    try {
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon('/api/analytics/track', JSON.stringify(payload));
-      } else {
-        fetch('/api/analytics/track', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          keepalive: true,
-        }).catch(() => {});
-      }
-    } catch {
-      // Ignore background analytics failures
+    if (cachedCity) {
+      sendTrackingData(cachedCity, cachedCountry);
+    } else {
+      // Async non-blocking GeoIP check
+      fetch('https://ipwho.is/', { cache: 'force-cache' })
+        .then((res) => res.json())
+        .then((geo) => {
+          if (geo && geo.success && geo.city) {
+            const resolvedCity = `${geo.city}, ${geo.country_code || 'PK'}`;
+            const resolvedCountry = geo.country_code || 'PK';
+            try {
+              sessionStorage.setItem('kite_geo_city', resolvedCity);
+              sessionStorage.setItem('kite_geo_country', resolvedCountry);
+            } catch {}
+            sendTrackingData(resolvedCity, resolvedCountry);
+          } else {
+            sendTrackingData('', 'PK');
+          }
+        })
+        .catch(() => {
+          sendTrackingData('', 'PK');
+        });
     }
   }, [pathname, searchParams]);
 
