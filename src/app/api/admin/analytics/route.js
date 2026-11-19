@@ -3,6 +3,9 @@ import { getAnalyticsSummary } from '@/lib/store';
 import { connectToDatabase } from '@/lib/db';
 import Analytics from '@/lib/models/Analytics';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     let summary = getAnalyticsSummary();

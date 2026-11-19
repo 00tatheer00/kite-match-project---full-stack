@@ -3,6 +3,9 @@ import { connectToDatabase } from '@/lib/db';
 import Product from '@/lib/models/Product';
 import { fetchRemoteFallback } from '@/lib/api-fallback';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request) {
   try {
     await connectToDatabase();

@@ -203,7 +203,7 @@ export async function adminLogin(email, password) {
 let productsCache = null;
 let productsCacheTime = 0;
 let productsInFlightPromise = null;
-const PRODUCTS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const PRODUCTS_CACHE_TTL = 15 * 1000; // 15 seconds short cache for instant freshness
 
 export function invalidateProductsCache() {
   productsCache = null;
@@ -225,7 +225,7 @@ export async function getProducts(options = {}) {
 
   productsInFlightPromise = (async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/products`);
+      const res = await fetch(`${API_BASE_URL}/products`, { cache: 'no-store' });
       const data = await handleResponse(res);
       if (Array.isArray(data)) {
         productsCache = data;
@@ -328,6 +328,7 @@ export async function adminGetPromotions() {
 }
 
 export async function adminCreatePromotion(data) {
+  invalidateProductsCache();
   const res = await fetch(`${API_BASE_URL}/admin/promotions`, {
     method: "POST",
     headers: { ...getAuthHeaders() },
@@ -337,6 +338,7 @@ export async function adminCreatePromotion(data) {
 }
 
 export async function adminUpdatePromotion(id, data) {
+  invalidateProductsCache();
   const res = await fetch(`${API_BASE_URL}/admin/promotions/${id}`, {
     method: "PUT",
     headers: { ...getAuthHeaders() },
@@ -345,8 +347,17 @@ export async function adminUpdatePromotion(id, data) {
   return handleResponse(res);
 }
 
+export async function adminDeletePromotion(id) {
+  invalidateProductsCache();
+  const res = await fetch(`${API_BASE_URL}/admin/promotions/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse(res);
+}
+
 export async function getPromotions() {
-  const res = await fetch(`${API_BASE_URL}/promotions`);
+  const res = await fetch(`${API_BASE_URL}/promotions`, { cache: 'no-store' });
   return handleResponse(res);
 }
 
@@ -374,14 +385,6 @@ export async function createOrder(payload) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-  });
-  return handleResponse(res);
-}
-
-export async function adminDeletePromotion(id) {
-  const res = await fetch(`${API_BASE_URL}/admin/promotions/${id}`, {
-    method: "DELETE",
-    headers: { ...getAuthHeaders() },
   });
   return handleResponse(res);
 }

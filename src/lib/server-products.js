@@ -1,6 +1,7 @@
 import { getAllProducts as getStoreProducts, getProductById as getStoreProductById, getAllPromotions as getStorePromotions } from '@/lib/store';
 import { connectToDatabase } from '@/lib/db';
 import Product from '@/lib/models/Product';
+import PromotionPackage from '@/lib/models/PromotionPackage';
 
 export async function fetchServerProducts() {
   try {
@@ -48,9 +49,21 @@ export async function fetchServerProductById(id) {
 
 export async function fetchServerPromotions() {
   try {
-    const promos = getStorePromotions();
+    await connectToDatabase();
+    const promos = await PromotionPackage.find({ isActive: true })
+      .sort({ displayOrder: 1, createdAt: -1 })
+      .lean();
     if (promos && promos.length > 0) {
       return JSON.parse(JSON.stringify(promos));
+    }
+  } catch (e) {
+    // MongoDB unavailable or offline
+  }
+
+  try {
+    const promos = getStorePromotions();
+    if (promos && promos.length > 0) {
+      return JSON.parse(JSON.stringify(promos.filter(p => p.isActive !== false)));
     }
   } catch (e) {}
   return [];

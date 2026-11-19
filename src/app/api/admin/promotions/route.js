@@ -4,6 +4,9 @@ import PromotionPackage from '@/lib/models/PromotionPackage';
 import { verifyAdminAuth } from '@/lib/auth';
 import { uploadImageBuffer, isCloudinaryConfigured } from '@/lib/cloudinary';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function parseJsonField(value, fallback = []) {
   if (value == null || value === '') return fallback;
   if (Array.isArray(value)) return value;
@@ -165,15 +168,8 @@ export async function GET(request) {
       .sort({ displayOrder: 1, createdAt: -1 })
       .lean();
 
-    if (promos && promos.length >= 9) {
-      return NextResponse.json(promos);
-    }
     if (promos && promos.length > 0) {
-      // Merge with store promos so all 9 packages are present
-      const map = new Map();
-      storePromos.forEach((p) => map.set(p.id, p));
-      promos.forEach((p) => map.set(p.id, p));
-      return NextResponse.json(Array.from(map.values()));
+      return NextResponse.json(promos);
     }
   } catch (err) {
     // MongoDB offline or connecting
@@ -219,10 +215,11 @@ export async function POST(request) {
     // Also attempt saving to MongoDB if reachable
     try {
       await connectToDatabase();
-      const existing = await PromotionPackage.findOne({ id: payload.id });
-      if (!existing) {
-        await PromotionPackage.create(payload);
-      }
+      await PromotionPackage.findOneAndUpdate(
+        { $or: [{ id: payload.id }, { _id: payload.id }] },
+        { $set: payload },
+        { upsert: true, new: true }
+      );
     } catch (dbErr) {
       console.warn('Could not persist to MongoDB, saved to local store:', dbErr.message);
     }

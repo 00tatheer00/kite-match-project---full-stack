@@ -1,23 +1,48 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 const DB_PATH = path.join(process.cwd(), 'data', 'db.json');
 const CACHE_PATH = path.join(process.cwd(), 'data', 'seed-cache.json');
+const TMP_DB_PATH = path.join(os.tmpdir(), 'kite-db.json');
 
 function ensureDataDir() {
   const dir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+  try {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  } catch {}
 }
 
 function loadInitialData() {
+  // 1. Check in-memory global cache first
+  if (global.__kite_db_cache && typeof global.__kite_db_cache === 'object') {
+    if (Array.isArray(global.__kite_db_cache.products) && Array.isArray(global.__kite_db_cache.promotions)) {
+      return global.__kite_db_cache;
+    }
+  }
+
+  // 2. Check writable tmp directory (serverless container cache)
+  if (fs.existsSync(TMP_DB_PATH)) {
+    try {
+      const raw = fs.readFileSync(TMP_DB_PATH, 'utf-8');
+      const data = JSON.parse(raw);
+      if (data && Array.isArray(data.products) && Array.isArray(data.promotions)) {
+        global.__kite_db_cache = data;
+        return data;
+      }
+    } catch {}
+  }
+
+  // 3. Fallback to bundled data/db.json
   ensureDataDir();
   if (fs.existsSync(DB_PATH)) {
     try {
       const raw = fs.readFileSync(DB_PATH, 'utf-8');
       const data = JSON.parse(raw);
       if (data && Array.isArray(data.products) && data.products.length > 0) {
+        global.__kite_db_cache = data;
         return data;
       }
     } catch (e) {
@@ -25,7 +50,7 @@ function loadInitialData() {
     }
   }
 
-  // Fallback to seed cache
+  // 4. Fallback to seed cache
   let products = [];
   let promotions = [];
   if (fs.existsSync(CACHE_PATH)) {
@@ -45,10 +70,13 @@ function loadInitialData() {
 
   try {
     fs.writeFileSync(DB_PATH, JSON.stringify(initial, null, 2), 'utf-8');
-  } catch (e) {
-    console.warn('Could not write initial db.json:', e.message);
-  }
+  } catch {}
 
+  try {
+    fs.writeFileSync(TMP_DB_PATH, JSON.stringify(initial, null, 2), 'utf-8');
+  } catch {}
+
+  global.__kite_db_cache = initial;
   return initial;
 }
 
@@ -57,11 +85,22 @@ function getDb() {
 }
 
 function saveDb(data) {
+  // Always update in-memory global cache
+  global.__kite_db_cache = data;
+
+  // Attempt writing to persistent file system
   try {
     ensureDataDir();
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf-8');
   } catch (e) {
-    console.error('Failed to save db.json:', e.message);
+    // Expected on serverless platforms like Vercel with read-only /var/task
+  }
+
+  // Always write to OS tmp directory which is guaranteed writable in serverless environments
+  try {
+    fs.writeFileSync(TMP_DB_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (e) {
+    console.error('Failed to write to tmp db:', e.message);
   }
 }
 

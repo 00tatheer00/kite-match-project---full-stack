@@ -3,6 +3,9 @@ import { connectToDatabase } from '@/lib/db';
 import Order from '@/lib/models/Order';
 import { verifyAdminAuth } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // GET /api/admin/orders
 export async function GET(request) {
   const admin = verifyAdminAuth(request);

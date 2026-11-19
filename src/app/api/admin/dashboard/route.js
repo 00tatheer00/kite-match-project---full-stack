@@ -5,6 +5,9 @@ import { connectToDatabase } from '@/lib/db';
 import PromotionPackage from '@/lib/models/PromotionPackage';
 import Analytics from '@/lib/models/Analytics';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request) {
   try {
     const auth = verifyAdminAuth(request);

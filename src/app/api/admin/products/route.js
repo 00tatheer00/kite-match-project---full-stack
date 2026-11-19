@@ -4,6 +4,9 @@ import Product from '@/lib/models/Product';
 import { verifyAdminAuth } from '@/lib/auth';
 import { uploadImageBuffer, isCloudinaryConfigured } from '@/lib/cloudinary';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function parseJsonField(value, fallback = []) {
   if (value == null || value === '') return fallback;
   if (Array.isArray(value)) return value;
@@ -225,10 +228,11 @@ export async function POST(request) {
     // Also attempt saving to MongoDB if reachable
     try {
       await connectToDatabase();
-      const existing = await Product.findOne({ id: payload.id });
-      if (!existing) {
-        await Product.create(payload);
-      }
+      await Product.findOneAndUpdate(
+        { $or: [{ id: payload.id }, { _id: payload.id }] },
+        { $set: payload },
+        { upsert: true, new: true }
+      );
     } catch (dbErr) {
       console.warn('Could not persist to MongoDB, saved to local store:', dbErr.message);
     }

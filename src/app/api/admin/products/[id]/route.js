@@ -4,6 +4,9 @@ import Product from '@/lib/models/Product';
 import { verifyAdminAuth } from '@/lib/auth';
 import { parseProductRequest } from '../route';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // PUT /api/admin/products/:id
 export async function PUT(request, context) {
   const admin = verifyAdminAuth(request);
@@ -40,10 +43,11 @@ export async function PUT(request, context) {
     // Also attempt updating in MongoDB if available
     try {
       await connectToDatabase();
-      const existingDb = await Product.findOne({ id });
-      if (existingDb) {
-        await Product.findOneAndUpdate({ id }, payload, { new: true });
-      }
+      await Product.findOneAndUpdate(
+        { $or: [{ id }, { _id: id }] },
+        { $set: payload },
+        { upsert: true, new: true }
+      );
     } catch (dbErr) {
       console.warn('Could not update MongoDB, updated local store:', dbErr.message);
     }
@@ -80,7 +84,7 @@ export async function DELETE(request, context) {
     // Also attempt deletion in MongoDB if available
     try {
       await connectToDatabase();
-      await Product.findOneAndDelete({ id });
+      await Product.findOneAndDelete({ $or: [{ id }, { _id: id }] });
     } catch (dbErr) {
       console.warn('Could not delete from MongoDB, deleted from local store:', dbErr.message);
     }

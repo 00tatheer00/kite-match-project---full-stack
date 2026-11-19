@@ -4,6 +4,9 @@ import PromotionPackage from '@/lib/models/PromotionPackage';
 import { verifyAdminAuth } from '@/lib/auth';
 import { parsePromotionRequest } from '../route';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // PUT /api/admin/promotions/:id
 export async function PUT(request, context) {
   const admin = verifyAdminAuth(request);
@@ -40,10 +43,11 @@ export async function PUT(request, context) {
     // Also attempt updating in MongoDB if available
     try {
       await connectToDatabase();
-      const existingDb = await PromotionPackage.findOne({ id });
-      if (existingDb) {
-        await PromotionPackage.findOneAndUpdate({ id }, payload, { new: true });
-      }
+      await PromotionPackage.findOneAndUpdate(
+        { $or: [{ id }, { _id: id }] },
+        { $set: payload },
+        { upsert: true, new: true }
+      );
     } catch (dbErr) {
       console.warn('Could not update MongoDB, updated local store:', dbErr.message);
     }
@@ -80,7 +84,7 @@ export async function DELETE(request, context) {
     // Also attempt deletion in MongoDB if available
     try {
       await connectToDatabase();
-      await PromotionPackage.findOneAndDelete({ id });
+      await PromotionPackage.findOneAndDelete({ $or: [{ id }, { _id: id }] });
     } catch (dbErr) {
       console.warn('Could not delete from MongoDB, deleted from local store:', dbErr.message);
     }
