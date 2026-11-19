@@ -9,6 +9,7 @@ import {
   adminCreatePromotion,
   adminUpdatePromotion,
   adminDeletePromotion,
+  getPromotions,
 } from "../services/api";
 import { colors } from "../theme";
 
@@ -39,17 +40,57 @@ const AdminPromotionsPage = () => {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [promotionImages, setPromotionImages] = useState([]);
+  const [syncing, setSyncing] = useState(false);
 
   const load = async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await adminGetPromotions();
-      setPromos(data);
+      let data = await adminGetPromotions();
+      if (!Array.isArray(data) || data.length === 0) {
+        const publicData = await getPromotions();
+        if (Array.isArray(publicData) && publicData.length > 0) {
+          data = publicData;
+        }
+      }
+      setPromos(Array.isArray(data) ? data : []);
     } catch (err) {
+      try {
+        const publicData = await getPromotions();
+        if (Array.isArray(publicData) && publicData.length > 0) {
+          setPromos(publicData);
+          setError("");
+          return;
+        }
+      } catch {
+        // ignore fallback error
+      }
       setError(err.message || "Failed to load promotions");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSyncOfficialPackages = async () => {
+    try {
+      setSyncing(true);
+      setError("");
+      const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : '';
+      const res = await fetch('/api/admin/promotions?sync=true', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setPromos(data);
+          return;
+        }
+      }
+      await load();
+    } catch (err) {
+      await load();
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -221,21 +262,69 @@ const AdminPromotionsPage = () => {
                 Create, update, and delete promotions with easy item and image fields.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (showForm && !editingId) {
-                  setShowForm(false);
-                } else {
-                  setEditingId(null);
-                  setForm(emptyForm);
-                  setShowForm(true);
-                }
-              }}
-              className="px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-md shadow-pink-500/20 flex items-center gap-2 cursor-pointer self-start sm:self-auto transition-all"
-            >
-              <span>{showForm && !editingId ? "✕ Close Form" : "+ Add New Promotion"}</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={handleSyncOfficialPackages}
+                disabled={syncing || loading}
+                className={`px-4 py-2.5 rounded-xl font-bold text-xs border transition-all cursor-pointer flex items-center gap-1.5 ${
+                  isDark
+                    ? "bg-[#161D2E] border-[#1E293B] text-sky-400 hover:bg-[#1E293B]"
+                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                }`}
+                title="Restore and synchronize the 9 official rate-sheet packages"
+              >
+                <span className={syncing ? "animate-spin" : ""}>↻</span>
+                <span>{syncing ? "Syncing..." : "Re-Sync 9 Official Packages"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (showForm && !editingId) {
+                    setShowForm(false);
+                  } else {
+                    setEditingId(null);
+                    setForm(emptyForm);
+                    setShowForm(true);
+                  }
+                }}
+                className="px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-md shadow-pink-500/20 flex items-center gap-2 cursor-pointer transition-all"
+              >
+                <span>{showForm && !editingId ? "✕ Close Form" : "+ Add New Promotion"}</span>
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-sm font-semibold flex items-center justify-between">
+              <span>{error}</span>
+              <button
+                type="button"
+                onClick={handleSyncOfficialPackages}
+                className="underline text-xs ml-4 cursor-pointer hover:text-red-600"
+              >
+                Retry &amp; Sync
+              </button>
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
+            <span className={`px-3 py-1.5 rounded-lg border ${
+              isDark ? "bg-[#111726] border-[#1E293B] text-slate-300" : "bg-white border-slate-200 text-slate-700"
+            }`}>
+              Total Packages: <span className="text-sky-500 font-black">{promos.length}</span>
+            </span>
+            <span className={`px-3 py-1.5 rounded-lg border ${
+              isDark ? "bg-[#111726] border-[#1E293B] text-slate-300" : "bg-white border-slate-200 text-slate-700"
+            }`}>
+              Free Delivery Bundles: <span className="text-emerald-500 font-black">{promos.filter(p => p.shippingCost === 0).length}</span>
+            </span>
+            <span className={`px-3 py-1.5 rounded-lg border ${
+              isDark ? "bg-[#111726] border-[#1E293B] text-slate-300" : "bg-white border-slate-200 text-slate-700"
+            }`}>
+              Standard Rs. 200 Delivery: <span className="text-amber-500 font-black">{promos.filter(p => p.shippingCost !== 0).length}</span>
+            </span>
           </div>
 
           {loading ? (

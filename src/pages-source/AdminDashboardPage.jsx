@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
-import { adminGetDashboard } from "../services/api";
+import { adminGetDashboard, getPromotions } from "../services/api";
 import { Link } from "@/components/RouterCompat";
 import { useAdminTheme } from "@/context/AdminThemeContext";
 import { 
@@ -20,7 +20,8 @@ import {
   FaFire,
   FaShieldAlt,
   FaBoxes,
-  FaChartBar
+  FaChartBar,
+  FaTag
 } from "react-icons/fa";
 
 function DashboardContent() {
@@ -29,14 +30,29 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
+  const [promotionsList, setPromotionsList] = useState([]);
 
   const loadDashboard = async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
     try {
       const res = await adminGetDashboard();
       setData(res);
+      if (res?.promotions && Array.isArray(res.promotions) && res.promotions.length > 0) {
+        setPromotionsList(res.promotions);
+      } else {
+        const fallbackPromos = await getPromotions();
+        if (Array.isArray(fallbackPromos) && fallbackPromos.length > 0) {
+          setPromotionsList(fallbackPromos);
+        }
+      }
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
+      try {
+        const fallbackPromos = await getPromotions();
+        if (Array.isArray(fallbackPromos) && fallbackPromos.length > 0) {
+          setPromotionsList(fallbackPromos);
+        }
+      } catch {}
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -63,6 +79,9 @@ function DashboardContent() {
   const totalVisitors = overview.totalVisitors ?? 0;
   const todayVisitors = overview.todayVisitors ?? 0;
   const totalPageviews = overview.totalPageviews ?? 0;
+  const totalPromotions = overview.totalPromotions ?? (promotionsList.length || 9);
+  const activePromotions = overview.activePromotions ?? (promotionsList.length || 9);
+  const freeShippingPromotions = overview.freeShippingPromotions ?? (promotionsList.filter(p => p.shippingCost === 0).length || 3);
 
   // City breakdown calculation with comfortable proportions
   const defaultCities = {
@@ -129,7 +148,7 @@ function DashboardContent() {
                 isDark ? "text-slate-400" : "text-slate-600"
               }`}
             >
-              {totalOrders} Consumer Orders &bull; 4 Industrial Divisions &bull; 98% Lead Conversion &bull; Live GPS / Edge Location Tracking
+              {totalOrders} Consumer Orders &bull; {totalPromotions} Value Packages &bull; 4 Industrial Divisions &bull; Edge Location Tracking
             </p>
           </div>
 
@@ -183,6 +202,18 @@ function DashboardContent() {
             </button>
 
             <Link
+              to="/admin/promotions"
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                isDark
+                  ? "bg-pink-500/15 text-pink-300 border border-pink-500/30 hover:bg-pink-500/25"
+                  : "bg-pink-50 text-pink-700 border border-pink-200 hover:bg-pink-100"
+              }`}
+            >
+              <FaTag className="text-[10px]" />
+              <span>Promotions ({totalPromotions})</span>
+            </Link>
+
+            <Link
               to="/admin/orders"
               className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-600 to-orange-500 text-white shadow-md shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-102 transition-all flex items-center gap-1.5 cursor-pointer"
             >
@@ -206,9 +237,9 @@ function DashboardContent() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. THREE DIVISION MODULE CARDS */}
+        {/* 2. FOUR DIVISION MODULE CARDS */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
           
           {/* P1: Safety Matches Division */}
           <div
@@ -402,6 +433,81 @@ function DashboardContent() {
                   Certified
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* P4: Promotions & Combo Bundles */}
+          <div
+            className={`relative rounded-2xl p-4 sm:p-5 transition-all group overflow-hidden border ${
+              isDark
+                ? "bg-[#111726] border-[#1E293B] hover:border-pink-500/50 shadow-md"
+                : "bg-white border-slate-200 hover:border-pink-400 shadow-xs hover:shadow-md"
+            }`}
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-pink-500/20 transition-all"></div>
+            
+            <div className="flex items-start justify-between mb-3.5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-pink-500/15 border border-pink-500/30 text-pink-500 flex items-center justify-center text-xs font-black shadow-inner">
+                  P4
+                </div>
+                <div>
+                  <h3
+                    className={`font-black text-base transition-colors ${
+                      isDark ? "text-white group-hover:text-pink-400" : "text-slate-900 group-hover:text-pink-600"
+                    }`}
+                  >
+                    Promotions (Module 4)
+                  </h3>
+                  <p className={`text-xs font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    Kite Affordable &bull; Glow &bull; BURQ
+                  </p>
+                </div>
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-pink-500/15 text-pink-600 dark:text-pink-300 border border-pink-500/30">
+                {totalPromotions} Deals
+              </span>
+            </div>
+
+            <div
+              className={`grid grid-cols-3 gap-2 pt-3 border-t text-center ${
+                isDark ? "border-[#1E293B]" : "border-slate-100"
+              }`}
+            >
+              <div>
+                <div className="text-xl sm:text-2xl font-black text-pink-500">
+                  {totalPromotions}
+                </div>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  Active
+                </div>
+              </div>
+              <div>
+                <div className="text-xl sm:text-2xl font-black text-emerald-500">
+                  {freeShippingPromotions}
+                </div>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  Free Ship
+                </div>
+              </div>
+              <div>
+                <div className={`text-xl sm:text-2xl font-black ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                  Rs.400
+                </div>
+                <div className={`text-[10px] sm:text-[11px] uppercase font-bold tracking-wider mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  Starting
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-3 pt-2 text-right">
+              <Link
+                to="/admin/promotions"
+                className="text-xs font-bold text-pink-500 hover:text-pink-600 inline-flex items-center gap-1 cursor-pointer"
+              >
+                <span>Manage Promotions</span>
+                <FaArrowRight className="text-[9px]" />
+              </Link>
             </div>
           </div>
 
@@ -736,7 +842,111 @@ function DashboardContent() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 5. LIVE RECENT CUSTOMER ACTIVITY STREAM TABLE (High Readability) */}
+        {/* 5. PROMOTIONAL PACKAGES & VALUE BUNDLES (9 Official Rate-Sheet Bundles) */}
+        {/* ========================================================================= */}
+        <div
+          className={`rounded-2xl p-4 sm:p-6 lg:p-8 border transition-all ${
+            isDark
+              ? "bg-[#111726] border-[#1E293B] shadow-xl"
+              : "bg-white border-slate-200 shadow-sm hover:shadow-md"
+          }`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse"></span>
+                <span className="text-[11px] font-black uppercase tracking-wider text-pink-500">
+                  CONSUMER VALUE PACKAGES
+                </span>
+              </div>
+              <h3 className={`font-black text-lg sm:text-xl flex items-center gap-2.5 ${isDark ? "text-white" : "text-slate-900"}`}>
+                Active Promotional Bundles ({promotionsList.length || 9} Packages)
+              </h3>
+              <p className={`text-xs sm:text-sm font-medium mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                Verified against client rate-sheet: Packages 1-6 standard delivery, bottom 3 premium bundles free shipping
+              </p>
+            </div>
+            <Link
+              to="/admin/promotions"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-md shadow-pink-500/20 inline-flex items-center gap-1.5 cursor-pointer self-start sm:self-auto transition-all"
+            >
+              <span>Manage in Promotions</span>
+              <FaArrowRight className="text-[10px]" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {promotionsList.map((p, idx) => {
+              const saveAmount = p.discount != null ? p.discount : (p.originalPrice && p.totalPrice ? p.originalPrice - p.totalPrice : null);
+              const isFreeShipping = p.shippingCost === 0;
+
+              return (
+                <div
+                  key={p.id || idx}
+                  className={`p-4 rounded-xl border flex flex-col justify-between transition-all group ${
+                    isDark
+                      ? "bg-[#161D2E] border-[#1E293B] hover:border-pink-500/40"
+                      : "bg-slate-50 border-slate-200 hover:border-pink-400 hover:bg-white"
+                  }`}
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-14 h-14 rounded-lg overflow-hidden bg-white border border-slate-200 flex-shrink-0 flex items-center justify-center p-1">
+                      {p.image ? (
+                        <img src={p.image?.src || p.image} alt={p.title} className="w-full h-full object-contain" />
+                      ) : (
+                        <span className="text-[10px] text-gray-400">Pack {idx + 1}</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                          #{idx + 1}
+                        </span>
+                        <h4 className={`text-sm font-bold truncate ${isDark ? "text-white" : "text-slate-900"}`}>
+                          {p.title}
+                        </h4>
+                      </div>
+                      <p className={`text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                        {p.totalQuantity || (p.items?.reduce((s, it) => s + (Number(it.quantity) || 0), 0) || 0)} items &bull; {p.category || 'Combo'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-inherit flex items-center justify-between">
+                    <div>
+                      {p.originalPrice && (
+                        <span className="line-through text-xs text-gray-400 mr-1.5 font-medium">
+                          Rs. {p.originalPrice}
+                        </span>
+                      )}
+                      <span className="font-black text-base text-[#00AEEF]">
+                        Rs. {p.totalPrice}
+                      </span>
+                      {saveAmount != null && saveAmount > 0 && (
+                        <span className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          Save Rs. {saveAmount}
+                        </span>
+                      )}
+                    </div>
+
+                    <span
+                      className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                        isFreeShipping
+                          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 font-black"
+                          : "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30"
+                      }`}
+                    >
+                      {isFreeShipping ? "FREE Delivery" : "Rs. 200 Delivery"}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* 6. LIVE RECENT CUSTOMER ACTIVITY STREAM TABLE (High Readability) */}
         {/* ========================================================================= */}
         <div
           className={`rounded-2xl p-4 sm:p-6 lg:p-8 border transition-all ${

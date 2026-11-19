@@ -129,27 +129,58 @@ export async function GET(request) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
+  const { searchParams } = new URL(request.url);
+  const forceSync = searchParams.get('sync') === 'true';
+
+  // Always have local store packages ready as source of truth
+  let storePromos = [];
+  try {
+    const { getAllPromotions } = await import('@/lib/store');
+    storePromos = getAllPromotions();
+  } catch (e) {
+    console.warn('Store read failed for promotions:', e.message);
+  }
+
   try {
     await connectToDatabase();
+
+    // Auto-sync if requested or if database is missing packages
+    const count = await PromotionPackage.countDocuments();
+    const starter = await PromotionPackage.findOne({ id: 'pkg-kite-smart-starter' });
+
+    if (forceSync || count < 9 || !starter) {
+      if (storePromos && storePromos.length > 0) {
+        for (const p of storePromos) {
+          await PromotionPackage.findOneAndUpdate(
+            { id: p.id },
+            { $set: p },
+            { upsert: true, new: true }
+          );
+        }
+      }
+    }
+
     const promos = await PromotionPackage.find()
       .sort({ displayOrder: 1, createdAt: -1 })
       .lean();
-    if (promos && promos.length > 0) {
+
+    if (promos && promos.length >= 9) {
       return NextResponse.json(promos);
     }
+    if (promos && promos.length > 0) {
+      // Merge with store promos so all 9 packages are present
+      const map = new Map();
+      storePromos.forEach((p) => map.set(p.id, p));
+      promos.forEach((p) => map.set(p.id, p));
+      return NextResponse.json(Array.from(map.values()));
+    }
   } catch (err) {
-    // MongoDB offline or error
+    // MongoDB offline or connecting
   }
 
   // Use local persistent store
-  try {
-    const { getAllPromotions } = await import('@/lib/store');
-    const storePromos = getAllPromotions();
-    if (storePromos && storePromos.length > 0) {
-      return NextResponse.json(storePromos);
-    }
-  } catch (e) {
-    console.warn('Store read failed for promotions:', e.message);
+  if (storePromos && storePromos.length > 0) {
+    return NextResponse.json(storePromos);
   }
 
   // Fallback to remote backend
