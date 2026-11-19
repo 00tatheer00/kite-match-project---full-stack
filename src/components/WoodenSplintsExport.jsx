@@ -13,10 +13,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
 import { Link } from '@/components/RouterCompat';
 import { useState } from "react";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
-import "swiper/css/effect-fade";
 
 // Import splints images
 import splints from "../assets/splints.jpg";

@@ -195,13 +195,6 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap"
         />
 
-        <link rel="icon" type="image/svg+xml" href="/logo.png" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="theme-color" content="#00AEEF" />
-
         {/* Structured Data (JSON-LD) for #1 Google Rank for "best match factory in pakistan" & "mohsin match factory" */}
         <script
           type="application/ld+json"
@@ -226,6 +219,9 @@ export default function RootLayout({ children }) {
                   gtag('js', new Date());
                   gtag('config', '${GA_ID}', {
                     page_path: window.location.pathname,
+                    allow_google_signals: false,
+                    allow_ad_personalization_signals: false,
+                    restricted_data_processing: true
                   });
                 `,
               }}

@@ -4,10 +4,10 @@ import React, { useEffect, useState } from 'react';
 import NextLink from 'next/link';
 import { useRouter, usePathname, useParams as useNextParams } from 'next/navigation';
 
-export function Link({ to, href, children, ...props }) {
+export function Link({ to, href, children, prefetch, ...props }) {
   const target = href || to || '#';
   return (
-    <NextLink href={target} {...props}>
+    <NextLink href={target} prefetch={prefetch !== undefined ? prefetch : false} {...props}>
       {children}
     </NextLink>
   );

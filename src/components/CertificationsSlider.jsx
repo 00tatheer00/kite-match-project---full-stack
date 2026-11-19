@@ -2,9 +2,6 @@
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
 import efs from "../assets/certificates/efs.jpeg";
 import fbr from "../assets/certificates/fbr.jpeg";
 import iaf from "../assets/certificates/iaf.jpeg";
