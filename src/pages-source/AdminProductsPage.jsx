@@ -94,6 +94,23 @@ function normalizeVariantImages(list = []) {
 
 const AdminProductsPage = () => {
   const { isDark } = useAdminTheme();
+
+  const inputCls = isDark
+    ? "w-full px-3 py-2 border border-slate-700 rounded-lg text-sm bg-[#0B0F19] text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-500 transition-colors"
+    : "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors";
+
+  const labelCls = isDark
+    ? "block mb-1.5 font-semibold text-xs text-slate-300"
+    : "block mb-1.5 font-semibold text-xs text-slate-700";
+
+  const removeBtnCls = isDark
+    ? "px-3 py-1.5 rounded-lg border border-red-900/50 text-red-400 hover:bg-red-950/40 text-xs font-semibold cursor-pointer transition-colors"
+    : "px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 bg-white text-xs font-semibold cursor-pointer transition-colors";
+
+  const addSubBtnCls = isDark
+    ? "px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-semibold cursor-pointer transition-colors"
+    : "px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold cursor-pointer shadow-2xs transition-colors";
+
   const [showForm, setShowForm] = useState(false);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -185,6 +202,23 @@ const AdminProductsPage = () => {
     });
     return ["all", ...Array.from(set)];
   }, [allSkus]);
+
+  const getCategoryBadge = (category) => {
+    const cat = (category || "").toLowerCase();
+    if (cat.includes("dish")) {
+      return isDark
+        ? "bg-emerald-950/70 text-emerald-300 border border-emerald-800/80 font-medium"
+        : "bg-emerald-50 text-emerald-800 border border-emerald-200/90 font-semibold";
+    }
+    if (cat.includes("match")) {
+      return isDark
+        ? "bg-amber-950/70 text-amber-300 border border-amber-800/80 font-medium"
+        : "bg-amber-50 text-amber-800 border border-amber-200/90 font-semibold";
+    }
+    return isDark
+      ? "bg-sky-950/70 text-sky-300 border border-sky-800/80 font-medium"
+      : "bg-sky-50 text-sky-800 border border-sky-200/90 font-semibold";
+  };
 
   const handleEditSku = (sku) => {
     const parentProd = products.find((p) => p.id === sku.productId) || sku.product;
@@ -616,19 +650,21 @@ const AdminProductsPage = () => {
             </div>
           ) : (
             <div className={`border rounded-2xl p-5 md:p-6 transition-colors shadow-sm ${
-              isDark ? "bg-[#111726] border-[#1E293B]" : "bg-white border-slate-200"
+              isDark ? "bg-[#111726] border-slate-800" : "bg-white border-slate-200"
             }`}>
               {/* VIEW SWITCHER TABS & SKU SEARCH */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b pb-5 border-slate-200 dark:border-[#1E293B]">
+              <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b pb-5 ${
+                isDark ? "border-slate-800" : "border-slate-200"
+              }`}>
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setActiveTab("skus")}
                     className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
                       activeTab === "skus"
-                        ? "bg-[#00AEEF] text-white shadow-md shadow-sky-500/20"
+                        ? "bg-[#00AEEF] text-white shadow-sm"
                         : isDark
-                        ? "bg-[#161D2E] text-slate-300 hover:bg-[#1E293B]"
+                        ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
                         : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                     }`}
                   >
@@ -640,9 +676,9 @@ const AdminProductsPage = () => {
                     onClick={() => setActiveTab("products")}
                     className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
                       activeTab === "products"
-                        ? "bg-[#00AEEF] text-white shadow-md shadow-sky-500/20"
+                        ? "bg-[#00AEEF] text-white shadow-sm"
                         : isDark
-                        ? "bg-[#161D2E] text-slate-300 hover:bg-[#1E293B]"
+                        ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
                         : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                     }`}
                   >
@@ -652,20 +688,22 @@ const AdminProductsPage = () => {
                 </div>
 
                 {activeTab === "skus" && (
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                     {/* Category Filter Pills */}
-                    <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
                       {categories.map((cat) => (
                         <button
                           key={cat}
                           type="button"
                           onClick={() => setSelectedCategory(cat)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize whitespace-nowrap transition-all cursor-pointer ${
+                          className={`px-3 py-1 rounded-lg text-xs font-semibold capitalize whitespace-nowrap transition-all cursor-pointer ${
                             selectedCategory === cat
-                              ? "bg-sky-500/20 text-[#00AEEF] border border-[#00AEEF]/40"
+                              ? isDark
+                                ? "bg-sky-950 text-sky-300 border border-sky-800"
+                                : "bg-sky-50 text-sky-700 border border-sky-300 font-bold"
                               : isDark
-                              ? "text-slate-400 hover:text-slate-200"
-                              : "text-slate-600 hover:text-slate-900"
+                              ? "bg-slate-800/60 text-slate-400 hover:text-slate-200 border border-transparent"
+                              : "bg-slate-100 text-slate-600 hover:text-slate-900 border border-transparent"
                           }`}
                         >
                           {cat}
@@ -674,17 +712,17 @@ const AdminProductsPage = () => {
                     </div>
 
                     {/* Search Input */}
-                    <div className="relative w-full sm:w-60">
+                    <div className="relative w-full sm:w-64">
                       <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
                       <input
                         type="text"
                         value={skuSearch}
                         onChange={(e) => setSkuSearch(e.target.value)}
-                        placeholder="Search SKU name, price, bar..."
-                        className={`w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border outline-none transition-colors ${
+                        placeholder="Search SKU, weight, carton, price..."
+                        className={`w-full pl-8 pr-3 py-2 text-xs rounded-xl border outline-none transition-colors ${
                           isDark
-                            ? "bg-[#161D2E] border-[#1E293B] text-white focus:border-[#00AEEF]"
-                            : "bg-slate-50 border-slate-200 text-slate-800 focus:border-[#00AEEF]"
+                            ? "bg-[#161D2E] border-slate-700 text-white placeholder:text-slate-500 focus:border-sky-500"
+                            : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-sky-500"
                         }`}
                       />
                     </div>
@@ -701,22 +739,24 @@ const AdminProductsPage = () => {
                     <table className="min-w-full text-sm">
                       <thead>
                         <tr className={`border-b text-xs font-bold uppercase tracking-wider ${
-                          isDark ? "border-[#1E293B] text-slate-300" : "border-slate-200 text-slate-700"
+                          isDark ? "border-slate-800 text-slate-400 bg-slate-900/40" : "border-slate-200 text-slate-600 bg-slate-50/70"
                         }`}>
-                          <th className="text-left py-3 pr-3 w-14">Image</th>
-                          <th className="text-left py-3 pr-4">SKU / Variant Name</th>
-                          <th className="text-left py-3 pr-4">Parent Product / Brand</th>
-                          <th className="text-left py-3 pr-4">Category</th>
-                          <th className="text-left py-3 pr-4">Packing / Details</th>
-                          <th className="text-left py-3 pr-4 font-mono">Price (Rs.)</th>
-                          <th className="text-right py-3 pl-4">Actions</th>
+                          <th className="text-left py-3.5 pl-4 pr-3 w-14 rounded-l-xl">Image</th>
+                          <th className="text-left py-3.5 pr-4">SKU / Variant Name</th>
+                          <th className="text-left py-3.5 pr-4">Parent Product / Brand</th>
+                          <th className="text-left py-3.5 pr-4">Category</th>
+                          <th className="text-left py-3.5 pr-4">Packing / Details</th>
+                          <th className="text-left py-3.5 pr-4 font-mono">Price</th>
+                          <th className="text-right py-3.5 pr-4 pl-4 rounded-r-xl">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className={isDark ? "divide-y divide-[#1E293B]/60 text-slate-200" : "divide-y divide-slate-100 text-slate-800"}>
+                      <tbody className={`divide-y ${isDark ? "divide-slate-800 text-slate-200" : "divide-slate-100 text-slate-800"}`}>
                         {filteredSkus.map((sku) => (
-                          <tr key={sku.id} className={`transition-colors ${isDark ? "hover:bg-[#161D2E]" : "hover:bg-slate-50"}`}>
-                            <td className="py-2.5 pr-3">
-                              <div className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700">
+                          <tr key={sku.id} className={`transition-colors ${isDark ? "hover:bg-slate-800/50" : "hover:bg-slate-50/80"}`}>
+                            <td className="py-3 pl-4 pr-3">
+                              <div className={`w-11 h-11 rounded-xl flex items-center justify-center overflow-hidden border ${
+                                isDark ? "bg-slate-800/90 border-slate-700" : "bg-white border-slate-200 shadow-2xs"
+                              }`}>
                                 {sku.image ? (
                                   <img
                                     src={sku.image?.src || sku.image}
@@ -725,43 +765,56 @@ const AdminProductsPage = () => {
                                     loading="lazy"
                                   />
                                 ) : (
-                                  <FaBoxOpen className="text-slate-400 text-xs" />
+                                  <FaBoxOpen className="text-slate-400 text-sm" />
                                 )}
                               </div>
                             </td>
-                            <td className="py-2.5 pr-4 font-bold text-slate-900 dark:text-white">
-                              <div className="flex items-center gap-1.5">
-                                <span>{sku.variant.name}</span>
+                            <td className="py-3 pr-4">
+                              <div className="flex items-center gap-2">
+                                <span className={`font-bold text-sm ${isDark ? "text-white" : "text-slate-900"}`}>
+                                  {sku.variant.name}
+                                </span>
                                 {sku.variant.detail && (
-                                  <span className="text-[11px] font-normal px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-md border ${
+                                    isDark
+                                      ? "bg-slate-800 text-slate-300 border-slate-700"
+                                      : "bg-slate-100 text-slate-700 border-slate-200"
+                                  }`}>
                                     {sku.variant.detail}
                                   </span>
                                 )}
                               </div>
                             </td>
-                            <td className="py-2.5 pr-4 text-xs font-semibold text-sky-600 dark:text-sky-400">
+                            <td className={`py-3 pr-4 text-xs font-semibold ${isDark ? "text-slate-300" : "text-slate-700"}`}>
                               {sku.brandName}
                             </td>
-                            <td className="py-2.5 pr-4">
-                              <span className="text-xs px-2 py-0.5 rounded-md font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                            <td className="py-3 pr-4">
+                              <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${getCategoryBadge(sku.category)}`}>
                                 {sku.category}
                               </span>
                             </td>
-                            <td className="py-2.5 pr-4 text-xs text-slate-600 dark:text-slate-400">
+                            <td className={`py-3 pr-4 text-xs ${isDark ? "text-slate-400" : "text-slate-600"}`}>
                               {sku.variant.packing || "—"}
                             </td>
-                            <td className="py-2.5 pr-4 font-mono font-black text-sky-500 whitespace-nowrap">
-                              Rs. {sku.variant.price ?? "—"}
+                            <td className="py-3 pr-4 whitespace-nowrap">
+                              <span className="text-xs text-slate-400 font-medium mr-1">Rs.</span>
+                              <span className={`text-sm font-bold font-mono ${isDark ? "text-slate-100" : "text-slate-900"}`}>
+                                {sku.variant.price ?? "—"}
+                              </span>
                             </td>
-                            <td className="py-2.5 pl-4 text-right">
+                            <td className="py-3 pr-4 pl-4 text-right">
                               <button
                                 type="button"
                                 onClick={() => handleEditSku(sku)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 border border-sky-500/30 transition-all cursor-pointer ml-auto"
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-2xs ml-auto ${
+                                  isDark
+                                    ? "bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
+                                    : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400"
+                                }`}
                                 title="Edit this SKU / price in parent product"
                               >
-                                <FaEdit className="text-[11px]" />
-                                <span>Edit Price / Details</span>
+                                <FaEdit className="text-slate-400 text-xs" />
+                                <span>Edit Price</span>
                               </button>
                             </td>
                           </tr>
@@ -783,11 +836,13 @@ const AdminProductsPage = () => {
                       <div
                         key={sku.id}
                         className={`border rounded-xl p-3.5 flex items-center justify-between gap-3 ${
-                          isDark ? "border-[#1E293B] bg-[#161D2E]" : "border-slate-200 bg-slate-50"
+                          isDark ? "border-slate-800 bg-[#161D2E]" : "border-slate-200 bg-white shadow-2xs"
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border shrink-0 ${
+                            isDark ? "bg-slate-800 border-slate-700" : "bg-slate-50 border-slate-200"
+                          }`}>
                             {sku.image ? (
                               <img src={sku.image?.src || sku.image} alt={sku.variant.name} className="w-full h-full object-contain p-1" />
                             ) : (
@@ -795,22 +850,35 @@ const AdminProductsPage = () => {
                             )}
                           </div>
                           <div>
-                            <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1">
-                              <span>{sku.variant.name}</span>
-                              {sku.variant.detail && <span className="text-[10px] text-slate-500">({sku.variant.detail})</span>}
+                            <div className="flex items-center gap-1.5">
+                              <span className={`font-bold text-sm ${isDark ? "text-white" : "text-slate-900"}`}>
+                                {sku.variant.name}
+                              </span>
+                              {sku.variant.detail && (
+                                <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${
+                                  isDark ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-700"
+                                }`}>
+                                  {sku.variant.detail}
+                                </span>
+                              )}
                             </div>
-                            <p className="text-xs text-sky-600 dark:text-sky-400">{sku.brandName}</p>
+                            <p className={`text-xs font-semibold ${isDark ? "text-slate-300" : "text-slate-700"}`}>{sku.brandName}</p>
                             <p className="text-[11px] text-slate-500">{sku.variant.packing || sku.category}</p>
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="block font-mono font-bold text-sky-500 text-sm">
-                            Rs. {sku.variant.price ?? "—"}
+                          <span className={`block font-mono font-bold text-sm ${isDark ? "text-white" : "text-slate-900"}`}>
+                            <span className="text-xs text-slate-400 mr-0.5">Rs.</span>
+                            {sku.variant.price ?? "—"}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleEditSku(sku)}
-                            className="mt-1 px-2.5 py-1 rounded text-xs font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/30"
+                            className={`mt-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                              isDark
+                                ? "bg-slate-800 border-slate-700 text-slate-200"
+                                : "bg-white border-slate-300 text-slate-700 shadow-2xs"
+                            }`}
                           >
                             Edit
                           </button>
@@ -830,61 +898,80 @@ const AdminProductsPage = () => {
                     <table className="min-w-full text-sm">
                       <thead>
                         <tr className={`border-b text-xs font-bold uppercase tracking-wider ${
-                          isDark ? "border-[#1E293B] text-slate-300" : "border-slate-200 text-slate-700"
+                          isDark ? "border-slate-800 text-slate-400 bg-slate-900/40" : "border-slate-200 text-slate-600 bg-slate-50/70"
                         }`}>
-                          <th className="text-left py-3 pr-4">ID</th>
-                          <th className="text-left py-3 pr-4">Title</th>
-                          <th className="text-left py-3 pr-4">Category</th>
-                          <th className="text-left py-3 pr-4">Variants / Factory SKUs</th>
-                          <th className="text-left py-3 pr-4">Type</th>
-                          <th className="text-right py-3 pl-4">Actions</th>
+                          <th className="text-left py-3.5 pl-4 pr-4 rounded-l-xl">ID</th>
+                          <th className="text-left py-3.5 pr-4">Title</th>
+                          <th className="text-left py-3.5 pr-4">Category</th>
+                          <th className="text-left py-3.5 pr-4">Variants / Factory SKUs</th>
+                          <th className="text-left py-3.5 pr-4">Type</th>
+                          <th className="text-right py-3.5 pr-4 pl-4 rounded-r-xl">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className={isDark ? "divide-y divide-[#1E293B]/60 text-slate-200" : "divide-y divide-slate-100 text-slate-800"}>
+                      <tbody className={`divide-y ${isDark ? "divide-slate-800 text-slate-200" : "divide-slate-100 text-slate-800"}`}>
                         {products.map((p) => (
-                          <tr key={p.id} className={`transition-colors ${isDark ? "hover:bg-[#161D2E]" : "hover:bg-slate-50"}`}>
-                            <td className={`py-3 pr-4 font-mono text-xs font-semibold ${isDark ? "text-sky-400" : "text-sky-600"}`}>{p.id}</td>
-                            <td className="py-3 pr-4 font-bold">{p.title}</td>
-                            <td className="py-3 pr-4">{p.category}</td>
-                            <td className="py-3 pr-4">
-                              <div className="flex flex-wrap gap-1 max-w-sm">
+                          <tr key={p.id} className={`transition-colors ${isDark ? "hover:bg-slate-800/50" : "hover:bg-slate-50/80"}`}>
+                            <td className={`py-3.5 pl-4 pr-4 font-mono text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                              {p.id}
+                            </td>
+                            <td className={`py-3.5 pr-4 font-bold text-sm ${isDark ? "text-white" : "text-slate-900"}`}>
+                              {p.title}
+                            </td>
+                            <td className="py-3.5 pr-4">
+                              <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${getCategoryBadge(p.category)}`}>
+                                {p.category}
+                              </span>
+                            </td>
+                            <td className="py-3.5 pr-4">
+                              <div className="flex flex-wrap gap-1.5 max-w-md">
                                 {(p.variants || []).map((v, i) => (
                                   <span
                                     key={i}
-                                    className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60"
+                                    className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md border ${
+                                      isDark
+                                        ? "bg-slate-800 text-slate-200 border-slate-700"
+                                        : "bg-slate-100 text-slate-800 border-slate-200"
+                                    }`}
                                   >
-                                    <span>{v.name}</span>
-                                    <span className="font-bold text-sky-500 font-mono">Rs.{v.price}</span>
+                                    <span className={`font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>{v.name}</span>
+                                    <span className={`font-bold font-mono ${isDark ? "text-sky-400" : "text-sky-600"}`}>Rs.{v.price}</span>
                                   </span>
                                 ))}
                                 {p.brands?.map((b) => (
                                   <span
                                     key={b.name}
-                                    className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded bg-pink-50 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-800/60"
+                                    className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border ${
+                                      isDark
+                                        ? "bg-amber-950/40 text-amber-300 border-amber-800/60"
+                                        : "bg-amber-50 text-amber-900 border-amber-200/80"
+                                    }`}
                                   >
-                                    {b.name} ({b.variants?.length || 0} sizes)
+                                    <span className="font-semibold">{b.name}</span>
+                                    <span className="text-[11px] opacity-75">({b.variants?.length || 0} sizes)</span>
                                   </span>
                                 ))}
                               </div>
                             </td>
-                            <td className="py-3 pr-4">{p.productType || "-"}</td>
-                            <td className="py-3 pl-4 text-right space-x-2">
+                            <td className={`py-3.5 pr-4 text-xs ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                              {p.productType || "-"}
+                            </td>
+                            <td className="py-3.5 pr-4 pl-4 text-right space-x-2">
                               <button
                                 onClick={() => handleEdit(p)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
                                   isDark
-                                    ? "border-[#1E293B] bg-[#161D2E] text-sky-400 hover:bg-[#1E293B]"
-                                    : "border-slate-200 text-slate-700 hover:bg-slate-100"
+                                    ? "border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700"
+                                    : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400"
                                 }`}
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => handleDelete(p.id)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
                                   isDark
-                                    ? "border-red-900/40 bg-red-950/20 text-red-400 hover:bg-red-900/40"
-                                    : "border-red-200 text-red-600 hover:bg-red-50"
+                                    ? "border-red-900/50 bg-red-950/30 text-red-400 hover:bg-red-900/50"
+                                    : "border-red-200 bg-white text-red-600 hover:bg-red-50 hover:border-red-300"
                                 }`}
                               >
                                 Delete
@@ -897,12 +984,12 @@ const AdminProductsPage = () => {
                   </div>
 
                   {/* Mobile Product Cards */}
-                  <div className="md:hidden space-y-4">
+                  <div className="md:hidden space-y-3">
                     {products.map((p) => (
                       <div
                         key={p.id}
                         className={`border rounded-xl p-4 ${
-                          isDark ? "border-[#1E293B] bg-[#161D2E]" : "border-slate-200 bg-slate-50"
+                          isDark ? "border-slate-800 bg-[#161D2E]" : "border-slate-200 bg-white shadow-2xs"
                         }`}
                       >
                         <div className="flex items-center justify-between gap-3">
@@ -912,14 +999,19 @@ const AdminProductsPage = () => {
                               {p.category || "-"}
                             </p>
                           </div>
-                          <span className={`text-xs font-mono ${isDark ? "text-sky-400" : "text-sky-600"}`}>
+                          <span className={`text-xs font-mono ${isDark ? "text-slate-400" : "text-slate-600"}`}>
                             {p.id}
                           </span>
                         </div>
-                        <div className="mt-3 flex flex-wrap gap-1">
+                        <div className="mt-3 flex flex-wrap gap-1.5">
                           {(p.variants || []).map((v, i) => (
-                            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-300">
-                              {v.name} (Rs.{v.price})
+                            <span
+                              key={i}
+                              className={`text-[11px] font-medium px-2 py-0.5 rounded border ${
+                                isDark ? "bg-slate-800 text-slate-200 border-slate-700" : "bg-slate-100 text-slate-800 border-slate-200"
+                              }`}
+                            >
+                              <span className="font-semibold">{v.name}</span> (Rs.{v.price})
                             </span>
                           ))}
                         </div>
@@ -927,14 +1019,14 @@ const AdminProductsPage = () => {
                           <button
                             onClick={() => handleEdit(p)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${
-                              isDark ? "border-[#1E293B] bg-[#161D2E] text-sky-400" : "border-slate-200 text-slate-700"
+                              isDark ? "border-slate-700 bg-slate-800 text-slate-200" : "border-slate-300 bg-white text-slate-700"
                             }`}
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(p.id)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50"
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 bg-white text-red-600 hover:bg-red-50"
                           >
                             Delete
                           </button>
@@ -984,43 +1076,43 @@ const AdminProductsPage = () => {
               className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm"
             >
               <div>
-                <label className="block mb-1.5 font-medium">ID (slug)</label>
+                <label className={labelCls}>ID (slug)</label>
                 <input
                   name="id"
                   value={form.id}
                   onChange={handleChange}
                   required
                   disabled={!!editingId}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block mb-1.5 font-medium">Title</label>
+                <label className={labelCls}>Title</label>
                 <input
                   name="title"
                   value={form.title}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block mb-1.5 font-medium">Category</label>
+                <label className={labelCls}>Category</label>
                 <input
                   name="category"
                   value={form.category}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block mb-1.5 font-medium">Product Type</label>
+                <label className={labelCls}>Product Type</label>
                 <select
                   name="productType"
                   value={form.productType}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 >
                   <option value="matches">Safety Matches</option>
                   <option value="detergents">Detergents</option>
@@ -1029,22 +1121,22 @@ const AdminProductsPage = () => {
                 </select>
               </div>
               <div>
-                <label className="block mb-1.5 font-medium">Navbar Group</label>
+                <label className={labelCls}>Navbar Group</label>
                 <input
                   name="navGroup"
                   value={form.navGroup}
                   onChange={handleChange}
                   placeholder="Safety Matches / Detergents / Dish Wash"
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block mb-1.5 font-medium">Icon Type</label>
+                <label className={labelCls}>Icon Type</label>
                 <select
                   name="iconType"
                   value={form.iconType}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 >
                   <option value="">None</option>
                   <option value="fire">fire</option>
@@ -1053,18 +1145,18 @@ const AdminProductsPage = () => {
                 </select>
               </div>
               <div>
-                <label className="block mb-1.5 font-medium">
+                <label className={labelCls}>
                   Primary Image URL (optional)
                 </label>
                 <input
                   name="image"
                   value={form.image}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block mb-1.5 font-medium">
+                <label className={labelCls}>
                   Upload Product Image(s)
                 </label>
                 <input
@@ -1074,23 +1166,23 @@ const AdminProductsPage = () => {
                   onChange={(e) =>
                     setProductImages(Array.from(e.target.files || []))
                   }
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg"
+                  className={inputCls}
                 />
-                <p className="text-xs text-[#666666] mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Upload one or many. First image is used as primary.
                 </p>
               </div>
               <div>
-                <label className="block mb-1.5 font-medium">Color (hex)</label>
+                <label className={labelCls}>Color (hex)</label>
                 <input
                   name="color"
                   value={form.color}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block mb-1.5 font-medium">Shipping Cost (Rs)</label>
+                <label className={labelCls}>Shipping Cost (Rs)</label>
                 <input
                   name="shippingCost"
                   type="number"
@@ -1098,11 +1190,11 @@ const AdminProductsPage = () => {
                   placeholder="Leave empty for default"
                   value={form.shippingCost}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block mb-1.5 font-medium">
+                <label className={labelCls}>
                   Display Order
                 </label>
                 <input
@@ -1110,11 +1202,11 @@ const AdminProductsPage = () => {
                   type="number"
                   value={form.displayOrder}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block mb-1.5 font-medium">
+                <label className={labelCls}>
                   Carousel Order
                 </label>
                 <input
@@ -1122,36 +1214,36 @@ const AdminProductsPage = () => {
                   type="number"
                   value={form.carouselOrder}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block mb-1.5 font-medium">Description</label>
+                <label className={labelCls}>Description</label>
                 <textarea
                   name="description"
                   value={form.description}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block mb-1.5 font-medium">Tagline</label>
+                <label className={labelCls}>Tagline</label>
                 <input
                   name="tagline"
                   value={form.tagline}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block mb-1.5 font-medium">Services</label>
+                <label className={labelCls}>Services</label>
                 <textarea
                   name="services"
                   value={form.services}
                   onChange={handleChange}
                   rows={2}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                  className={inputCls}
                 />
               </div>
               <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -1179,7 +1271,7 @@ const AdminProductsPage = () => {
               {form.productType !== "matches" && (
                 <>
                   <div className="md:col-span-2">
-                    <label className="block mb-1.5 font-medium">Key Features</label>
+                    <label className={labelCls}>Key Features</label>
                     <div className="space-y-2">
                       {form.features.map((feature, idx) => (
                         <div key={`f-${idx}`} className="flex gap-2">
@@ -1187,12 +1279,12 @@ const AdminProductsPage = () => {
                             value={feature}
                             onChange={(e) => updateFeature(idx, e.target.value)}
                             placeholder={`Feature ${idx + 1}`}
-                            className="flex-1 px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                            className={`flex-1 ${inputCls}`}
                           />
                           <button
                             type="button"
                             onClick={() => removeFeature(idx)}
-                            className="px-3 py-2 rounded-lg border border-red-200 text-red-600"
+                            className={removeBtnCls}
                           >
                             Remove
                           </button>
@@ -1201,25 +1293,31 @@ const AdminProductsPage = () => {
                       <button
                         type="button"
                         onClick={addFeature}
-                        className="px-3 py-2 rounded-lg border border-[#E0E0E0] hover:bg-[#F9F9F9]"
+                        className={addSubBtnCls}
                       >
-                        Add Feature
+                        + Add Feature
                       </button>
                     </div>
                   </div>
 
-                  <div id="variants-section" className="md:col-span-2 p-5 rounded-2xl bg-sky-500/5 border border-sky-500/20">
+                  <div id="variants-section" className={`md:col-span-2 p-5 rounded-2xl border ${
+                    isDark ? "bg-slate-900/40 border-slate-800" : "bg-slate-50 border-slate-200"
+                  }`}>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                       <div>
-                        <label className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                        <label className={`font-bold text-base flex items-center gap-2 ${
+                          isDark ? "text-white" : "text-slate-900"
+                        }`}>
                           <FaBoxOpen className="text-sky-500" />
                           <span>Factory SKUs &amp; Sizes (Displayed in Online Store)</span>
                         </label>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className={`text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                           Each variant defined below (e.g. SUPER BAR, LONG BAR, CLASSIC BAR, 1 KG) displays as an individual card in &quot;Factory SKUs &amp; Individual Sizes&quot;.
                         </p>
                       </div>
-                      <span className="text-xs font-bold px-3 py-1 bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 rounded-full self-start sm:self-auto border border-sky-200 dark:border-sky-800">
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full border self-start sm:self-auto ${
+                        isDark ? "bg-slate-800 text-slate-200 border-slate-700" : "bg-white text-slate-700 border-slate-200 shadow-2xs"
+                      }`}>
                         {form.variants?.length || 0} SKUs
                       </span>
                     </div>
@@ -1229,44 +1327,64 @@ const AdminProductsPage = () => {
                         <div
                           key={`v-${idx}`}
                           className={`p-3.5 rounded-xl border transition-colors grid grid-cols-1 md:grid-cols-5 gap-3 items-center ${
-                            isDark ? "bg-[#161D2E] border-[#1E293B]" : "bg-white border-slate-200 shadow-xs"
+                            isDark ? "bg-[#161D2E] border-slate-800" : "bg-white border-slate-200 shadow-2xs"
                           }`}
                         >
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">SKU Name</label>
+                            <label className={`block text-[11px] font-bold mb-1 ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                              SKU Name
+                            </label>
                             <input
                               placeholder="e.g. SUPER BAR, 1 KG"
                               value={variant.name}
                               onChange={(e) =>
                                 updateVariant(idx, "name", e.target.value)
                               }
-                              className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm font-bold text-slate-900 dark:text-white"
+                              className={`w-full px-3 py-2 border rounded-lg text-sm font-bold outline-none transition-colors ${
+                                isDark
+                                  ? "bg-[#0B0F19] text-white border-slate-700 focus:border-sky-500"
+                                  : "bg-white text-slate-900 border-slate-300 focus:border-sky-500"
+                              }`}
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Weight / Detail</label>
+                            <label className={`block text-[11px] font-bold mb-1 ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                              Weight / Detail
+                            </label>
                             <input
                               placeholder="e.g. 200 g, 1000 g"
                               value={variant.detail}
                               onChange={(e) =>
                                 updateVariant(idx, "detail", e.target.value)
                               }
-                              className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                              className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-colors ${
+                                isDark
+                                  ? "bg-[#0B0F19] text-white border-slate-700 focus:border-sky-500"
+                                  : "bg-white text-slate-900 border-slate-300 focus:border-sky-500"
+                              }`}
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Carton Packing</label>
+                            <label className={`block text-[11px] font-bold mb-1 ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                              Carton Packing
+                            </label>
                             <input
                               placeholder="e.g. 36 pcs/ctn"
                               value={variant.packing}
                               onChange={(e) =>
                                 updateVariant(idx, "packing", e.target.value)
                               }
-                              className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                              className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-colors ${
+                                isDark
+                                  ? "bg-[#0B0F19] text-white border-slate-700 focus:border-sky-500"
+                                  : "bg-white text-slate-900 border-slate-300 focus:border-sky-500"
+                              }`}
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Factory Price (Rs.)</label>
+                            <label className={`block text-[11px] font-bold mb-1 ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                              Factory Price (Rs.)
+                            </label>
                             <input
                               placeholder="Price"
                               type="number"
@@ -1274,14 +1392,22 @@ const AdminProductsPage = () => {
                               onChange={(e) =>
                                 updateVariant(idx, "price", e.target.value)
                               }
-                              className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm font-black text-sky-600 dark:text-sky-400 font-mono"
+                              className={`w-full px-3 py-2 border rounded-lg text-sm font-bold font-mono outline-none transition-colors ${
+                                isDark
+                                  ? "bg-[#0B0F19] text-sky-400 border-slate-700 focus:border-sky-500"
+                                  : "bg-white text-sky-600 border-slate-300 focus:border-sky-500"
+                              }`}
                             />
                           </div>
                           <div className="flex md:items-end md:justify-end pt-2 md:pt-4">
                             <button
                               type="button"
                               onClick={() => removeVariant(idx)}
-                              className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold cursor-pointer"
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-colors ${
+                                isDark
+                                  ? "border-red-900/50 text-red-400 hover:bg-red-950/40"
+                                  : "border-red-200 text-red-600 hover:bg-red-50"
+                              }`}
                             >
                               ✕ Remove
                             </button>
@@ -1291,21 +1417,24 @@ const AdminProductsPage = () => {
                       <button
                         type="button"
                         onClick={addVariant}
-                        className="px-4 py-2 rounded-xl border border-sky-300 dark:border-sky-800 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-xs font-bold flex items-center gap-2 cursor-pointer transition-all mt-2"
+                        className={`px-4 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 cursor-pointer transition-all mt-2 ${
+                          isDark
+                            ? "border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700"
+                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs"
+                        }`}
                       >
-                        <FaPlus className="text-xs" />
-                        <span>+ Add Another SKU / Size Variant</span>
+                        <FaPlus className="text-xs text-sky-500" />
+                        <span>Add Another SKU / Size Variant</span>
                       </button>
                     </div>
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block mb-1.5 font-medium">
+                    <label className={labelCls}>
                       Variant Images (Name + Image)
                     </label>
-                    <p className="text-xs text-[#666666] mb-2">
-                      Add labels like 1 KG / 500 G and upload or paste image URL for
-                      each.
+                    <p className="text-xs text-slate-500 mb-2">
+                      Add labels like 1 KG / 500 G and upload or paste image URL for each.
                     </p>
                     <div className="space-y-2">
                       {form.variantImages.map((variantImage, idx) => (
@@ -1319,7 +1448,7 @@ const AdminProductsPage = () => {
                             onChange={(e) =>
                               updateVariantImage(idx, "name", e.target.value)
                             }
-                            className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                            className={inputCls}
                           />
                           <input
                             placeholder="Image URL (optional)"
@@ -1327,7 +1456,7 @@ const AdminProductsPage = () => {
                             onChange={(e) =>
                               updateVariantImage(idx, "image", e.target.value)
                             }
-                            className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                            className={inputCls}
                           />
                           <input
                             type="file"
@@ -1338,12 +1467,12 @@ const AdminProductsPage = () => {
                                 e.target.files?.[0] || null,
                               )
                             }
-                            className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                            className={inputCls}
                           />
                           <button
                             type="button"
                             onClick={() => removeVariantImage(idx)}
-                            className="px-3 py-2 rounded-lg border border-red-200 text-red-600"
+                            className={removeBtnCls}
                           >
                             Remove
                           </button>
@@ -1352,9 +1481,9 @@ const AdminProductsPage = () => {
                       <button
                         type="button"
                         onClick={addVariantImage}
-                        className="px-3 py-2 rounded-lg border border-[#E0E0E0] hover:bg-[#F9F9F9]"
+                        className={addSubBtnCls}
                       >
-                        Add Variant Image
+                        + Add Variant Image
                       </button>
                     </div>
                   </div>
@@ -1363,56 +1492,102 @@ const AdminProductsPage = () => {
 
               {form.productType === "matches" && (
                 <div className="md:col-span-2">
-                  <label className="block mb-1.5 font-medium">Matches List</label>
+                  <label className={labelCls}>Matches List</label>
                   <div className="space-y-4">
                     {form.brands.map((brand, bIdx) => (
-                      <div key={`b-${bIdx}`} className="border border-[#E0E0E0] p-4 rounded-xl space-y-4 bg-white shadow-sm">
-                        <div className="flex justify-between items-center border-b pb-2">
-                          <h4 className="font-semibold text-[#00AEEF]">Match #{bIdx + 1}</h4>
-                          <button type="button" onClick={() => removeBrand(bIdx)} className="px-3 py-1 rounded-lg border border-red-200 text-red-600 text-xs hover:bg-red-50">Remove Match</button>
+                      <div
+                        key={`b-${bIdx}`}
+                        className={`p-4 rounded-xl space-y-4 border ${
+                          isDark ? "border-slate-800 bg-[#161D2E]" : "border-slate-200 bg-white shadow-2xs"
+                        }`}
+                      >
+                        <div className={`flex justify-between items-center border-b pb-2 ${
+                          isDark ? "border-slate-800" : "border-slate-200"
+                        }`}>
+                          <h4 className={`font-bold text-sm ${isDark ? "text-amber-400" : "text-amber-800"}`}>
+                            Match #{bIdx + 1}
+                          </h4>
+                          <button
+                            type="button"
+                            onClick={() => removeBrand(bIdx)}
+                            className={removeBtnCls}
+                          >
+                            Remove Match
+                          </button>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-[#666] mb-1">Brand Name</label>
-                            <input placeholder="e.g. Kite Safety Matches" value={brand.name} onChange={(e) => updateBrand(bIdx, 'name', e.target.value)} className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm" />
+                            <label className={labelCls}>Brand Name</label>
+                            <input
+                              placeholder="e.g. Kite Safety Matches"
+                              value={brand.name}
+                              onChange={(e) => updateBrand(bIdx, 'name', e.target.value)}
+                              className={inputCls}
+                            />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-[#666] mb-1">Tagline (Urdu/English)</label>
-                            <input placeholder="e.g. پل میں روشن دیر پا شعلہ" value={brand.tagline || ''} onChange={(e) => updateBrand(bIdx, 'tagline', e.target.value)} className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm" dir="auto" />
+                            <label className={labelCls}>Tagline (Urdu/English)</label>
+                            <input
+                              placeholder="e.g. پل میں روشن دیر پا شعلہ"
+                              value={brand.tagline || ''}
+                              onChange={(e) => updateBrand(bIdx, 'tagline', e.target.value)}
+                              className={inputCls}
+                              dir="auto"
+                            />
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-xs font-medium text-[#666] mb-1">Description</label>
-                          <textarea placeholder="Description" value={brand.description} onChange={(e) => updateBrand(bIdx, 'description', e.target.value)} rows={2} className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm" />
+                          <label className={labelCls}>Description</label>
+                          <textarea
+                            placeholder="Description"
+                            value={brand.description}
+                            onChange={(e) => updateBrand(bIdx, 'description', e.target.value)}
+                            rows={2}
+                            className={inputCls}
+                          />
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-[#666] mb-1">Match Image URL (optional)</label>
-                            <input placeholder="URL" value={brand.image} onChange={(e) => updateBrand(bIdx, 'image', e.target.value)} className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm" />
+                            <label className={labelCls}>Match Image URL (optional)</label>
+                            <input
+                              placeholder="URL"
+                              value={brand.image}
+                              onChange={(e) => updateBrand(bIdx, 'image', e.target.value)}
+                              className={inputCls}
+                            />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-[#666] mb-1">Upload Match Image</label>
-                            <input type="file" accept="image/*" onChange={(e) => updateBrandImageFile(bIdx, e.target.files?.[0] || null)} className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm" />
+                            <label className={labelCls}>Upload Match Image</label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => updateBrandImageFile(bIdx, e.target.files?.[0] || null)}
+                              className={inputCls}
+                            />
                           </div>
                         </div>
 
-                        <div className="bg-[#F9F9F9] p-3 rounded-lg space-y-2 border border-[#E0E0E0]">
-                          <label className="block text-sm font-medium text-[#222]">Key Features</label>
+                        <div className={`p-3.5 rounded-xl space-y-2 border ${
+                          isDark ? "bg-[#0B0F19]/60 border-slate-800" : "bg-slate-50 border-slate-200"
+                        }`}>
+                          <label className={`block font-semibold text-xs ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                            Key Features
+                          </label>
                           {(brand.features || []).map((feature, fIdx) => (
                             <div key={`bf-${bIdx}-${fIdx}`} className="flex gap-2">
                               <input
                                 value={feature}
                                 onChange={(e) => updateBrandFeature(bIdx, fIdx, e.target.value)}
                                 placeholder="e.g. Premium Quality"
-                                className="flex-1 px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm bg-white"
+                                className={`flex-1 ${inputCls}`}
                               />
                               <button
                                 type="button"
                                 onClick={() => removeBrandFeature(bIdx, fIdx)}
-                                className="px-3 py-1 rounded text-red-600 text-xs border border-red-200 hover:bg-red-50"
+                                className={removeBtnCls}
                               >
                                 Remove
                               </button>
@@ -1421,30 +1596,69 @@ const AdminProductsPage = () => {
                           <button
                             type="button"
                             onClick={() => addBrandFeature(bIdx)}
-                            className="text-xs text-[#00AEEF] hover:underline font-medium"
+                            className={addSubBtnCls}
                           >
                             + Add Feature
                           </button>
                         </div>
 
-                        <div className="bg-[#F9F9F9] p-3 rounded-lg space-y-2 border border-[#E0E0E0]">
-                          <label className="block text-sm font-medium text-[#222]">Match Variants</label>
+                        <div className={`p-3.5 rounded-xl space-y-2 border ${
+                          isDark ? "bg-[#0B0F19]/60 border-slate-800" : "bg-slate-50 border-slate-200"
+                        }`}>
+                          <label className={`block font-semibold text-xs ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                            Match Variants
+                          </label>
                           {brand.variants.map((v, vIdx) => (
                             <div key={`bv-${bIdx}-${vIdx}`} className="grid grid-cols-1 md:grid-cols-5 gap-2">
-                              <input placeholder="Name (e.g. LARGE)" value={v.name} onChange={(e) => updateBrandVariant(bIdx, vIdx, 'name', e.target.value)} className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm bg-white" />
-                              <input placeholder="Detail" value={v.detail} onChange={(e) => updateBrandVariant(bIdx, vIdx, 'detail', e.target.value)} className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm bg-white" />
-                              <input placeholder="Packing" value={v.packing} onChange={(e) => updateBrandVariant(bIdx, vIdx, 'packing', e.target.value)} className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm bg-white" />
-                              <input placeholder="Price" type="number" value={v.price} onChange={(e) => updateBrandVariant(bIdx, vIdx, 'price', e.target.value)} className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm bg-white" />
-                              <button type="button" onClick={() => removeBrandVariant(bIdx, vIdx)} className="px-2 py-1 rounded text-red-600 text-xs border border-red-200 hover:bg-red-50">Remove</button>
+                              <input
+                                placeholder="Name (e.g. LARGE)"
+                                value={v.name}
+                                onChange={(e) => updateBrandVariant(bIdx, vIdx, 'name', e.target.value)}
+                                className={inputCls}
+                              />
+                              <input
+                                placeholder="Detail"
+                                value={v.detail}
+                                onChange={(e) => updateBrandVariant(bIdx, vIdx, 'detail', e.target.value)}
+                                className={inputCls}
+                              />
+                              <input
+                                placeholder="Packing"
+                                value={v.packing}
+                                onChange={(e) => updateBrandVariant(bIdx, vIdx, 'packing', e.target.value)}
+                                className={inputCls}
+                              />
+                              <input
+                                placeholder="Price"
+                                type="number"
+                                value={v.price}
+                                onChange={(e) => updateBrandVariant(bIdx, vIdx, 'price', e.target.value)}
+                                className={inputCls}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeBrandVariant(bIdx, vIdx)}
+                                className={removeBtnCls}
+                              >
+                                Remove
+                              </button>
                             </div>
                           ))}
-                          <button type="button" onClick={() => addBrandVariant(bIdx)} className="text-xs text-[#00AEEF] hover:underline font-medium">
+                          <button
+                            type="button"
+                            onClick={() => addBrandVariant(bIdx)}
+                            className={addSubBtnCls}
+                          >
                             + Add Variant
                           </button>
                         </div>
                       </div>
                     ))}
-                    <button type="button" onClick={addBrand} className="px-4 py-2 rounded-lg font-semibold text-white bg-[#00AEEF] hover:bg-[#0095CC] transition-colors">
+                    <button
+                      type="button"
+                      onClick={addBrand}
+                      className="px-4 py-2 rounded-xl font-bold text-xs text-white bg-[#00AEEF] hover:bg-[#0095CC] transition-colors cursor-pointer"
+                    >
                       + Add Another Match
                     </button>
                   </div>
@@ -1452,7 +1666,7 @@ const AdminProductsPage = () => {
               )}
 
               <div className="md:col-span-2">
-                <label className="block mb-1.5 font-medium">Facilities</label>
+                <label className={labelCls}>Facilities</label>
                 <div className="space-y-2">
                   {form.facilities.map((facility, idx) => (
                     <div
@@ -1465,7 +1679,7 @@ const AdminProductsPage = () => {
                         onChange={(e) =>
                           updateFacility(idx, "name", e.target.value)
                         }
-                        className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                        className={inputCls}
                       />
                       <input
                         placeholder="Location"
@@ -1473,7 +1687,7 @@ const AdminProductsPage = () => {
                         onChange={(e) =>
                           updateFacility(idx, "location", e.target.value)
                         }
-                        className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                        className={inputCls}
                       />
                       <input
                         placeholder="Note"
@@ -1481,12 +1695,12 @@ const AdminProductsPage = () => {
                         onChange={(e) =>
                           updateFacility(idx, "note", e.target.value)
                         }
-                        className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                        className={inputCls}
                       />
                       <button
                         type="button"
                         onClick={() => removeFacility(idx)}
-                        className="px-3 py-2 rounded-lg border border-red-200 text-red-600"
+                        className={removeBtnCls}
                       >
                         Remove
                       </button>
@@ -1495,15 +1709,15 @@ const AdminProductsPage = () => {
                   <button
                     type="button"
                     onClick={addFacility}
-                    className="px-3 py-2 rounded-lg border border-[#E0E0E0] hover:bg-[#F9F9F9]"
+                    className={addSubBtnCls}
                   >
-                    Add Facility
+                    + Add Facility
                   </button>
                 </div>
               </div>
 
               <div className="md:col-span-2">
-                <label className="block mb-1.5 font-medium">
+                <label className={labelCls}>
                   Extra Image URLs
                 </label>
                 <div className="space-y-2">
@@ -1513,12 +1727,12 @@ const AdminProductsPage = () => {
                         value={url}
                         onChange={(e) => updateImageUrl(idx, e.target.value)}
                         placeholder="https://..."
-                        className="flex-1 px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                        className={`flex-1 ${inputCls}`}
                       />
                       <button
                         type="button"
                         onClick={() => removeImageUrl(idx)}
-                        className="px-3 py-2 rounded-lg border border-red-200 text-red-600"
+                        className={removeBtnCls}
                       >
                         Remove
                       </button>
@@ -1527,18 +1741,18 @@ const AdminProductsPage = () => {
                   <button
                     type="button"
                     onClick={addImageUrl}
-                    className="px-3 py-2 rounded-lg border border-[#E0E0E0] hover:bg-[#F9F9F9]"
+                    className={addSubBtnCls}
                   >
-                    Add URL
+                    + Add URL
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-end gap-2 pt-1 md:col-span-2">
+              <div className="flex items-end gap-3 pt-3 md:col-span-2">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-[#00AEEF] to-[#0095CC] hover:shadow-lg hover:shadow-[#00AEEF]/30 transition-all disabled:opacity-60"
+                  className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[#00AEEF] hover:bg-[#0095CC] shadow-md shadow-sky-500/20 transition-all cursor-pointer disabled:opacity-60"
                 >
                   {saving
                     ? "Saving..."
@@ -1556,10 +1770,10 @@ const AdminProductsPage = () => {
                       setVariantImageFiles({});
                       setShowForm(false);
                     }}
-                    className={`px-5 py-2 rounded-lg text-sm font-semibold border transition-colors cursor-pointer ${
+                    className={`px-6 py-2.5 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
                       isDark
-                        ? "border-[#1E293B] bg-[#161D2E] text-slate-300 hover:bg-[#1E293B]"
-                        : "border-[#E0E0E0] bg-white text-slate-700 hover:bg-[#F9F9F9]"
+                        ? "border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700"
+                        : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs"
                     }`}
                   >
                     Cancel Edit

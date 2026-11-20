@@ -4,6 +4,9 @@
 @import "swiper/css/navigation";
 @import "swiper/css/effect-fade";
 
+/* Tell Tailwind v4 to only apply dark: variants when .dark class is explicitly present, NEVER by OS preference */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Tailwind v4 - Custom Theme Configuration */
 @theme {
   /* ============================================
@@ -364,6 +367,23 @@ body.admin-route:has(.admin-dark-theme) {
 
 .admin-dark-theme label {
   color: #CBD5E1 !important;
+}
+
+.admin-light-theme input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.admin-light-theme select,
+.admin-light-theme textarea {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.admin-light-theme input::placeholder,
+.admin-light-theme textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.admin-light-theme label {
+  color: #334155 !important;
 }
 
 

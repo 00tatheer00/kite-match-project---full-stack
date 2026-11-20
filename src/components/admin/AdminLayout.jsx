@@ -36,7 +36,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
     <div
       className={`min-h-screen flex flex-col md:flex-row transition-colors duration-200 text-sm ${
         isDark
-          ? "bg-[#080C14] text-slate-100 admin-dark-theme"
+          ? "bg-[#080C14] text-slate-100 admin-dark-theme dark"
           : "bg-slate-50 text-slate-800"
       }`}
     >

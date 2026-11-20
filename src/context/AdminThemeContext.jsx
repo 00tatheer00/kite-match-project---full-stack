@@ -20,13 +20,23 @@ export const AdminThemeProvider = ({ children }) => {
       if (saved === 'light' || saved === 'dark') {
         setTheme(saved);
       } else {
-        setTheme('dark');
+        setTheme('light');
       }
     } catch {
-      setTheme('dark');
+      setTheme('light');
     }
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [theme]);
 
   const toggleTheme = () => {
     setTheme((prev) => {
