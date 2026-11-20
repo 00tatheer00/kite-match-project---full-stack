@@ -13,36 +13,34 @@ export async function GET(request) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
+  let dbOrders = [];
   try {
     await connectToDatabase();
-    const orders = await Order.find().sort({ createdAt: -1 }).lean();
-    if (orders && orders.length > 0) {
-      return NextResponse.json(orders);
-    }
+    dbOrders = await Order.find().sort({ createdAt: -1 }).lean();
   } catch (err) {
     // MongoDB offline or error
   }
 
-  // Use local persistent store
+  let storeOrders = [];
   try {
     const { getAllOrders } = await import('@/lib/store');
-    const storeOrders = getAllOrders();
-    if (storeOrders && storeOrders.length > 0) {
-      return NextResponse.json(storeOrders);
-    }
+    storeOrders = getAllOrders();
   } catch (e) {
     console.warn('Store read failed for orders:', e.message);
   }
 
-  try {
-    const { fetchRemoteFallback } = await import('@/lib/api-fallback');
-    const auth = request.headers.get('authorization') || '';
-    const remoteOrders = await fetchRemoteFallback('/admin/orders', auth ? { Authorization: auth } : {});
-    if (remoteOrders && Array.isArray(remoteOrders)) {
-      return NextResponse.json(remoteOrders);
+  // Deduplicate and merge
+  const ordersMap = new Map();
+  [...(dbOrders || []), ...(storeOrders || [])].forEach((o) => {
+    const key = o.orderNumber || o._id || o.id;
+    if (key && !ordersMap.has(key)) {
+      ordersMap.set(key, o);
     }
-  } catch (e) {
-    console.warn('Remote fallback unavailable for admin orders:', e.message);
-  }
-  return NextResponse.json([]);
+  });
+
+  const merged = Array.from(ordersMap.values()).sort(
+    (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+  );
+
+  return NextResponse.json(merged);
 }

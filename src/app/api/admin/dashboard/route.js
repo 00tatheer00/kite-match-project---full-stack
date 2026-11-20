@@ -16,7 +16,21 @@ export async function GET(request) {
     }
 
     const products = getAllProducts();
-    const orders = getAllOrders();
+    let orders = getAllOrders();
+    try {
+      await connectToDatabase();
+      const dbOrders = await Order.find().sort({ createdAt: -1 }).lean();
+      if (dbOrders && dbOrders.length > 0) {
+        const orderMap = new Map();
+        [...dbOrders, ...orders].forEach((o) => {
+          const key = o.orderNumber || o._id || o.id;
+          if (key && !orderMap.has(key)) orderMap.set(key, o);
+        });
+        orders = Array.from(orderMap.values()).sort(
+          (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+        );
+      }
+    } catch {}
 
     // Persistent Analytics from DB with Store fallback
     let analytics = getAnalyticsSummary();
@@ -110,7 +124,7 @@ export async function GET(request) {
         cities,
         countries,
       },
-      recentOrders: orders.slice(0, 6),
+      recentOrders: orders.slice(0, 10),
       lastUpdated: new Date().toISOString(),
     });
   } catch (err) {

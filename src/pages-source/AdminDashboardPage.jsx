@@ -625,6 +625,167 @@ function DashboardContent() {
         </div>
 
         {/* ========================================================================= */}
+        {/* RECENT CUSTOMER ORDERS TABLE (Instant visibility on Dashboard) */}
+        {/* ========================================================================= */}
+        <div
+          className={`rounded-2xl p-4 sm:p-6 lg:p-8 border transition-all ${
+            isDark
+              ? "bg-[#111726] border-[#1E293B] shadow-xl"
+              : "bg-white border-slate-200 shadow-sm hover:shadow-md"
+          }`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span className="text-[11px] font-black uppercase tracking-wider text-emerald-500">
+                  REAL-TIME ORDER INBOX
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                  {pendingOrders} Pending
+                </span>
+              </div>
+              <h3 className={`font-black text-lg sm:text-xl flex items-center gap-2.5 ${isDark ? "text-white" : "text-slate-900"}`}>
+                Recent Customer Orders &amp; Inquiries ({recentOrders.length} Recent)
+              </h3>
+              <p className={`text-xs sm:text-sm font-medium mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                Orders placed from online store, checkout cart, and packages with customer contact details
+              </p>
+            </div>
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <Link
+                to="/admin/orders"
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#00AEEF] hover:bg-[#0095cc] text-white shadow-md shadow-sky-500/20 inline-flex items-center gap-1.5 cursor-pointer transition-all"
+              >
+                <span>Full Orders Manager ({totalOrders})</span>
+                <FaArrowRight className="text-[10px]" />
+              </Link>
+            </div>
+          </div>
+
+          {recentOrders.length === 0 ? (
+            <div
+              className={`text-center py-10 px-4 rounded-xl border ${
+                isDark ? "bg-[#161D2E] border-[#1E293B] text-slate-400" : "bg-slate-50 border-slate-200 text-slate-600"
+              }`}
+            >
+              <FaClipboardList className="mx-auto text-3xl mb-2 text-slate-400" />
+              <p className={`text-base font-bold mb-1 ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                No orders recorded yet
+              </p>
+              <p className="text-xs sm:text-sm">
+                Orders placed on <a href="/online-order" target="_blank" className="text-sky-500 underline font-bold">Online Order</a> will appear here immediately.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto -mx-1 sm:mx-0">
+              <table className="w-full min-w-[700px] text-left text-sm">
+                <thead>
+                  <tr
+                    className={`border-b uppercase text-xs font-bold tracking-wider ${
+                      isDark ? "border-[#1E293B] text-slate-400" : "border-slate-200 text-slate-600"
+                    }`}
+                  >
+                    <th className="py-3.5 px-4">Order #</th>
+                    <th className="py-3.5 px-4">Customer</th>
+                    <th className="py-3.5 px-4">Phone / WhatsApp</th>
+                    <th className="py-3.5 px-4">City / Address</th>
+                    <th className="py-3.5 px-4">Items &amp; Type</th>
+                    <th className="py-3.5 px-4 text-right">Amount</th>
+                    <th className="py-3.5 px-4 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody
+                  className={`divide-y ${
+                    isDark ? "divide-[#1E293B]/70 text-slate-300" : "divide-slate-200 text-slate-700"
+                  }`}
+                >
+                  {recentOrders.map((order, idx) => {
+                    const cleanPhone = String(order.phone || "").replace(/[^0-9]/g, "");
+                    const waPhone = cleanPhone.startsWith("0") ? "92" + cleanPhone.slice(1) : (cleanPhone.startsWith("92") ? cleanPhone : "92" + cleanPhone);
+                    const isPending = order.status === "pending" || !order.status;
+                    const isConfirmed = order.status === "confirmed";
+                    const isShipped = order.status === "shipped";
+                    const isCancelled = order.status === "cancelled";
+
+                    const statusClass = isPending
+                      ? "bg-amber-500/10 text-amber-500 border-amber-500/30"
+                      : isConfirmed
+                      ? "bg-blue-500/10 text-blue-500 border-blue-500/30"
+                      : isShipped
+                      ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
+                      : "bg-red-500/10 text-red-500 border-red-500/30";
+
+                    return (
+                      <tr
+                        key={order._id || order.id || order.orderNumber || idx}
+                        className={`transition-colors ${
+                          isDark ? "hover:bg-[#161D2E]" : "hover:bg-slate-50"
+                        }`}
+                      >
+                        <td className="py-3.5 px-4 font-mono font-bold text-sky-500">
+                          {order.orderNumber || order._id || "KT-00" + (idx + 1)}
+                          <div className={`text-[11px] font-sans font-normal mt-0.5 ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                            {getRelativeTime(order.createdAt)}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 font-bold">
+                          {order.customerName || "Customer"}
+                          {order.email && (
+                            <div className={`text-[11px] font-normal truncate max-w-[140px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                              {order.email}
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono">
+                          <a
+                            href={`https://wa.me/${waPhone}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 font-bold hover:underline"
+                            title="Chat on WhatsApp"
+                          >
+                            <FaWhatsapp className="text-emerald-500" />
+                            <span>{order.phone || "—"}</span>
+                          </a>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="font-bold text-xs px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                            {order.city || "Pakistan"}
+                          </span>
+                          <div className={`text-xs mt-0.5 truncate max-w-[180px] ${isDark ? "text-slate-400" : "text-slate-500"}`} title={order.address}>
+                            {order.address || "—"}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-xs">
+                          <span className="capitalize font-bold text-slate-800 dark:text-slate-200">
+                            {order.type || "product"}
+                          </span>
+                          {order.productId && <span className="block text-[11px] text-slate-500">{order.productId} ({order.selectedSkuOrSize || "1x"})</span>}
+                          {order.promotionId && <span className="block text-[11px] text-pink-500 font-semibold">{order.promotionId}</span>}
+                          {order.items?.length > 0 && <span className="block text-[11px] text-slate-500">{order.items.length} cart items</span>}
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-black text-[#00AEEF] whitespace-nowrap">
+                          Rs. {order.totalAmount || order.totalPrice || "—"}
+                          <div className={`text-[10px] font-normal uppercase ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                            {order.paymentMethod || "COD"}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-bold border uppercase tracking-wider ${statusClass}`}>
+                            {order.status || "pending"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* ========================================================================= */}
         {/* 4. REAL-TIME LOCATION & CITY TRACING (Large Map & City Breakdown) */}
         {/* ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">

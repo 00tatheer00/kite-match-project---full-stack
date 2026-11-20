@@ -1,4 +1,5 @@
 import emailjs from '@emailjs/nodejs';
+import nodemailer from 'nodemailer';
 
 const htmlEscapeMap = {
   "&": "&amp;",
@@ -80,10 +81,45 @@ function buildOrderDetailsText(order, productOrPromotion) {
   return lines.join("\n");
 }
 
+function createSmtpTransporter() {
+  const host = process.env.SMTP_HOST;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (host && user && pass) {
+    const port = Number(process.env.SMTP_PORT || (process.env.SMTP_SECURE === 'true' ? 465 : 587));
+    const secure = process.env.SMTP_SECURE === 'true' || port === 465;
+
+    return nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: { user, pass },
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+  }
+
+  const gmailUser = process.env.GMAIL_USER || (process.env.ADMIN_EMAIL?.includes('@gmail.com') ? process.env.ADMIN_EMAIL : null);
+  const gmailPass = process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_PASS;
+
+  if (gmailUser && gmailPass) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: gmailUser,
+        pass: gmailPass,
+      },
+    });
+  }
+
+  return null;
+}
+
 async function sendViaEmailJS(templateId, templateParams) {
   if (!process.env.EMAILJS_SERVICE_ID || !templateId || !process.env.EMAILJS_PUBLIC_KEY || !process.env.EMAILJS_PRIVATE_KEY) {
-    console.warn("[EmailJS] Missing required environment variables. Skipping email.");
-    return;
+    return false;
   }
 
   try {
@@ -97,31 +133,30 @@ async function sendViaEmailJS(templateId, templateParams) {
       }
     );
     console.log(`[EmailJS] Successfully sent via template ${templateId}`);
+    return true;
   } catch (error) {
     console.error(`[EmailJS Error] Failed via template ${templateId}:`, {
       status: error?.status,
       text:   error?.text,
       message: error?.message,
     });
-    throw error;
+    return false;
   }
 }
 
 export async function sendOrderEmail(order, productOrPromotion) {
-  const adminOrderEmail = process.env.ADMIN_ORDER_EMAIL || process.env.CLIENT_ORDER_EMAIL;
-  if (!adminOrderEmail) {
-    console.warn("ADMIN_ORDER_EMAIL not set; skipping email send");
-    return;
-  }
+  const adminOrderEmail = process.env.ADMIN_ORDER_EMAIL || process.env.CLIENT_ORDER_EMAIL || process.env.ADMIN_EMAIL || 'admin@kitepk.com';
+  const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER || process.env.GMAIL_USER || `Kite FMCG Orders <orders@kitepk.com>`;
 
   const isCart = order.type === "cart";
   const itemName = getItemName(order, productOrPromotion);
   const orderTypeLabel = getOrderTypeLabel(order);
-  const subject = isCart ? `New Cart Order` : (order.type === "product" ? `New product order: ${itemName}` : `New promotion order: ${itemName}`);
+  const orderNumber = order.orderNumber || order._id || order.id || 'N/A';
+  const subject = `[New Order ${orderNumber}] ${order.customerName} - Rs. ${order.totalAmount} (${orderTypeLabel})`;
 
   const createdAt = formatDateTime(order.createdAt);
   const paymentMethod = displayValue(order.paymentMethod);
-  const adminPanelUrl = process.env.ADMIN_PANEL_URL || process.env.FRONTEND_URL;
+  const adminPanelUrl = process.env.ADMIN_PANEL_URL || process.env.FRONTEND_URL || 'https://www.kitepk.com/admin/orders';
 
   const orderDetailsText = buildOrderDetailsText(order, productOrPromotion);
 
@@ -137,6 +172,7 @@ export async function sendOrderEmail(order, productOrPromotion) {
         <div style="max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; border: 1px solid #eaeaea;">
           <h2 style="margin-top: 0; color: #111;">${escapeHtml(title)}</h2>
           <p style="color: #555; font-size: 15px; line-height: 1.5;">
+            <strong>Order No:</strong> ${escapeHtml(orderNumber)}<br>
             <strong>Order Type:</strong> ${escapeHtml(orderTypeLabel)}<br>
             <strong>Status:</strong> ${escapeHtml(order.status || 'pending')}<br>
             <strong>Payment:</strong> ${escapeHtml(paymentMethod)}<br>
@@ -172,30 +208,67 @@ export async function sendOrderEmail(order, productOrPromotion) {
     </html>
   `;
 
+  const adminHtml = buildHtml("New Order Received #" + orderNumber, true);
+  const customerSubject = `Order Confirmation #${orderNumber} - Kite FMCG`;
+  const customerHtml = buildHtml("Your Order is Confirmed (#" + orderNumber + ")", false);
+
+  // 1. Try Nodemailer SMTP / Gmail
+  const smtp = createSmtpTransporter();
+  if (smtp) {
+    try {
+      await smtp.sendMail({
+        from: fromEmail,
+        to: adminOrderEmail,
+        subject: subject,
+        text: `New Order Received\n\n${orderDetailsText}\n\nCustomer: ${order.customerName} (${order.phone})\nAddress: ${order.address}, ${order.city}`,
+        html: adminHtml,
+      });
+      console.log(`[SMTP] Successfully sent admin order email to ${adminOrderEmail}`);
+    } catch (err) {
+      console.error(`[SMTP Error] Failed sending admin email:`, err.message);
+    }
+
+    if (order.email) {
+      try {
+        await smtp.sendMail({
+          from: fromEmail,
+          to: order.email,
+          subject: customerSubject,
+          text: `Thank you for your order!\n\n${orderDetailsText}\n\nWe will deliver your order soon via Cash on Delivery.`,
+          html: customerHtml,
+        });
+        console.log(`[SMTP] Successfully sent customer confirmation email to ${order.email}`);
+      } catch (err) {
+        console.error(`[SMTP Error] Failed sending customer email:`, err.message);
+      }
+    }
+    return;
+  }
+
+  // 2. Try EmailJS
   if (process.env.EMAILJS_TEMPLATE_ID_ADMIN) {
-    console.log(`[EmailJS] Sending admin order email to ${adminOrderEmail}...`);
     await sendViaEmailJS(process.env.EMAILJS_TEMPLATE_ID_ADMIN, {
       to_name: "Admin",
       to_email: adminOrderEmail,
       subject: subject,
-      html_content: buildHtml("New Order Received", true),
+      html_content: adminHtml,
     });
   }
 
   if (order.email && process.env.EMAILJS_TEMPLATE_ID_CUSTOMER) {
-    const customerSubject = isCart ? "Your Kite Order Confirmation" : "Your Order Confirmation: " + itemName;
     await sendViaEmailJS(process.env.EMAILJS_TEMPLATE_ID_CUSTOMER, {
       to_email: order.email,
       subject: customerSubject,
-      html_content: buildHtml("Your Order is Confirmed", false),
+      html_content: customerHtml,
     });
   }
 }
 
 export async function sendStatusUpdateEmail(order) {
-  if (!order.email || !process.env.EMAILJS_TEMPLATE_ID_CUSTOMER) return;
+  if (!order.email) return;
 
-  const subject = `Update on your Kite Order (${order.orderNumber || order._id || order.id})`;
+  const orderNumber = order.orderNumber || order._id || order.id || 'N/A';
+  const subject = `Update on your Kite Order (${orderNumber})`;
   const orderDetailsText = buildOrderDetailsText(order, null);
   const paymentMethod = displayValue(order.paymentMethod);
   const createdAt = formatDateTime(order.createdAt);
@@ -216,7 +289,7 @@ export async function sendStatusUpdateEmail(order) {
             Hi ${escapeHtml(order.customerName)},
           </p>
           <p style="color: #555; font-size: 16px; line-height: 1.5;">
-            The status of your order (<strong>${escapeHtml(order.orderNumber || order._id || order.id)}</strong>) has been updated to:
+            The status of your order (<strong>${escapeHtml(orderNumber)}</strong>) has been updated to:
           </p>
           <div style="background: #f0f0f0; padding: 15px; border-radius: 6px; text-align: center; font-size: 18px; font-weight: bold; color: #111; text-transform: uppercase; margin: 20px 0;">
             ${escapeHtml(order.status)}
@@ -246,9 +319,29 @@ export async function sendStatusUpdateEmail(order) {
     </html>
   `;
 
-  await sendViaEmailJS(process.env.EMAILJS_TEMPLATE_ID_CUSTOMER, {
-    to_email: order.email,
-    subject: subject,
-    html_content: html,
-  });
+  const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER || process.env.GMAIL_USER || `Kite FMCG <orders@kitepk.com>`;
+
+  const smtp = createSmtpTransporter();
+  if (smtp) {
+    try {
+      await smtp.sendMail({
+        from: fromEmail,
+        to: order.email,
+        subject,
+        html,
+      });
+      console.log(`[SMTP] Successfully sent status update email to ${order.email}`);
+    } catch (err) {
+      console.error(`[SMTP Error] Failed sending status update email:`, err.message);
+    }
+    return;
+  }
+
+  if (process.env.EMAILJS_TEMPLATE_ID_CUSTOMER) {
+    await sendViaEmailJS(process.env.EMAILJS_TEMPLATE_ID_CUSTOMER, {
+      to_email: order.email,
+      subject: subject,
+      html_content: html,
+    });
+  }
 }

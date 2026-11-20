@@ -286,6 +286,14 @@ export async function POST(request) {
       } catch {}
     }
 
+    // Mirror order to remote persistent backend for durability across serverless cold starts
+    try {
+      const { postRemoteFallback } = await import('@/lib/api-fallback');
+      postRemoteFallback('/orders', orderPayload).catch((e) => {
+        console.warn('Mirror to remote backend deferred:', e.message);
+      });
+    } catch {}
+
     // Fire-and-forget email notification
     sendOrderEmail(order.toObject ? order.toObject() : order, productOrPromotion).catch((err) => {
       console.error('[Email Error] sendOrderEmail failed:', err);
