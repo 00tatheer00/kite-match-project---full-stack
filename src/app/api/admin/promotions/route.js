@@ -96,9 +96,6 @@ export async function parsePromotionRequest(request) {
   let hasGalleryUpload = false;
 
   if (files.length > 0) {
-    if (!isCloudinaryConfigured()) {
-      throw new Error('Cloudinary credentials are missing.');
-    }
 
     const promotionImages = files.filter((f) => f.fieldname === 'promotionImages');
     const singleImage = files.find((f) => f.fieldname === 'image');

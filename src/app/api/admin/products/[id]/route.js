@@ -28,12 +28,24 @@ export async function PUT(request, context) {
     const existingInStore = getProductById(id);
 
     if (existingInStore) {
-      payload.image = payload.image || existingInStore.image;
+      payload.image = payload.image || existingInStore.image || "";
       payload.images = Array.isArray(payload.images) && payload.images.length
         ? payload.images
         : existingInStore.images || [];
 
-      if (!hasBodyVariantImages && (!payload.variantImages || !payload.variantImages.length)) {
+      if (Array.isArray(payload.variantImages) && Array.isArray(existingInStore.variantImages)) {
+        payload.variantImages = payload.variantImages.map((v, idx) => {
+          const match =
+            existingInStore.variantImages.find(
+              (ev) =>
+                ev?.name?.trim().toLowerCase() === v?.name?.trim().toLowerCase()
+            ) || existingInStore.variantImages[idx];
+          return {
+            name: v?.name || match?.name || "",
+            image: v?.image || match?.image || "",
+          };
+        });
+      } else if (!hasBodyVariantImages && (!payload.variantImages || !payload.variantImages.length)) {
         payload.variantImages = existingInStore.variantImages || [];
       }
     }

@@ -104,11 +104,8 @@ export async function parseProductRequest(request) {
     showInNavbar: toBoolean(body.showInNavbar, true),
   };
 
-  // Upload any attached files to Cloudinary
+  // Upload any attached files (to Cloudinary if configured, or optimized webp fallback)
   if (files.length > 0) {
-    if (!isCloudinaryConfigured()) {
-      throw new Error('Cloudinary credentials are missing.');
-    }
 
     const productImages = files.filter((f) => f.fieldname === 'productImages');
     const singleImage = files.find((f) => f.fieldname === 'image');

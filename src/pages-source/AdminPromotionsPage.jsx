@@ -1,9 +1,18 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
 import RequireAdminAuth from "../components/admin/RequireAdminAuth";
 import { useAdminTheme } from "@/context/AdminThemeContext";
+import {
+  FaTrashAlt,
+  FaPlus,
+  FaFileExcel,
+  FaFileUpload,
+  FaFileDownload,
+  FaSyncAlt,
+  FaEdit,
+} from "react-icons/fa";
 import {
   adminGetPromotions,
   adminCreatePromotion,
@@ -11,6 +20,12 @@ import {
   adminDeletePromotion,
   getPromotions,
 } from "../services/api";
+import {
+  parsePromotionsCSV,
+  generatePromotionsSampleCSV,
+  exportPromotionsToCSV,
+  downloadCSV,
+} from "@/utils/csvHelper";
 import { colors } from "../theme";
 
 const emptyForm = {
@@ -215,15 +230,21 @@ const AdminPromotionsPage = () => {
     };
     try {
       if (editingId) {
-        await adminUpdatePromotion(editingId, payload);
+        const res = await adminUpdatePromotion(editingId, payload);
+        const updated = res || payload;
+        setPromos((prev) =>
+          prev.map((p) =>
+            p.id === editingId ? { ...p, ...payload, ...updated } : p
+          )
+        );
       } else {
-        await adminCreatePromotion(payload);
+        const created = await adminCreatePromotion(payload);
+        setPromos((prev) => [created || payload, ...prev]);
       }
       setForm(emptyForm);
       setEditingId(null);
       setShowForm(false);
       setPromotionImages([]);
-      await load();
     } catch (err) {
       setError(err.message || "Failed to save promotion");
     } finally {
@@ -256,25 +277,81 @@ const AdminPromotionsPage = () => {
   };
 
   const handleToggleActive = async (p) => {
+    const updated = { ...p, isActive: !p.isActive };
+    setPromos((prev) =>
+      prev.map((item) => (item.id === p.id ? updated : item))
+    );
     try {
-      await adminUpdatePromotion(p.id, {
-        ...p,
-        isActive: !p.isActive,
-      });
-      await load();
+      await adminUpdatePromotion(p.id, updated);
     } catch (err) {
       setError(err.message || "Failed to update status");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this promotion?")) return;
+    if (!window.confirm("Are you sure you want to delete this promotion?")) return;
     try {
+      setSaving(true);
       await adminDeletePromotion(id);
-      await load();
+      setPromos((prev) => prev.filter((p) => p.id !== id));
+      if (editingId === id) {
+        setShowForm(false);
+        setEditingId(null);
+      }
     } catch (err) {
       setError(err.message || "Failed to delete promotion");
+    } finally {
+      setSaving(false);
     }
+  };
+
+  const fileInputRef = useRef(null);
+
+  const handleDownloadSampleTemplate = () => {
+    const csvContent = generatePromotionsSampleCSV();
+    downloadCSV("kite-promotions-sample-template.csv", csvContent);
+  };
+
+  const handleExportPromotions = () => {
+    const csvContent = exportPromotionsToCSV(promos);
+    downloadCSV(
+      `kite-promotions-export-${new Date().toISOString().slice(0, 10)}.csv`,
+      csvContent
+    );
+  };
+
+  const handleImportCsvFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target?.result;
+        if (!text) return;
+        const merged = parsePromotionsCSV(text, promos);
+        if (!merged || !merged.length) {
+          alert("No valid promotions detected in file. Please check format.");
+          return;
+        }
+        const confirmImport = window.confirm(
+          `Found ${merged.length} promotions in CSV.\n\nDo you want to import and save these into the system now?`
+        );
+        if (!confirmImport) return;
+
+        setSaving(true);
+        for (const promo of merged) {
+          await adminUpdatePromotion(promo.id, promo);
+        }
+        setPromos(merged);
+        alert(`Successfully imported ${merged.length} promotions!`);
+      } catch (err) {
+        alert("Error importing CSV: " + (err.message || "Invalid file format"));
+      } finally {
+        setSaving(false);
+        e.target.value = "";
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -298,20 +375,70 @@ const AdminPromotionsPage = () => {
                 Create, update, and delete promotions with easy item and image fields.
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+            <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,.txt"
+                className="hidden"
+                onChange={handleImportCsvFile}
+              />
+              <button
+                type="button"
+                onClick={handleDownloadSampleTemplate}
+                className={`px-3.5 py-2.5 rounded-xl font-semibold text-xs border flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isDark
+                    ? "bg-slate-800/90 border-slate-700 text-slate-200 hover:bg-slate-700"
+                    : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs"
+                }`}
+                title="Download standard Excel/CSV template to fill out with promotions data"
+              >
+                <FaFileExcel className="text-emerald-500 text-sm" />
+                <span>Sample Excel Doc</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={saving}
+                className={`px-3.5 py-2.5 rounded-xl font-semibold text-xs border flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isDark
+                    ? "bg-slate-800/90 border-slate-700 text-pink-400 hover:bg-slate-700"
+                    : "bg-white border-slate-300 text-pink-700 hover:bg-pink-50 shadow-2xs"
+                }`}
+                title="Import promotions from Excel/CSV file"
+              >
+                <FaFileUpload className="text-pink-500 text-sm" />
+                <span>Import Excel/CSV</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleExportPromotions}
+                className={`px-3.5 py-2.5 rounded-xl font-semibold text-xs border flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isDark
+                    ? "bg-slate-800/90 border-slate-700 text-slate-200 hover:bg-slate-700"
+                    : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs"
+                }`}
+                title="Export all promotions to CSV file"
+              >
+                <FaFileDownload className="text-slate-400 text-sm" />
+                <span>Export CSV</span>
+              </button>
+
               <button
                 type="button"
                 onClick={handleSyncOfficialPackages}
                 disabled={syncing || loading}
-                className={`px-4 py-2.5 rounded-xl font-bold text-xs border transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`px-3.5 py-2.5 rounded-xl font-semibold text-xs border transition-all cursor-pointer flex items-center gap-1.5 ${
                   isDark
                     ? "bg-[#161D2E] border-[#1E293B] text-sky-400 hover:bg-[#1E293B]"
-                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs"
                 }`}
                 title="Restore and synchronize the 9 official rate-sheet packages"
               >
                 <span className={syncing ? "animate-spin" : ""}>↻</span>
-                <span>{syncing ? "Syncing..." : "Re-Sync 9 Official Packages"}</span>
+                <span>{syncing ? "Syncing..." : "Re-Sync Official Packages"}</span>
               </button>
 
               <button
@@ -325,9 +452,10 @@ const AdminPromotionsPage = () => {
                     setShowForm(true);
                   }
                 }}
-                className="px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-md shadow-pink-500/20 flex items-center gap-2 cursor-pointer transition-all"
+                className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-md shadow-pink-500/20 flex items-center gap-1.5 cursor-pointer transition-all"
               >
-                <span>{showForm && !editingId ? "✕ Close Form" : "+ Add New Promotion"}</span>
+                <FaPlus className="text-xs" />
+                <span>+ Add New Promotion</span>
               </button>
             </div>
           </div>
@@ -905,42 +1033,57 @@ const AdminPromotionsPage = () => {
 
                   {/* Sticky Footer */}
                   <div
-                    className={`sticky bottom-0 z-20 flex items-center justify-end gap-3 px-6 py-3.5 border-t ${
+                    className={`sticky bottom-0 z-20 flex items-center justify-between gap-3 px-6 py-3.5 border-t ${
                       isDark
                         ? "bg-[#111726]/95 backdrop-blur-sm border-slate-800"
                         : "bg-slate-50/95 backdrop-blur-sm border-slate-200"
                     }`}
                   >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingId(null);
-                        setForm(emptyForm);
-                        setPromotionImages([]);
-                        setShowForm(false);
-                      }}
-                      className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer ${
-                        isDark
-                          ? "border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white"
-                          : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-2xs"
-                      }`}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-md shadow-pink-500/25 transition-all cursor-pointer disabled:opacity-60 flex items-center gap-2"
-                    >
-                      {saving && <span className="animate-spin">↻</span>}
-                      <span>
-                        {saving
-                          ? "Saving..."
-                          : editingId
-                            ? "Update Promotion"
-                            : "Create Promotion"}
-                      </span>
-                    </button>
+                    <div>
+                      {editingId && (
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(editingId)}
+                          className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-red-200 text-red-600 hover:bg-red-50 bg-white dark:bg-red-950/40 dark:border-red-900/60 dark:text-red-400 cursor-pointer transition-all flex items-center gap-1.5"
+                          title="Delete this entire promotion package"
+                        >
+                          <FaTrashAlt className="text-xs" />
+                          <span>Delete Promotion</span>
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingId(null);
+                          setForm(emptyForm);
+                          setPromotionImages([]);
+                          setShowForm(false);
+                        }}
+                        className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer ${
+                          isDark
+                            ? "border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white"
+                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-2xs"
+                        }`}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={saving}
+                        className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-md shadow-pink-500/25 transition-all cursor-pointer disabled:opacity-60 flex items-center gap-2"
+                      >
+                        {saving && <span className="animate-spin">↻</span>}
+                        <span>
+                          {saving
+                            ? "Saving..."
+                            : editingId
+                              ? "Update Promotion"
+                              : "Create Promotion"}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>

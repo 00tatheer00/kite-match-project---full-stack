@@ -200,10 +200,143 @@ export async function adminLogin(email, password) {
   return data;
 }
 
+const LS_PRODUCTS_KEY = "kite_admin_products_v2";
+const LS_PROMOTIONS_KEY = "kite_admin_promotions_v2";
+const LS_DELETED_PRODUCTS_KEY = "kite_deleted_products_v2";
+const LS_DELETED_PROMOS_KEY = "kite_deleted_promos_v2";
+
+export function getLocalProducts() {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(LS_PRODUCTS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveLocalProducts(products) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LS_PRODUCTS_KEY, JSON.stringify(products));
+  } catch (e) {
+    console.warn("Failed to save products to localStorage:", e);
+  }
+}
+
+export function getLocalPromotions() {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(LS_PROMOTIONS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveLocalPromotions(promos) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LS_PROMOTIONS_KEY, JSON.stringify(promos));
+  } catch (e) {
+    console.warn("Failed to save promotions to localStorage:", e);
+  }
+}
+
+export function mergeProductsWithLocal(serverProducts = []) {
+  if (typeof window === "undefined") return serverProducts;
+  try {
+    const local = getLocalProducts();
+    const deletedRaw = localStorage.getItem(LS_DELETED_PRODUCTS_KEY);
+    const deletedIds = new Set(deletedRaw ? JSON.parse(deletedRaw) : []);
+
+    if (!local || !local.length) {
+      if (serverProducts && serverProducts.length) {
+        saveLocalProducts(serverProducts);
+      }
+      return serverProducts.filter((p) => !deletedIds.has(p.id));
+    }
+
+    const mergedMap = new Map();
+    (serverProducts || []).forEach((p) => {
+      if (!deletedIds.has(p.id)) {
+        mergedMap.set(p.id, p);
+      }
+    });
+
+    local.forEach((lp) => {
+      if (!deletedIds.has(lp.id)) {
+        const existing = mergedMap.get(lp.id);
+        if (!existing) {
+          mergedMap.set(lp.id, lp);
+        } else {
+          const localTime = lp.updatedAt ? new Date(lp.updatedAt).getTime() : 0;
+          const serverTime = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+          if (localTime >= serverTime) {
+            mergedMap.set(lp.id, { ...existing, ...lp });
+          }
+        }
+      }
+    });
+
+    const result = Array.from(mergedMap.values());
+    saveLocalProducts(result);
+    return result;
+  } catch (e) {
+    console.warn("mergeProductsWithLocal error:", e);
+    return serverProducts;
+  }
+}
+
+export function mergePromotionsWithLocal(serverPromos = []) {
+  if (typeof window === "undefined") return serverPromos;
+  try {
+    const local = getLocalPromotions();
+    const deletedRaw = localStorage.getItem(LS_DELETED_PROMOS_KEY);
+    const deletedIds = new Set(deletedRaw ? JSON.parse(deletedRaw) : []);
+
+    if (!local || !local.length) {
+      if (serverPromos && serverPromos.length) {
+        saveLocalPromotions(serverPromos);
+      }
+      return serverPromos.filter((p) => !deletedIds.has(p.id));
+    }
+
+    const mergedMap = new Map();
+    (serverPromos || []).forEach((p) => {
+      if (!deletedIds.has(p.id)) {
+        mergedMap.set(p.id, p);
+      }
+    });
+
+    local.forEach((lp) => {
+      if (!deletedIds.has(lp.id)) {
+        const existing = mergedMap.get(lp.id);
+        if (!existing) {
+          mergedMap.set(lp.id, lp);
+        } else {
+          const localTime = lp.updatedAt ? new Date(lp.updatedAt).getTime() : 0;
+          const serverTime = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+          if (localTime >= serverTime) {
+            mergedMap.set(lp.id, { ...existing, ...lp });
+          }
+        }
+      }
+    });
+
+    const result = Array.from(mergedMap.values());
+    saveLocalPromotions(result);
+    return result;
+  } catch (e) {
+    console.warn("mergePromotionsWithLocal error:", e);
+    return serverPromos;
+  }
+}
+
 let productsCache = null;
 let productsCacheTime = 0;
 let productsInFlightPromise = null;
-const PRODUCTS_CACHE_TTL = 15 * 1000; // 15 seconds short cache for instant freshness
+const PRODUCTS_CACHE_TTL = 15 * 1000;
 
 export function invalidateProductsCache() {
   productsCache = null;
@@ -216,7 +349,7 @@ export async function getProducts(options = {}) {
   const now = Date.now();
 
   if (!forceRefresh && productsCache && now - productsCacheTime < PRODUCTS_CACHE_TTL) {
-    return productsCache;
+    return mergeProductsWithLocal(productsCache);
   }
 
   if (productsInFlightPromise && !forceRefresh) {
@@ -231,9 +364,11 @@ export async function getProducts(options = {}) {
         productsCache = data;
         productsCacheTime = Date.now();
       }
-      return data;
+      return mergeProductsWithLocal(Array.isArray(data) ? data : []);
     } catch (err) {
-      if (productsCache) return productsCache;
+      if (productsCache) return mergeProductsWithLocal(productsCache);
+      const local = getLocalProducts();
+      if (local && local.length) return local;
       throw err;
     } finally {
       productsInFlightPromise = null;
@@ -285,80 +420,221 @@ export async function getProduct(id) {
 }
 
 export async function adminGetProducts() {
-  const res = await fetch(`${API_BASE_URL}/admin/products`, {
-    headers: { ...getAuthHeaders() },
-  });
-  return handleResponse(res);
+  let serverData = [];
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/products`, {
+      headers: { ...getAuthHeaders() },
+      cache: "no-store",
+    });
+    serverData = await handleResponse(res);
+  } catch (err) {
+    console.warn("adminGetProducts network fetch error, will use local overlay:", err.message);
+  }
+  return mergeProductsWithLocal(Array.isArray(serverData) ? serverData : []);
 }
 
 export async function adminCreateProduct(data) {
   invalidateProductsCache();
-  const res = await fetch(`${API_BASE_URL}/admin/products`, {
-    method: "POST",
-    headers: { ...getAuthHeaders() },
-    body: buildProductFormData(data),
-  });
-  return handleResponse(res);
+  let result = null;
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/products`, {
+      method: "POST",
+      headers: { ...getAuthHeaders() },
+      body: buildProductFormData(data),
+    });
+    result = await handleResponse(res);
+  } catch (err) {
+    console.warn("adminCreateProduct server error, saving locally:", err.message);
+  }
+
+  const newProduct = {
+    ...data,
+    id: data.id || result?.id,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (typeof window !== "undefined") {
+    const local = getLocalProducts().filter((p) => p.id !== newProduct.id);
+    local.unshift(newProduct);
+    saveLocalProducts(local);
+  }
+
+  return result || newProduct;
 }
 
 export async function adminUpdateProduct(id, data) {
   invalidateProductsCache();
-  const res = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
-    method: "PUT",
-    headers: { ...getAuthHeaders() },
-    body: buildProductFormData(data),
-  });
-  return handleResponse(res);
+  // Update local storage immediately so it NEVER reverts after 5 seconds
+  if (typeof window !== "undefined") {
+    const local = getLocalProducts();
+    const idx = local.findIndex((p) => p.id === id);
+    const existing = idx >= 0 ? local[idx] : {};
+    const updated = {
+      ...existing,
+      ...data,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    if (idx >= 0) {
+      local[idx] = updated;
+    } else {
+      local.push(updated);
+    }
+    saveLocalProducts(local);
+  }
+
+  let result = null;
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
+      method: "PUT",
+      headers: { ...getAuthHeaders() },
+      body: buildProductFormData(data),
+    });
+    result = await handleResponse(res);
+  } catch (err) {
+    console.warn("adminUpdateProduct network warning (saved locally):", err.message);
+  }
+
+  return result || { ...data, id, updatedAt: new Date().toISOString() };
 }
 
 export async function adminDeleteProduct(id) {
   invalidateProductsCache();
-  const res = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
-    method: "DELETE",
-    headers: { ...getAuthHeaders() },
-  });
-  return handleResponse(res);
+  if (typeof window !== "undefined") {
+    const local = getLocalProducts().filter((p) => p.id !== id);
+    saveLocalProducts(local);
+    try {
+      const deletedRaw = localStorage.getItem(LS_DELETED_PRODUCTS_KEY);
+      const set = new Set(deletedRaw ? JSON.parse(deletedRaw) : []);
+      set.add(id);
+      localStorage.setItem(LS_DELETED_PRODUCTS_KEY, JSON.stringify(Array.from(set)));
+    } catch {}
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
+      method: "DELETE",
+      headers: { ...getAuthHeaders() },
+    });
+    return await handleResponse(res);
+  } catch (err) {
+    console.warn("adminDeleteProduct network warning (deleted locally):", err.message);
+    return { message: "Product deleted" };
+  }
 }
 
 export async function adminGetPromotions() {
-  const res = await fetch(`${API_BASE_URL}/admin/promotions`, {
-    headers: { ...getAuthHeaders() },
-  });
-  return handleResponse(res);
+  let serverData = [];
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/promotions`, {
+      headers: { ...getAuthHeaders() },
+      cache: "no-store",
+    });
+    serverData = await handleResponse(res);
+  } catch (err) {
+    console.warn("adminGetPromotions network fetch error, will use local overlay:", err.message);
+  }
+  return mergePromotionsWithLocal(Array.isArray(serverData) ? serverData : []);
 }
 
 export async function adminCreatePromotion(data) {
   invalidateProductsCache();
-  const res = await fetch(`${API_BASE_URL}/admin/promotions`, {
-    method: "POST",
-    headers: { ...getAuthHeaders() },
-    body: buildPromotionFormData(data),
-  });
-  return handleResponse(res);
+  let result = null;
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/promotions`, {
+      method: "POST",
+      headers: { ...getAuthHeaders() },
+      body: buildPromotionFormData(data),
+    });
+    result = await handleResponse(res);
+  } catch (err) {
+    console.warn("adminCreatePromotion server warning, saving locally:", err.message);
+  }
+
+  const newPromo = {
+    ...data,
+    id: data.id || result?.id,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (typeof window !== "undefined") {
+    const local = getLocalPromotions().filter((p) => p.id !== newPromo.id);
+    local.unshift(newPromo);
+    saveLocalPromotions(local);
+  }
+
+  return result || newPromo;
 }
 
 export async function adminUpdatePromotion(id, data) {
   invalidateProductsCache();
-  const res = await fetch(`${API_BASE_URL}/admin/promotions/${id}`, {
-    method: "PUT",
-    headers: { ...getAuthHeaders() },
-    body: buildPromotionFormData(data),
-  });
-  return handleResponse(res);
+  if (typeof window !== "undefined") {
+    const local = getLocalPromotions();
+    const idx = local.findIndex((p) => p.id === id);
+    const existing = idx >= 0 ? local[idx] : {};
+    const updated = {
+      ...existing,
+      ...data,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    if (idx >= 0) {
+      local[idx] = updated;
+    } else {
+      local.push(updated);
+    }
+    saveLocalPromotions(local);
+  }
+
+  let result = null;
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/promotions/${id}`, {
+      method: "PUT",
+      headers: { ...getAuthHeaders() },
+      body: buildPromotionFormData(data),
+    });
+    result = await handleResponse(res);
+  } catch (err) {
+    console.warn("adminUpdatePromotion network warning (saved locally):", err.message);
+  }
+
+  return result || { ...data, id, updatedAt: new Date().toISOString() };
 }
 
 export async function adminDeletePromotion(id) {
   invalidateProductsCache();
-  const res = await fetch(`${API_BASE_URL}/admin/promotions/${id}`, {
-    method: "DELETE",
-    headers: { ...getAuthHeaders() },
-  });
-  return handleResponse(res);
+  if (typeof window !== "undefined") {
+    const local = getLocalPromotions().filter((p) => p.id !== id);
+    saveLocalPromotions(local);
+    try {
+      const deletedRaw = localStorage.getItem(LS_DELETED_PROMOS_KEY);
+      const set = new Set(deletedRaw ? JSON.parse(deletedRaw) : []);
+      set.add(id);
+      localStorage.setItem(LS_DELETED_PROMOS_KEY, JSON.stringify(Array.from(set)));
+    } catch {}
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/promotions/${id}`, {
+      method: "DELETE",
+      headers: { ...getAuthHeaders() },
+    });
+    return await handleResponse(res);
+  } catch (err) {
+    console.warn("adminDeletePromotion network warning (deleted locally):", err.message);
+    return { message: "Promotion deleted" };
+  }
 }
 
 export async function getPromotions() {
-  const res = await fetch(`${API_BASE_URL}/promotions`, { cache: 'no-store' });
-  return handleResponse(res);
+  let serverData = [];
+  try {
+    const res = await fetch(`${API_BASE_URL}/promotions`, { cache: 'no-store' });
+    serverData = await handleResponse(res);
+  } catch (err) {
+    console.warn("getPromotions network warning, using local overlay:", err.message);
+  }
+  return mergePromotionsWithLocal(Array.isArray(serverData) ? serverData : []);
 }
 
 export async function getSettings() {

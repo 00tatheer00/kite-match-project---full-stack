@@ -23,13 +23,29 @@ function loadInitialData() {
     }
   }
 
-  // 2. Read bundled db.json (source of truth from codebase)
+  // 2. Read writable tmp directory first (contains runtime user edits & additions)
+  let tmpData = null;
+  if (fs.existsSync(TMP_DB_PATH)) {
+    try {
+      const raw = fs.readFileSync(TMP_DB_PATH, 'utf-8');
+      tmpData = JSON.parse(raw);
+      if (
+        tmpData &&
+        Array.isArray(tmpData.products) &&
+        tmpData.products.length > 0 &&
+        Array.isArray(tmpData.promotions)
+      ) {
+        global.__kite_db_cache = tmpData;
+        return tmpData;
+      }
+    } catch {}
+  }
+
+  // 3. Read bundled db.json (source of truth from codebase)
   ensureDataDir();
   let dbData = null;
-  let dbMtime = 0;
   if (fs.existsSync(DB_PATH)) {
     try {
-      dbMtime = fs.statSync(DB_PATH).mtimeMs;
       const raw = fs.readFileSync(DB_PATH, 'utf-8');
       dbData = JSON.parse(raw);
     } catch (e) {
@@ -37,26 +53,12 @@ function loadInitialData() {
     }
   }
 
-  // 3. Read writable tmp directory (serverless container cache)
-  let tmpData = null;
-  let tmpMtime = 0;
-  if (fs.existsSync(TMP_DB_PATH)) {
-    try {
-      tmpMtime = fs.statSync(TMP_DB_PATH).mtimeMs;
-      const raw = fs.readFileSync(TMP_DB_PATH, 'utf-8');
-      tmpData = JSON.parse(raw);
-    } catch {}
-  }
-
-  // If bundled DB_PATH exists and is newer than TMP_DB_PATH (or tmp is missing/invalid)
   if (dbData && Array.isArray(dbData.products) && dbData.products.length > 0) {
-    if (!tmpData || dbMtime >= tmpMtime) {
-      global.__kite_db_cache = dbData;
-      try {
-        fs.writeFileSync(TMP_DB_PATH, JSON.stringify(dbData, null, 2), 'utf-8');
-      } catch {}
-      return dbData;
-    }
+    global.__kite_db_cache = dbData;
+    try {
+      fs.writeFileSync(TMP_DB_PATH, JSON.stringify(dbData, null, 2), 'utf-8');
+    } catch {}
+    return dbData;
   }
 
   if (tmpData && Array.isArray(tmpData.products) && Array.isArray(tmpData.promotions)) {

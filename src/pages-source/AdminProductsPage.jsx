@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
 import RequireAdminAuth from "../components/admin/RequireAdminAuth";
 import { useAdminTheme } from "@/context/AdminThemeContext";
@@ -11,7 +11,10 @@ import {
   FaEdit,
   FaTrashAlt,
   FaPlus,
-  FaTag
+  FaTag,
+  FaFileDownload,
+  FaFileUpload,
+  FaFileExcel
 } from "react-icons/fa";
 import {
   adminGetProducts,
@@ -19,6 +22,12 @@ import {
   adminUpdateProduct,
   adminDeleteProduct,
 } from "../services/api";
+import {
+  parseProductsCSV,
+  generateProductsSampleCSV,
+  exportProductsToCSV,
+  downloadCSV,
+} from "@/utils/csvHelper";
 import { colors } from "../theme";
 
 const emptyForm = {
@@ -229,6 +238,83 @@ const AdminProductsPage = () => {
         if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 150);
     }
+  };
+
+  const fileInputRef = useRef(null);
+
+  const handleDeleteSku = async (sku) => {
+    const parentProd = products.find((p) => p.id === sku.productId) || sku.product;
+    if (!parentProd) return;
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete SKU "${sku.variant.name}" (${sku.variant.detail || ""}) from ${sku.productTitle}?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      setSaving(true);
+      const nextVariants = (parentProd.variants || []).filter(
+        (_, idx) => idx !== sku.variantIndex
+      );
+      const updatedProduct = {
+        ...parentProd,
+        variants: nextVariants,
+      };
+      await adminUpdateProduct(parentProd.id, updatedProduct);
+      setProducts((prev) =>
+        prev.map((p) => (p.id === parentProd.id ? updatedProduct : p))
+      );
+    } catch (err) {
+      setError(err.message || "Failed to delete SKU");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDownloadSampleTemplate = () => {
+    const csvContent = generateProductsSampleCSV();
+    downloadCSV("kite-products-sample-template.csv", csvContent);
+  };
+
+  const handleExportProducts = () => {
+    const csvContent = exportProductsToCSV(products);
+    downloadCSV(
+      `kite-products-export-${new Date().toISOString().slice(0, 10)}.csv`,
+      csvContent
+    );
+  };
+
+  const handleImportCsvFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target?.result;
+        if (!text) return;
+        const merged = parseProductsCSV(text, products);
+        if (!merged || !merged.length) {
+          alert("No valid products detected in file. Please check format.");
+          return;
+        }
+        const confirmImport = window.confirm(
+          `Found ${merged.length} products with variants in CSV.\n\nDo you want to import and save these into the system now?`
+        );
+        if (!confirmImport) return;
+
+        setSaving(true);
+        for (const prod of merged) {
+          await adminUpdateProduct(prod.id, prod);
+        }
+        setProducts(merged);
+        alert(`Successfully imported ${merged.length} products!`);
+      } catch (err) {
+        alert("Error importing CSV: " + (err.message || "Invalid file format"));
+      } finally {
+        setSaving(false);
+        e.target.value = "";
+      }
+    };
+    reader.readAsText(file);
   };
 
   const load = async () => {
@@ -553,9 +639,16 @@ const AdminProductsPage = () => {
       payload.brandImageFiles = compactBrandImageFiles;
 
       if (editingId) {
-        await adminUpdateProduct(editingId, payload);
+        const res = await adminUpdateProduct(editingId, payload);
+        const updated = res || payload;
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === editingId ? { ...p, ...payload, ...updated } : p
+          )
+        );
       } else {
-        await adminCreateProduct(payload);
+        const created = await adminCreateProduct(payload);
+        setProducts((prev) => [created || payload, ...prev]);
       }
       setForm(emptyForm);
       setEditingId(null);
@@ -563,7 +656,6 @@ const AdminProductsPage = () => {
       setProductImages([]);
       setVariantImageFiles({});
       setBrandImageFiles({});
-      await load();
     } catch (err) {
       setError(err.message || "Failed to save product");
     } finally {
@@ -616,12 +708,19 @@ const AdminProductsPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this product?")) return;
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
+      setSaving(true);
       await adminDeleteProduct(id);
-      await load();
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      if (editingId === id) {
+        setShowForm(false);
+        setEditingId(null);
+      }
     } catch (err) {
       setError(err.message || "Failed to delete product");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -646,21 +745,74 @@ const AdminProductsPage = () => {
                 Create, update, and delete products with variants, facilities, and images.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (showForm && !editingId) {
-                  setShowForm(false);
-                } else {
-                  setEditingId(null);
-                  setForm(emptyForm);
-                  setShowForm(true);
-                }
-              }}
-              className="px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white shadow-md shadow-sky-500/20 flex items-center gap-2 cursor-pointer self-start sm:self-auto transition-all"
-            >
-              <span>{showForm && !editingId ? "✕ Close Form" : "+ Add New Product"}</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,.txt"
+                className="hidden"
+                onChange={handleImportCsvFile}
+              />
+              <button
+                type="button"
+                onClick={handleDownloadSampleTemplate}
+                className={`px-3.5 py-2.5 rounded-xl font-semibold text-xs border flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isDark
+                    ? "bg-slate-800/90 border-slate-700 text-slate-200 hover:bg-slate-700"
+                    : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs"
+                }`}
+                title="Download standard Excel/CSV template to fill out with products data"
+              >
+                <FaFileExcel className="text-emerald-500 text-sm" />
+                <span>Sample Excel Doc</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={saving}
+                className={`px-3.5 py-2.5 rounded-xl font-semibold text-xs border flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isDark
+                    ? "bg-slate-800/90 border-slate-700 text-sky-400 hover:bg-slate-700"
+                    : "bg-white border-slate-300 text-sky-700 hover:bg-sky-50 shadow-2xs"
+                }`}
+                title="Import products from Excel/CSV file"
+              >
+                <FaFileUpload className="text-sky-500 text-sm" />
+                <span>Import Excel/CSV</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleExportProducts}
+                className={`px-3.5 py-2.5 rounded-xl font-semibold text-xs border flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isDark
+                    ? "bg-slate-800/90 border-slate-700 text-slate-200 hover:bg-slate-700"
+                    : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs"
+                }`}
+                title="Export all products to CSV file"
+              >
+                <FaFileDownload className="text-slate-400 text-sm" />
+                <span>Export CSV</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (showForm && !editingId) {
+                    setShowForm(false);
+                  } else {
+                    setEditingId(null);
+                    setForm(emptyForm);
+                    setShowForm(true);
+                  }
+                }}
+                className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white shadow-md shadow-sky-500/20 flex items-center gap-1.5 cursor-pointer transition-all"
+              >
+                <FaPlus className="text-xs" />
+                <span>+ Add New Product</span>
+              </button>
+            </div>
           </div>
 
           {loading ? (
@@ -822,19 +974,30 @@ const AdminProductsPage = () => {
                               </span>
                             </td>
                             <td className="py-3 pr-4 pl-4 text-right">
-                              <button
-                                type="button"
-                                onClick={() => handleEditSku(sku)}
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-2xs ml-auto ${
-                                  isDark
-                                    ? "bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
-                                    : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400"
-                                }`}
-                                title="Edit this SKU / price in parent product"
-                              >
-                                <FaEdit className="text-slate-400 text-xs" />
-                                <span>Edit Price</span>
-                              </button>
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleEditSku(sku)}
+                                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
+                                    isDark
+                                      ? "bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
+                                      : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400"
+                                  }`}
+                                  title="Edit this SKU / price in parent product"
+                                >
+                                  <FaEdit className="text-slate-400 text-xs" />
+                                  <span>Edit Price</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteSku(sku)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50 bg-white dark:bg-red-950/40 dark:border-red-900/60 dark:text-red-400 cursor-pointer shadow-2xs transition-all"
+                                  title="Delete this SKU variant"
+                                >
+                                  <FaTrashAlt className="text-[11px]" />
+                                  <span>Delete SKU</span>
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -890,17 +1053,26 @@ const AdminProductsPage = () => {
                             <span className="text-xs text-slate-400 mr-0.5">Rs.</span>
                             {sku.variant.price ?? "—"}
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => handleEditSku(sku)}
-                            className={`mt-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
-                              isDark
-                                ? "bg-slate-800 border-slate-700 text-slate-200"
-                                : "bg-white border-slate-300 text-slate-700 shadow-2xs"
-                            }`}
-                          >
-                            Edit
-                          </button>
+                          <div className="flex items-center gap-1.5 mt-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleEditSku(sku)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                                isDark
+                                  ? "bg-slate-800 border-slate-700 text-slate-200"
+                                  : "bg-white border-slate-300 text-slate-700 shadow-2xs"
+                              }`}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSku(sku)}
+                              className="px-2.5 py-1 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50 bg-white dark:bg-red-950/40 dark:border-red-900/60 dark:text-red-400"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1806,43 +1978,58 @@ const AdminProductsPage = () => {
 
                   {/* Sticky Footer */}
                   <div
-                    className={`sticky bottom-0 z-20 flex items-center justify-end gap-3 px-6 py-3.5 border-t ${
+                    className={`sticky bottom-0 z-20 flex items-center justify-between gap-3 px-6 py-3.5 border-t ${
                       isDark
                         ? "bg-[#111726]/95 backdrop-blur-sm border-slate-800"
                         : "bg-slate-50/95 backdrop-blur-sm border-slate-200"
                     }`}
                   >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingId(null);
-                        setForm(emptyForm);
-                        setProductImages([]);
-                        setVariantImageFiles({});
-                        setShowForm(false);
-                      }}
-                      className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer ${
-                        isDark
-                          ? "border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white"
-                          : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-2xs"
-                      }`}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#00AEEF] hover:bg-[#0095CC] shadow-md shadow-sky-500/25 transition-all cursor-pointer disabled:opacity-60 flex items-center gap-2"
-                    >
-                      {saving && <span className="animate-spin">↻</span>}
-                      <span>
-                        {saving
-                          ? "Saving..."
-                          : editingId
-                            ? "Update Product"
-                            : "Create Product"}
-                      </span>
-                    </button>
+                    <div>
+                      {editingId && (
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(editingId)}
+                          className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-red-200 text-red-600 hover:bg-red-50 bg-white dark:bg-red-950/40 dark:border-red-900/60 dark:text-red-400 cursor-pointer transition-all flex items-center gap-1.5"
+                          title="Delete this entire product"
+                        >
+                          <FaTrashAlt className="text-xs" />
+                          <span>Delete Product</span>
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingId(null);
+                          setForm(emptyForm);
+                          setProductImages([]);
+                          setVariantImageFiles({});
+                          setShowForm(false);
+                        }}
+                        className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer ${
+                          isDark
+                            ? "border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white"
+                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-2xs"
+                        }`}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={saving}
+                        className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#00AEEF] hover:bg-[#0095CC] shadow-md shadow-sky-500/25 transition-all cursor-pointer disabled:opacity-60 flex items-center gap-2"
+                      >
+                        {saving && <span className="animate-spin">↻</span>}
+                        <span>
+                          {saving
+                            ? "Saving..."
+                            : editingId
+                              ? "Update Product"
+                              : "Create Product"}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>
