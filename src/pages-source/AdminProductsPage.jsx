@@ -1,9 +1,18 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
 import RequireAdminAuth from "../components/admin/RequireAdminAuth";
 import { useAdminTheme } from "@/context/AdminThemeContext";
+import {
+  FaBoxOpen,
+  FaLayerGroup,
+  FaSearch,
+  FaEdit,
+  FaTrashAlt,
+  FaPlus,
+  FaTag
+} from "react-icons/fa";
 import {
   adminGetProducts,
   adminCreateProduct,
@@ -95,6 +104,98 @@ const AdminProductsPage = () => {
   const [productImages, setProductImages] = useState([]);
   const [variantImageFiles, setVariantImageFiles] = useState({});
   const [brandImageFiles, setBrandImageFiles] = useState({});
+  const [activeTab, setActiveTab] = useState("skus");
+  const [skuSearch, setSkuSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const allSkus = useMemo(() => {
+    const list = [];
+    products.forEach((prod) => {
+      if (Array.isArray(prod.variants) && prod.variants.length > 0) {
+        prod.variants.forEach((v, vIdx) => {
+          const matchedImg = prod.variantImages?.find(
+            (vi) => vi?.name?.trim().toLowerCase() === v?.name?.trim().toLowerCase()
+          )?.image;
+          list.push({
+            id: `${prod.id}-${v.name}`,
+            productId: prod.id,
+            productTitle: prod.title,
+            brandName: prod.title,
+            variantIndex: vIdx,
+            variant: v,
+            category: prod.category || prod.navGroup || "Detergents",
+            image: matchedImg || prod.image,
+            tagline: prod.tagline || "",
+            color: prod.color || "#00AEEF",
+            product: prod,
+          });
+        });
+      }
+
+      if (Array.isArray(prod.brands) && prod.brands.length > 0) {
+        prod.brands.forEach((brand, bIdx) => {
+          if (Array.isArray(brand.variants)) {
+            brand.variants.forEach((v, vIdx) => {
+              list.push({
+                id: `${prod.id}-${brand.name}-${v.name}`,
+                productId: prod.id,
+                productTitle: prod.title,
+                brandName: brand.name,
+                brandIndex: bIdx,
+                variantIndex: vIdx,
+                variant: v,
+                category: "Safety Matches",
+                image: brand.image || prod.image,
+                tagline: brand.tagline || "",
+                color: "#ED028C",
+                product: prod,
+              });
+            });
+          }
+        });
+      }
+    });
+    return list;
+  }, [products]);
+
+  const filteredSkus = useMemo(() => {
+    return allSkus.filter((sku) => {
+      const q = skuSearch.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        sku.variant?.name?.toLowerCase().includes(q) ||
+        sku.variant?.detail?.toLowerCase().includes(q) ||
+        sku.variant?.packing?.toLowerCase().includes(q) ||
+        sku.brandName?.toLowerCase().includes(q) ||
+        sku.category?.toLowerCase().includes(q) ||
+        String(sku.variant?.price || "").includes(q);
+
+      const matchesCategory =
+        selectedCategory === "all" ||
+        sku.category?.toLowerCase() === selectedCategory.toLowerCase();
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [allSkus, skuSearch, selectedCategory]);
+
+  const categories = useMemo(() => {
+    const set = new Set();
+    allSkus.forEach((s) => {
+      if (s.category) set.add(s.category);
+    });
+    return ["all", ...Array.from(set)];
+  }, [allSkus]);
+
+  const handleEditSku = (sku) => {
+    const parentProd = products.find((p) => p.id === sku.productId) || sku.product;
+    if (parentProd) {
+      handleEdit(parentProd);
+      setTimeout(() => {
+        const el = document.getElementById("variants-section");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 150);
+    }
+  };
 
   const load = async () => {
     try {
@@ -517,124 +618,332 @@ const AdminProductsPage = () => {
             <div className={`border rounded-2xl p-5 md:p-6 transition-colors shadow-sm ${
               isDark ? "bg-[#111726] border-[#1E293B]" : "bg-white border-slate-200"
             }`}>
-              <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className={`border-b text-xs font-bold uppercase tracking-wider ${
-                      isDark ? "border-[#1E293B] text-slate-300" : "border-slate-200 text-slate-700"
-                    }`}>
-                      <th className="text-left py-3 pr-4">ID</th>
-                      <th className="text-left py-3 pr-4">Title</th>
-                      <th className="text-left py-3 pr-4">Category</th>
-                      <th className="text-left py-3 pr-4">Type</th>
-                      <th className="text-left py-3 pr-4">Updated</th>
-                      <th className="text-right py-3 pl-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className={isDark ? "divide-y divide-[#1E293B]/60 text-slate-200" : "divide-y divide-slate-100 text-slate-800"}>
+              {/* VIEW SWITCHER TABS & SKU SEARCH */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b pb-5 border-slate-200 dark:border-[#1E293B]">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("skus")}
+                    className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
+                      activeTab === "skus"
+                        ? "bg-[#00AEEF] text-white shadow-md shadow-sky-500/20"
+                        : isDark
+                        ? "bg-[#161D2E] text-slate-300 hover:bg-[#1E293B]"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}
+                  >
+                    <FaBoxOpen className="text-sm" />
+                    <span>Factory SKUs &amp; Sizes ({allSkus.length})</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("products")}
+                    className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
+                      activeTab === "products"
+                        ? "bg-[#00AEEF] text-white shadow-md shadow-sky-500/20"
+                        : isDark
+                        ? "bg-[#161D2E] text-slate-300 hover:bg-[#1E293B]"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}
+                  >
+                    <FaLayerGroup className="text-sm" />
+                    <span>Main Product Lines ({products.length})</span>
+                  </button>
+                </div>
+
+                {activeTab === "skus" && (
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    {/* Category Filter Pills */}
+                    <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setSelectedCategory(cat)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize whitespace-nowrap transition-all cursor-pointer ${
+                            selectedCategory === cat
+                              ? "bg-sky-500/20 text-[#00AEEF] border border-[#00AEEF]/40"
+                              : isDark
+                              ? "text-slate-400 hover:text-slate-200"
+                              : "text-slate-600 hover:text-slate-900"
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Search Input */}
+                    <div className="relative w-full sm:w-60">
+                      <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
+                      <input
+                        type="text"
+                        value={skuSearch}
+                        onChange={(e) => setSkuSearch(e.target.value)}
+                        placeholder="Search SKU name, price, bar..."
+                        className={`w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border outline-none transition-colors ${
+                          isDark
+                            ? "bg-[#161D2E] border-[#1E293B] text-white focus:border-[#00AEEF]"
+                            : "bg-slate-50 border-slate-200 text-slate-800 focus:border-[#00AEEF]"
+                        }`}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* ========================================================================= */}
+              {/* TAB 1: ALL FACTORY SKUS & INDIVIDUAL SIZES TABLE */}
+              {/* ========================================================================= */}
+              {activeTab === "skus" && (
+                <>
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                      <thead>
+                        <tr className={`border-b text-xs font-bold uppercase tracking-wider ${
+                          isDark ? "border-[#1E293B] text-slate-300" : "border-slate-200 text-slate-700"
+                        }`}>
+                          <th className="text-left py-3 pr-3 w-14">Image</th>
+                          <th className="text-left py-3 pr-4">SKU / Variant Name</th>
+                          <th className="text-left py-3 pr-4">Parent Product / Brand</th>
+                          <th className="text-left py-3 pr-4">Category</th>
+                          <th className="text-left py-3 pr-4">Packing / Details</th>
+                          <th className="text-left py-3 pr-4 font-mono">Price (Rs.)</th>
+                          <th className="text-right py-3 pl-4">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className={isDark ? "divide-y divide-[#1E293B]/60 text-slate-200" : "divide-y divide-slate-100 text-slate-800"}>
+                        {filteredSkus.map((sku) => (
+                          <tr key={sku.id} className={`transition-colors ${isDark ? "hover:bg-[#161D2E]" : "hover:bg-slate-50"}`}>
+                            <td className="py-2.5 pr-3">
+                              <div className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700">
+                                {sku.image ? (
+                                  <img
+                                    src={sku.image?.src || sku.image}
+                                    alt={sku.variant.name}
+                                    className="w-full h-full object-contain p-1"
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <FaBoxOpen className="text-slate-400 text-xs" />
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-2.5 pr-4 font-bold text-slate-900 dark:text-white">
+                              <div className="flex items-center gap-1.5">
+                                <span>{sku.variant.name}</span>
+                                {sku.variant.detail && (
+                                  <span className="text-[11px] font-normal px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                    {sku.variant.detail}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-2.5 pr-4 text-xs font-semibold text-sky-600 dark:text-sky-400">
+                              {sku.brandName}
+                            </td>
+                            <td className="py-2.5 pr-4">
+                              <span className="text-xs px-2 py-0.5 rounded-md font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                                {sku.category}
+                              </span>
+                            </td>
+                            <td className="py-2.5 pr-4 text-xs text-slate-600 dark:text-slate-400">
+                              {sku.variant.packing || "—"}
+                            </td>
+                            <td className="py-2.5 pr-4 font-mono font-black text-sky-500 whitespace-nowrap">
+                              Rs. {sku.variant.price ?? "—"}
+                            </td>
+                            <td className="py-2.5 pl-4 text-right">
+                              <button
+                                type="button"
+                                onClick={() => handleEditSku(sku)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 border border-sky-500/30 transition-all cursor-pointer ml-auto"
+                                title="Edit this SKU / price in parent product"
+                              >
+                                <FaEdit className="text-[11px]" />
+                                <span>Edit Price / Details</span>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredSkus.length === 0 && (
+                          <tr>
+                            <td colSpan={7} className={`py-8 text-center text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                              No matching factory SKUs found. Try another search or filter.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile SKU Cards */}
+                  <div className="md:hidden space-y-3">
+                    {filteredSkus.map((sku) => (
+                      <div
+                        key={sku.id}
+                        className={`border rounded-xl p-3.5 flex items-center justify-between gap-3 ${
+                          isDark ? "border-[#1E293B] bg-[#161D2E]" : "border-slate-200 bg-slate-50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0">
+                            {sku.image ? (
+                              <img src={sku.image?.src || sku.image} alt={sku.variant.name} className="w-full h-full object-contain p-1" />
+                            ) : (
+                              <FaBoxOpen className="text-slate-400" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1">
+                              <span>{sku.variant.name}</span>
+                              {sku.variant.detail && <span className="text-[10px] text-slate-500">({sku.variant.detail})</span>}
+                            </div>
+                            <p className="text-xs text-sky-600 dark:text-sky-400">{sku.brandName}</p>
+                            <p className="text-[11px] text-slate-500">{sku.variant.packing || sku.category}</p>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="block font-mono font-bold text-sky-500 text-sm">
+                            Rs. {sku.variant.price ?? "—"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleEditSku(sku)}
+                            className="mt-1 px-2.5 py-1 rounded text-xs font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/30"
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* ========================================================================= */}
+              {/* TAB 2: MAIN PRODUCT LINES (5 PARENT PRODUCTS) TABLE */}
+              {/* ========================================================================= */}
+              {activeTab === "products" && (
+                <>
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                      <thead>
+                        <tr className={`border-b text-xs font-bold uppercase tracking-wider ${
+                          isDark ? "border-[#1E293B] text-slate-300" : "border-slate-200 text-slate-700"
+                        }`}>
+                          <th className="text-left py-3 pr-4">ID</th>
+                          <th className="text-left py-3 pr-4">Title</th>
+                          <th className="text-left py-3 pr-4">Category</th>
+                          <th className="text-left py-3 pr-4">Variants / Factory SKUs</th>
+                          <th className="text-left py-3 pr-4">Type</th>
+                          <th className="text-right py-3 pl-4">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className={isDark ? "divide-y divide-[#1E293B]/60 text-slate-200" : "divide-y divide-slate-100 text-slate-800"}>
+                        {products.map((p) => (
+                          <tr key={p.id} className={`transition-colors ${isDark ? "hover:bg-[#161D2E]" : "hover:bg-slate-50"}`}>
+                            <td className={`py-3 pr-4 font-mono text-xs font-semibold ${isDark ? "text-sky-400" : "text-sky-600"}`}>{p.id}</td>
+                            <td className="py-3 pr-4 font-bold">{p.title}</td>
+                            <td className="py-3 pr-4">{p.category}</td>
+                            <td className="py-3 pr-4">
+                              <div className="flex flex-wrap gap-1 max-w-sm">
+                                {(p.variants || []).map((v, i) => (
+                                  <span
+                                    key={i}
+                                    className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60"
+                                  >
+                                    <span>{v.name}</span>
+                                    <span className="font-bold text-sky-500 font-mono">Rs.{v.price}</span>
+                                  </span>
+                                ))}
+                                {p.brands?.map((b) => (
+                                  <span
+                                    key={b.name}
+                                    className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded bg-pink-50 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-800/60"
+                                  >
+                                    {b.name} ({b.variants?.length || 0} sizes)
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="py-3 pr-4">{p.productType || "-"}</td>
+                            <td className="py-3 pl-4 text-right space-x-2">
+                              <button
+                                onClick={() => handleEdit(p)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                                  isDark
+                                    ? "border-[#1E293B] bg-[#161D2E] text-sky-400 hover:bg-[#1E293B]"
+                                    : "border-slate-200 text-slate-700 hover:bg-slate-100"
+                                }`}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDelete(p.id)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                                  isDark
+                                    ? "border-red-900/40 bg-red-950/20 text-red-400 hover:bg-red-900/40"
+                                    : "border-red-200 text-red-600 hover:bg-red-50"
+                                }`}
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile Product Cards */}
+                  <div className="md:hidden space-y-4">
                     {products.map((p) => (
-                      <tr key={p.id} className={`transition-colors ${isDark ? "hover:bg-[#161D2E]" : "hover:bg-slate-50"}`}>
-                        <td className={`py-3 pr-4 font-mono text-xs font-semibold ${isDark ? "text-sky-400" : "text-sky-600"}`}>{p.id}</td>
-                        <td className="py-3 pr-4 font-medium">{p.title}</td>
-                        <td className="py-3 pr-4">{p.category}</td>
-                        <td className="py-3 pr-4">{p.productType || "-"}</td>
-                        <td className={`py-3 pr-4 text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                          {p.updatedAt
-                            ? new Date(p.updatedAt).toLocaleString()
-                            : "-"}
-                        </td>
-                        <td className="py-3 pl-4 text-right space-x-2">
+                      <div
+                        key={p.id}
+                        className={`border rounded-xl p-4 ${
+                          isDark ? "border-[#1E293B] bg-[#161D2E]" : "border-slate-200 bg-slate-50"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>{p.title}</p>
+                            <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                              {p.category || "-"}
+                            </p>
+                          </div>
+                          <span className={`text-xs font-mono ${isDark ? "text-sky-400" : "text-sky-600"}`}>
+                            {p.id}
+                          </span>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-1">
+                          {(p.variants || []).map((v, i) => (
+                            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-300">
+                              {v.name} (Rs.{v.price})
+                            </span>
+                          ))}
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
                           <button
                             onClick={() => handleEdit(p)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                              isDark
-                                ? "border-[#1E293B] bg-[#161D2E] text-sky-400 hover:bg-[#1E293B]"
-                                : "border-slate-200 text-slate-700 hover:bg-slate-100"
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+                              isDark ? "border-[#1E293B] bg-[#161D2E] text-sky-400" : "border-slate-200 text-slate-700"
                             }`}
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(p.id)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                              isDark
-                                ? "border-red-900/40 bg-red-950/20 text-red-400 hover:bg-red-900/40"
-                                : "border-red-200 text-red-600 hover:bg-red-50"
-                            }`}
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50"
                           >
                             Delete
                           </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {products.length === 0 && (
-                      <tr>
-                        <td
-                          className={`py-8 text-center text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}
-                          colSpan={6}
-                        >
-                          No products yet. Click &quot;+ Add New Product&quot; above to add one.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="md:hidden space-y-4">
-                {products.map((p) => (
-                  <div
-                    key={p.id}
-                    className={`border rounded-xl p-4 ${
-                      isDark ? "border-[#1E293B] bg-[#161D2E]" : "border-slate-200 bg-slate-50"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>{p.title}</p>
-                        <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                          {p.category || "-"}
-                        </p>
+                        </div>
                       </div>
-                      <span className={`text-xs font-mono ${isDark ? "text-sky-400" : "text-sky-600"}`}>
-                        {p.id}
-                      </span>
-                    </div>
-                    <div className={`mt-3 text-xs space-y-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      <span className="block">
-                        Type: {p.productType || "-"}
-                      </span>
-                      <span className="block">
-                        Updated:{" "}
-                        {p.updatedAt
-                          ? new Date(p.updatedAt).toLocaleString()
-                          : "-"}
-                      </span>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <button
-                        onClick={() => handleEdit(p)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${
-                          isDark ? "border-[#1E293B] bg-[#161D2E] text-sky-400" : "border-slate-200 text-slate-700"
-                        }`}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    ))}
                   </div>
-                ))}
-                {products.length === 0 && (
-                  <p className={`text-center text-sm py-6 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    No products yet. Click &quot;+ Add New Product&quot; above to add one.
-                  </p>
-                )}
-              </div>
+                </>
+              )}
             </div>
           )}
 
@@ -899,62 +1208,93 @@ const AdminProductsPage = () => {
                     </div>
                   </div>
 
-                  <div className="md:col-span-2">
-                    <label className="block mb-1.5 font-medium">Variants</label>
-                    <div className="space-y-2">
+                  <div id="variants-section" className="md:col-span-2 p-5 rounded-2xl bg-sky-500/5 border border-sky-500/20">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                      <div>
+                        <label className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                          <FaBoxOpen className="text-sky-500" />
+                          <span>Factory SKUs &amp; Sizes (Displayed in Online Store)</span>
+                        </label>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          Each variant defined below (e.g. SUPER BAR, LONG BAR, CLASSIC BAR, 1 KG) displays as an individual card in &quot;Factory SKUs &amp; Individual Sizes&quot;.
+                        </p>
+                      </div>
+                      <span className="text-xs font-bold px-3 py-1 bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 rounded-full self-start sm:self-auto border border-sky-200 dark:border-sky-800">
+                        {form.variants?.length || 0} SKUs
+                      </span>
+                    </div>
+
+                    <div className="space-y-3">
                       {form.variants.map((variant, idx) => (
                         <div
                           key={`v-${idx}`}
-                          className="grid grid-cols-1 md:grid-cols-5 gap-2"
+                          className={`p-3.5 rounded-xl border transition-colors grid grid-cols-1 md:grid-cols-5 gap-3 items-center ${
+                            isDark ? "bg-[#161D2E] border-[#1E293B]" : "bg-white border-slate-200 shadow-xs"
+                          }`}
                         >
-                          <input
-                            placeholder="Name (e.g. 1 KG)"
-                            value={variant.name}
-                            onChange={(e) =>
-                              updateVariant(idx, "name", e.target.value)
-                            }
-                            className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
-                          />
-                          <input
-                            placeholder="Detail (e.g. 1000 g)"
-                            value={variant.detail}
-                            onChange={(e) =>
-                              updateVariant(idx, "detail", e.target.value)
-                            }
-                            className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
-                          />
-                          <input
-                            placeholder="Packing (e.g. 12 pcs/ctn)"
-                            value={variant.packing}
-                            onChange={(e) =>
-                              updateVariant(idx, "packing", e.target.value)
-                            }
-                            className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
-                          />
-                          <input
-                            placeholder="Price"
-                            type="number"
-                            value={variant.price}
-                            onChange={(e) =>
-                              updateVariant(idx, "price", e.target.value)
-                            }
-                            className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeVariant(idx)}
-                            className="px-3 py-2 rounded-lg border border-red-200 text-red-600"
-                          >
-                            Remove
-                          </button>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">SKU Name</label>
+                            <input
+                              placeholder="e.g. SUPER BAR, 1 KG"
+                              value={variant.name}
+                              onChange={(e) =>
+                                updateVariant(idx, "name", e.target.value)
+                              }
+                              className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm font-bold text-slate-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Weight / Detail</label>
+                            <input
+                              placeholder="e.g. 200 g, 1000 g"
+                              value={variant.detail}
+                              onChange={(e) =>
+                                updateVariant(idx, "detail", e.target.value)
+                              }
+                              className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Carton Packing</label>
+                            <input
+                              placeholder="e.g. 36 pcs/ctn"
+                              value={variant.packing}
+                              onChange={(e) =>
+                                updateVariant(idx, "packing", e.target.value)
+                              }
+                              className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Factory Price (Rs.)</label>
+                            <input
+                              placeholder="Price"
+                              type="number"
+                              value={variant.price}
+                              onChange={(e) =>
+                                updateVariant(idx, "price", e.target.value)
+                              }
+                              className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm font-black text-sky-600 dark:text-sky-400 font-mono"
+                            />
+                          </div>
+                          <div className="flex md:items-end md:justify-end pt-2 md:pt-4">
+                            <button
+                              type="button"
+                              onClick={() => removeVariant(idx)}
+                              className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold cursor-pointer"
+                            >
+                              ✕ Remove
+                            </button>
+                          </div>
                         </div>
                       ))}
                       <button
                         type="button"
                         onClick={addVariant}
-                        className="px-3 py-2 rounded-lg border border-[#E0E0E0] hover:bg-[#F9F9F9]"
+                        className="px-4 py-2 rounded-xl border border-sky-300 dark:border-sky-800 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-xs font-bold flex items-center gap-2 cursor-pointer transition-all mt-2"
                       >
-                        Add Variant
+                        <FaPlus className="text-xs" />
+                        <span>+ Add Another SKU / Size Variant</span>
                       </button>
                     </div>
                   </div>

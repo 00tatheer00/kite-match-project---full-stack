@@ -77,7 +77,7 @@ function buildOrderDetailsText(order, productOrPromotion) {
   }
   if (order.shippingCost != null) lines.push(`Shipping Cost: Rs ${order.shippingCost}`);
   if (order.totalAmount != null) lines.push(`Total Amount: Rs ${order.totalAmount}`);
-  
+
   return lines.join("\n");
 }
 
@@ -199,7 +199,7 @@ async function sendViaEmailJS(templateId, templateParams) {
   } catch (error) {
     console.error(`[EmailJS Error] Failed via template ${templateId}:`, {
       status: error?.status,
-      text:   error?.text,
+      text: error?.text,
       message: error?.message,
     });
     return false;
