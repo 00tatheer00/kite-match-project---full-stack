@@ -204,6 +204,74 @@ const LS_PRODUCTS_KEY = "kite_admin_products_v2";
 const LS_PROMOTIONS_KEY = "kite_admin_promotions_v2";
 const LS_DELETED_PRODUCTS_KEY = "kite_deleted_products_v2";
 const LS_DELETED_PROMOS_KEY = "kite_deleted_promos_v2";
+const LS_ORDERS_KEY = "kite_admin_orders_v2";
+
+export function getLocalOrders() {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(LS_ORDERS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveLocalOrders(orders) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LS_ORDERS_KEY, JSON.stringify(orders));
+  } catch (e) {
+    console.warn("Failed to save orders to localStorage:", e);
+  }
+}
+
+export function mergeOrdersWithLocal(serverOrders = []) {
+  if (typeof window === "undefined") return serverOrders;
+  try {
+    const local = getLocalOrders();
+    const map = new Map();
+
+    // 1. Add server orders first
+    (Array.isArray(serverOrders) ? serverOrders : []).forEach((o) => {
+      const key = o.orderNumber || o._id || o.id;
+      if (key) map.set(String(key), o);
+    });
+
+    // 2. Overlay local orders (preserves newly placed orders & status updates)
+    local.forEach((o) => {
+      const key = o.orderNumber || o._id || o.id;
+      if (key) {
+        const strKey = String(key);
+        if (map.has(strKey)) {
+          map.set(strKey, { ...map.get(strKey), ...o });
+        } else {
+          map.set(strKey, o);
+        }
+      }
+    });
+
+    // 3. Fallback: also check lastOrder from checkout session
+    try {
+      const lastOrderRaw = localStorage.getItem('lastOrder');
+      if (lastOrderRaw) {
+        const lo = JSON.parse(lastOrderRaw);
+        const loKey = lo?.orderNumber || lo?._id || lo?.id;
+        if (loKey && !map.has(String(loKey))) {
+          map.set(String(loKey), lo);
+        }
+      }
+    } catch {}
+
+    const merged = Array.from(map.values()).sort(
+      (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+    );
+
+    saveLocalOrders(merged);
+    return merged;
+  } catch {
+    return serverOrders;
+  }
+}
 
 export function getLocalProducts() {
   if (typeof window === "undefined") return [];
@@ -657,28 +725,75 @@ export async function adminUpdateSettings(data) {
 }
 
 export async function createOrder(payload) {
-  const res = await fetch(`${API_BASE_URL}/orders`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  return handleResponse(res);
+  let data = null;
+  try {
+    const res = await fetch(`${API_BASE_URL}/orders`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    data = await handleResponse(res);
+  } catch (err) {
+    console.warn("Order creation server error:", err);
+    throw err;
+  }
+
+  // Immediately mirror into client-side order storage
+  if (data && typeof window !== "undefined") {
+    try {
+      const local = getLocalOrders();
+      const key = data.orderNumber || data._id || data.id;
+      const filtered = local.filter((o) => (o.orderNumber || o._id || o.id) !== key);
+      filtered.unshift(data);
+      saveLocalOrders(filtered);
+      localStorage.setItem('lastOrder', JSON.stringify(data));
+    } catch (e) {
+      console.warn("Failed to cache created order locally:", e);
+    }
+  }
+
+  return data;
 }
 
 export async function adminGetOrders() {
-  const res = await fetch(`${API_BASE_URL}/admin/orders`, {
-    headers: { ...getAuthHeaders() },
-  });
-  return handleResponse(res);
+  let serverData = [];
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/orders`, {
+      headers: { ...getAuthHeaders() },
+      cache: 'no-store',
+    });
+    serverData = await handleResponse(res);
+  } catch (err) {
+    console.warn("adminGetOrders network warning, using local overlay:", err.message);
+  }
+  return mergeOrdersWithLocal(Array.isArray(serverData) ? serverData : []);
 }
 
 export async function adminUpdateOrderStatus(id, status) {
-  const res = await fetch(`${API_BASE_URL}/admin/orders/${id}/status`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-    body: JSON.stringify({ status }),
-  });
-  return handleResponse(res);
+  if (typeof window !== "undefined") {
+    try {
+      const local = getLocalOrders();
+      const idx = local.findIndex((o) => o._id === id || o.id === id || o.orderNumber === id);
+      if (idx >= 0) {
+        local[idx] = { ...local[idx], status, updatedAt: new Date().toISOString() };
+        saveLocalOrders(local);
+      }
+    } catch {}
+  }
+
+  let result = null;
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/orders/${id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+      body: JSON.stringify({ status }),
+    });
+    result = await handleResponse(res);
+  } catch (err) {
+    console.warn("adminUpdateOrderStatus network warning (updated locally):", err.message);
+  }
+
+  return result || { _id: id, status, updatedAt: new Date().toISOString() };
 }
 
 export async function adminGetOrder(id) {

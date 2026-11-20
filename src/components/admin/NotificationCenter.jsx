@@ -62,6 +62,17 @@ const NotificationCenter = ({ dark = false }) => {
 
       setNotifications((prev) => [newNotification, ...prev]);
       setUnreadCount((prev) => prev + 1);
+
+      // Cache full order into local orders store so /admin/orders has it immediately
+      try {
+        const raw = localStorage.getItem('kite_admin_orders_v2');
+        const orders = raw ? JSON.parse(raw) : [];
+        const key = data.orderNumber || data._id || data.id || data.orderId;
+        if (key && !orders.some((o) => (o.orderNumber || o._id || o.id) === key)) {
+          orders.unshift(data);
+          localStorage.setItem('kite_admin_orders_v2', JSON.stringify(orders));
+        }
+      } catch {}
     });
 
     return () => {

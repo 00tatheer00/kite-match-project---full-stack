@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
 import RequireAdminAuth from "../components/admin/RequireAdminAuth";
 import OrderDetailPanel from "../components/admin/OrderDetailPanel";
-import { adminGetOrders, adminGetOrder, adminUpdateOrderStatus } from "../services/api";
+import { adminGetOrders, adminGetOrder, adminUpdateOrderStatus, saveLocalOrders, getLocalOrders } from "../services/api";
 import { colors } from "../theme";
 import toast from "react-hot-toast";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, RefreshCw, ShoppingCart, Clock } from "lucide-react";
 import { useAdminTheme } from "../context/AdminThemeContext";
+import Pusher from "pusher-js";
 
 const statuses = ["pending", "confirmed", "shipped", "cancelled"];
 
@@ -23,6 +24,7 @@ const AdminOrdersPage = () => {
   const { isDark } = useAdminTheme();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [updatingId, setUpdatingId] = useState("");
   const [error, setError] = useState("");
 
@@ -35,30 +37,88 @@ const AdminOrdersPage = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [panelLoading, setPanelLoading] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError("");
       const data = await adminGetOrders();
       setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message || "Failed to load orders");
+      if (!silent) setError(err.message || "Failed to load orders");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, []);
 
+  // Initial load + periodic polling every 15 seconds
   useEffect(() => {
     load();
+    const interval = setInterval(() => {
+      load(true);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [load]);
+
+  // Real-time Pusher listener for new orders
+  useEffect(() => {
+    const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY || process.env.VITE_PUSHER_KEY || 'd14edc647970149caa98';
+    const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || process.env.VITE_PUSHER_CLUSTER || 'ap2';
+
+    if (!pusherKey) return;
+
+    let pusher = null;
+    try {
+      pusher = new Pusher(pusherKey, { cluster: pusherCluster });
+      const channel = pusher.subscribe('admin-notifications');
+
+      channel.bind('new-order', (newOrderData) => {
+        if (!newOrderData) return;
+
+        toast.success(
+          `🔔 New Order Received #${newOrderData.orderNumber || newOrderData.orderId || ''} from ${newOrderData.customerName || 'Customer'}!`,
+          { duration: 6000 }
+        );
+
+        setOrders((prev) => {
+          const key = newOrderData.orderNumber || newOrderData._id || newOrderData.id;
+          const exists = prev.some((o) => (o.orderNumber || o._id || o.id) === key);
+          if (exists) {
+            return prev.map((o) => ((o.orderNumber || o._id || o.id) === key ? { ...o, ...newOrderData } : o));
+          }
+          const updated = [newOrderData, ...prev];
+          saveLocalOrders(updated);
+          return updated;
+        });
+      });
+    } catch (e) {
+      console.warn("Pusher subscription error:", e);
+    }
+
+    return () => {
+      if (pusher) {
+        try {
+          pusher.unsubscribe('admin-notifications');
+          pusher.disconnect();
+        } catch {}
+      }
+    };
   }, []);
+
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    await load(true);
+    toast.success("Orders list updated!");
+  };
 
   const handleRowClick = async (order) => {
     // Open panel immediately with list data, then fetch full detail
     setSelectedOrder(order);
     setPanelLoading(true);
     try {
-      const full = await adminGetOrder(order._id);
-      setSelectedOrder(full);
+      const orderLookupId = order._id || order.id || order.orderNumber;
+      const full = await adminGetOrder(orderLookupId);
+      if (full) setSelectedOrder(full);
     } catch {
       // fallback: keep list data
     } finally {
@@ -127,24 +187,53 @@ const AdminOrdersPage = () => {
     <RequireAdminAuth>
       <AdminLayout>
         <div className="flex flex-col gap-8">
-          <div>
-            <h1 className={`text-2xl sm:text-3xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
-              Orders Management
-            </h1>
-            <p className={`mt-1 text-sm ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-              Click any row to view full order details. Update status directly from the detail panel.
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className={`text-2xl sm:text-3xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
+                Orders Management
+              </h1>
+              <p className={`mt-1 text-sm ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                Click any row to view full order details. Real-time Pusher &amp; local sync enabled.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleManualRefresh}
+                disabled={refreshing}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm ${
+                  isDark
+                    ? "bg-[#1E293B] hover:bg-[#283548] text-white border border-[#334155]"
+                    : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200"
+                }`}
+                title="Sync and refresh orders"
+              >
+                <RefreshCw size={16} className={`text-[#00AEEF] ${refreshing ? "animate-spin" : ""}`} />
+                <span>{refreshing ? "Refreshing..." : "Refresh Orders"}</span>
+              </button>
+            </div>
           </div>
 
           {/* Search & Filters */}
           <div className={`border rounded-2xl p-4 space-y-3 transition-colors ${
             isDark ? "bg-[#111726] border-[#1E293B]" : "bg-white border-slate-200 shadow-sm"
           }`}>
-            <div className={`flex items-center gap-2 text-sm font-bold ${
-              isDark ? "text-slate-200" : "text-slate-700"
-            }`}>
-              <SlidersHorizontal size={16} className="text-[#00AEEF]" />
-              Filter Orders
+            <div className="flex items-center justify-between">
+              <div className={`flex items-center gap-2 text-sm font-bold ${
+                isDark ? "text-slate-200" : "text-slate-700"
+              }`}>
+                <SlidersHorizontal size={16} className="text-[#00AEEF]" />
+                Filter Orders
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${
+                  isDark ? "bg-[#161D2E] text-slate-300 border-[#1E293B]" : "bg-slate-100 text-slate-700 border-slate-200"
+                }`}>
+                  Total: {orders.length}
+                </span>
+                <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-yellow-500/10 text-yellow-500 border border-yellow-500/30">
+                  Pending: {orders.filter(o => o.status === 'pending').length}
+                </span>
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* Text search */}

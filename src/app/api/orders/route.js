@@ -299,14 +299,16 @@ export async function POST(request) {
       console.error('[Email Error] sendOrderEmail failed:', err);
     });
 
-    // Fire-and-forget Pusher notification
+    // Fire-and-forget Pusher notification with full order payload
     if (pusher) {
+      const orderPlain = order.toObject ? order.toObject() : order;
       pusher.trigger('admin-notifications', 'new-order', {
-        orderId: order._id,
-        orderNumber: order.orderNumber,
-        customerName: order.customerName,
-        totalAmount: order.totalAmount,
-        type: order.type,
+        ...orderPlain,
+        orderId: orderPlain._id || orderPlain.id,
+        orderNumber: orderPlain.orderNumber,
+        customerName: orderPlain.customerName,
+        totalAmount: orderPlain.totalAmount,
+        type: orderPlain.type,
       }).catch((err) => console.error('Failed to trigger Pusher event:', err));
     }
 
