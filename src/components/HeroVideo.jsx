@@ -54,6 +54,7 @@ const HeroVideo = () => {
             src={settings.bannerImage}
             alt={settings.bannerTitle || "Kite Brand Banner"}
             className="w-full h-full object-cover object-center block"
+            style={{ objectFit: 'cover', width: '100%', height: '100%' }}
             loading="eager"
             fetchPriority="high"
           />
@@ -84,8 +85,8 @@ const HeroVideo = () => {
       aria-label="Kite Brand Motion Video Banner"
       className="relative w-full overflow-hidden bg-black"
     >
-      {/* Banner-sized video: fills width, capped height so products section peeks in */}
-      <div className="relative w-full overflow-hidden h-[100vh]">
+      {/* Banner-sized video: fills width and height completely with object-fit: cover */}
+      <div className="relative w-full overflow-hidden h-[100vh] min-h-[400px]">
         <video
           ref={videoRef}
           autoPlay
@@ -95,7 +96,8 @@ const HeroVideo = () => {
           preload="auto"
           poster="/videos/kite-motion-poster.jpg"
           aria-label="Kite Motion Banner"
-          className="w-full h-full object-cover object-center block"
+          className="absolute inset-0 w-full h-full object-cover object-center block"
+          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
         >
           {/* Pristine original high-bitrate master video */}
           <source src="/videos/Kite Motion Banner.mp4" type="video/mp4" />
