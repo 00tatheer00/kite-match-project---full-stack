@@ -255,10 +255,12 @@ export async function POST(request) {
       postRemoteFallback('/orders', orderPayload).catch(() => {});
     } catch {}
 
-    // Fire-and-forget email
-    sendOrderEmail(order, productOrPromotion).catch((err) => {
-      console.error('[Email Error] sendOrderEmail failed:', err);
-    });
+    // Send email notification to sales team and customer
+    try {
+      await sendOrderEmail(order, productOrPromotion);
+    } catch (emailErr) {
+      console.error('[Email Error] sendOrderEmail failed:', emailErr.message);
+    }
 
     // Fire-and-forget Pusher
     if (pusher) {
