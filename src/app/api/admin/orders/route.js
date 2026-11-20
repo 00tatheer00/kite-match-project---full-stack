@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import Order from '@/lib/models/Order';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { verifyAdminAuth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -13,26 +12,35 @@ export async function GET(request) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  let dbOrders = [];
-  try {
-    await connectToDatabase();
-    dbOrders = await Order.find().sort({ createdAt: -1 }).lean();
-  } catch (err) {
-    // MongoDB offline or error
+  let sbOrders = [];
+  let storeOrders = [];
+
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const sb = getSupabaseAdmin();
+      const { data, error } = await sb
+        .from('orders')
+        .select('*')
+        .order('createdAt', { ascending: false });
+      if (!error && data) sbOrders = data;
+    } catch (err) {
+      console.warn('Supabase orders fetch failed:', err.message);
+    }
   }
 
-  let storeOrders = [];
+  // Also get local store orders
   try {
     const { getAllOrders } = await import('@/lib/store');
     storeOrders = getAllOrders();
   } catch (e) {
-    console.warn('Store read failed for orders:', e.message);
+    console.warn('Store read failed:', e.message);
   }
 
   // Deduplicate and merge
   const ordersMap = new Map();
-  [...(dbOrders || []), ...(storeOrders || [])].forEach((o) => {
-    const key = o.orderNumber || o._id || o.id;
+  [...sbOrders, ...storeOrders].forEach((o) => {
+    const key = o.orderNumber || o.id || o._id;
     if (key && !ordersMap.has(key)) {
       ordersMap.set(key, o);
     }

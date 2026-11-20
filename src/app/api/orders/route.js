@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import Order from '@/lib/models/Order';
-import Product from '@/lib/models/Product';
-import PromotionPackage from '@/lib/models/PromotionPackage';
-import Settings from '@/lib/models/Settings';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { sendOrderEmail } from '@/lib/email';
 import { pusher } from '@/lib/pusher';
 import { getProductById, getPromotionById, getSettings, createOrder as saveInStore } from '@/lib/store';
@@ -11,35 +7,38 @@ import { getProductById, getPromotionById, getSettings, createOrder as saveInSto
 const PHONE_REGEX = /^(?:\+92|92|0)3\d{9}$/;
 
 async function fetchPromotionRecord(id) {
-  try {
-    const promo = await PromotionPackage.findOne({ id }).lean();
-    if (promo) return promo;
-  } catch {}
-  try {
-    return getPromotionById(id);
-  } catch {}
+  if (isSupabaseConfigured()) {
+    try {
+      const sb = getSupabaseAdmin();
+      const { data } = await sb.from('promotions').select('*').eq('id', id).single();
+      if (data) return data;
+    } catch {}
+  }
+  try { return getPromotionById(id); } catch {}
   return null;
 }
 
 async function fetchProductRecord(id) {
-  try {
-    const prod = await Product.findOne({ id }).lean();
-    if (prod) return prod;
-  } catch {}
-  try {
-    return getProductById(id);
-  } catch {}
+  if (isSupabaseConfigured()) {
+    try {
+      const sb = getSupabaseAdmin();
+      const { data } = await sb.from('products').select('*').eq('id', id).single();
+      if (data) return data;
+    } catch {}
+  }
+  try { return getProductById(id); } catch {}
   return null;
 }
 
 async function fetchSettingsRecord() {
-  try {
-    const s = await Settings.findOne().lean();
-    if (s) return s;
-  } catch {}
-  try {
-    return getSettings();
-  } catch {}
+  if (isSupabaseConfigured()) {
+    try {
+      const sb = getSupabaseAdmin();
+      const { data } = await sb.from('settings').select('*').eq('id', 1).single();
+      if (data) return data;
+    } catch {}
+  }
+  try { return getSettings(); } catch {}
   return { defaultShippingCost: 150 };
 }
 
@@ -52,29 +51,11 @@ export async function POST(request) {
   }
 
   try {
-    try {
-      await connectToDatabase();
-    } catch (dbErr) {
-      console.warn('Database connection skipped for order processing:', dbErr.message);
-    }
-
     let {
-      type,
-      productId,
-      promotionId,
-      selectedSkuOrSize,
-      quantity,
-      customerName,
-      phone,
-      email,
-      address,
-      city,
-      note,
-      paymentMethod,
-      items,
+      type, productId, promotionId, selectedSkuOrSize, quantity,
+      customerName, phone, email, address, city, note, paymentMethod, items,
     } = body;
 
-    // Normalize type and customer fields (supports nested customer object or top-level)
     type = type || (Array.isArray(items) && items.length > 0 ? 'cart' : (productId ? 'product' : (promotionId ? 'promotion' : null)));
     customerName = customerName || body.customer?.name;
     phone = phone || body.customer?.phone;
@@ -82,7 +63,6 @@ export async function POST(request) {
     address = address || body.customer?.address;
     city = city || body.customer?.city;
 
-    // Normalize paymentMethod (case-insensitive)
     if (typeof paymentMethod === 'string') {
       const pmLower = paymentMethod.trim().toLowerCase();
       if (pmLower === 'cod') paymentMethod = 'COD';
@@ -132,13 +112,9 @@ export async function POST(request) {
       : ['pkg-glow-family-pack', 'pkg-glow-bachat-mega', 'pkg-vero-family-pack'];
 
     if (type === 'product') {
-      if (!productId) {
-        return NextResponse.json({ message: 'productId is required for product orders' }, { status: 400 });
-      }
+      if (!productId) return NextResponse.json({ message: 'productId is required for product orders' }, { status: 400 });
       productOrPromotion = await fetchProductRecord(productId);
-      if (!productOrPromotion) {
-        return NextResponse.json({ message: 'Product not found' }, { status: 404 });
-      }
+      if (!productOrPromotion) return NextResponse.json({ message: 'Product not found' }, { status: 404 });
 
       let unitPrice = 0;
       if (selectedSkuOrSize && Array.isArray(productOrPromotion.variants)) {
@@ -149,30 +125,21 @@ export async function POST(request) {
         unitPrice = productOrPromotion.variants[0].price || 0;
       }
       computedSubtotal = unitPrice * parsedQuantity;
-      // Products use configured or default delivery fee
       computedShippingCost = productOrPromotion.shippingCost !== null && productOrPromotion.shippingCost !== undefined
-        ? Number(productOrPromotion.shippingCost)
-        : defaultShipping;
+        ? Number(productOrPromotion.shippingCost) : defaultShipping;
     } else if (type === 'promotion') {
-      if (!promotionId) {
-        return NextResponse.json({ message: 'promotionId is required for promotion orders' }, { status: 400 });
-      }
+      if (!promotionId) return NextResponse.json({ message: 'promotionId is required for promotion orders' }, { status: 400 });
       productOrPromotion = await fetchPromotionRecord(promotionId);
-      if (!productOrPromotion) {
-        return NextResponse.json({ message: 'Promotion not found' }, { status: 404 });
-      }
+      if (!productOrPromotion) return NextResponse.json({ message: 'Promotion not found' }, { status: 404 });
 
       const unitPrice = Number(productOrPromotion.totalPrice) || 0;
       computedSubtotal = unitPrice * parsedQuantity;
-      
-      // Free shipping bundle check
       const isFreeShippingBundle = freeShippingBundles.includes(productOrPromotion.id);
       if (isFreeShippingBundle) {
         computedShippingCost = 0;
       } else {
         computedShippingCost = productOrPromotion.shippingCost !== null && productOrPromotion.shippingCost !== undefined
-          ? Number(productOrPromotion.shippingCost)
-          : 200;
+          ? Number(productOrPromotion.shippingCost) : 200;
       }
     } else if (type === 'cart') {
       let anyItemRequiresShipping = false;
@@ -193,12 +160,10 @@ export async function POST(request) {
           if (promo) {
             itemPrice = Number(promo.totalPrice) || itemPrice;
             const isFreeShippingBundle = freeShippingBundles.includes(promo.id);
-            if (isFreeShippingBundle) {
-              itemShipping = 0;
-            } else {
+            if (isFreeShippingBundle) { itemShipping = 0; }
+            else {
               itemShipping = promo.shippingCost !== null && promo.shippingCost !== undefined
-                ? Number(promo.shippingCost)
-                : 200;
+                ? Number(promo.shippingCost) : 200;
             }
           }
         } else if (prodLookupId) {
@@ -207,42 +172,34 @@ export async function POST(request) {
             const variant = prod.variants.find((v) => v.name === item.selectedVariant);
             if (variant?.price) itemPrice = Number(variant.price);
           }
-          // Product delivery calculation
           itemShipping = prod && prod.shippingCost !== null && prod.shippingCost !== undefined
-            ? Number(prod.shippingCost)
-            : defaultShipping;
+            ? Number(prod.shippingCost) : defaultShipping;
         }
 
         if (itemShipping > 0) {
           anyItemRequiresShipping = true;
-          if (itemShipping > maxApplicableShipping) {
-            maxApplicableShipping = itemShipping;
-          }
+          if (itemShipping > maxApplicableShipping) maxApplicableShipping = itemShipping;
         }
-
         calculatedCartTotal += itemPrice * qty;
 
-        return {
-          ...item,
-          quantity: qty,
-          price: itemPrice,
-          shippingCost: itemShipping,
-        };
+        return { ...item, quantity: qty, price: itemPrice, shippingCost: itemShipping };
       }));
 
       computedSubtotal = calculatedCartTotal;
-      // Cart delivery calculation
       computedShippingCost = anyItemRequiresShipping ? maxApplicableShipping : 0;
     }
 
     const finalTotalAmount = computedSubtotal + computedShippingCost;
 
-    // Generate sequential order number (KT-001, KT-002, ...)
+    // Generate order number
     let orderNumber = `KT-${Date.now().toString().slice(-4)}`;
-    try {
-      const orderCount = await Order.countDocuments();
-      orderNumber = `KT-${String(orderCount + 1).padStart(3, '0')}`;
-    } catch {}
+    if (isSupabaseConfigured()) {
+      try {
+        const sb = getSupabaseAdmin();
+        const { count } = await sb.from('orders').select('id', { count: 'exact', head: true });
+        orderNumber = `KT-${String((count || 0) + 1).padStart(3, '0')}`;
+      } catch {}
+    }
 
     const orderPayload = {
       orderNumber,
@@ -263,53 +220,56 @@ export async function POST(request) {
       shippingCost: computedShippingCost,
     };
 
-    let order;
-    let isStoreSaved = false;
-    try {
-      const { default: mongoose } = await import('mongoose');
-      if (mongoose.connection && mongoose.connection.readyState === 1) {
-        order = await Order.create(orderPayload);
-      } else {
-        order = saveInStore(orderPayload);
-        isStoreSaved = true;
-      }
-    } catch (orderDbErr) {
-      console.warn('MongoDB Order.create failed, falling back to local store:', orderDbErr.message);
-      order = saveInStore(orderPayload);
-      isStoreSaved = true;
-    }
+    let order = null;
 
-    // Mirror to local store if not already saved there
-    if (!isStoreSaved) {
+    // Save to Supabase
+    if (isSupabaseConfigured()) {
       try {
-        saveInStore(order.toObject ? order.toObject() : order);
-      } catch {}
+        const sb = getSupabaseAdmin();
+        const { data, error } = await sb
+          .from('orders')
+          .insert({
+            ...orderPayload,
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          })
+          .select()
+          .single();
+        if (!error && data) order = data;
+        else if (error) console.warn('Supabase order insert failed:', error.message);
+      } catch (sbErr) {
+        console.warn('Supabase error:', sbErr.message);
+      }
     }
 
-    // Mirror order to remote persistent backend for durability across serverless cold starts
+    // Also save to local store
     try {
-      const { postRemoteFallback } = await import('@/lib/api-fallback');
-      postRemoteFallback('/orders', orderPayload).catch((e) => {
-        console.warn('Mirror to remote backend deferred:', e.message);
-      });
+      const storeOrder = saveInStore(order || orderPayload);
+      if (!order) order = storeOrder;
     } catch {}
 
-    // Fire-and-forget email notification
-    sendOrderEmail(order.toObject ? order.toObject() : order, productOrPromotion).catch((err) => {
+    // Mirror to remote backend
+    try {
+      const { postRemoteFallback } = await import('@/lib/api-fallback');
+      postRemoteFallback('/orders', orderPayload).catch(() => {});
+    } catch {}
+
+    // Fire-and-forget email
+    sendOrderEmail(order, productOrPromotion).catch((err) => {
       console.error('[Email Error] sendOrderEmail failed:', err);
     });
 
-    // Fire-and-forget Pusher notification with full order payload
+    // Fire-and-forget Pusher
     if (pusher) {
-      const orderPlain = order.toObject ? order.toObject() : order;
       pusher.trigger('admin-notifications', 'new-order', {
-        ...orderPlain,
-        orderId: orderPlain._id || orderPlain.id,
-        orderNumber: orderPlain.orderNumber,
-        customerName: orderPlain.customerName,
-        totalAmount: orderPlain.totalAmount,
-        type: orderPlain.type,
-      }).catch((err) => console.error('Failed to trigger Pusher event:', err));
+        ...order,
+        orderId: order.id || order._id,
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        totalAmount: order.totalAmount,
+        type: order.type,
+      }).catch((err) => console.error('Pusher error:', err));
     }
 
     return NextResponse.json(order, { status: 201 });

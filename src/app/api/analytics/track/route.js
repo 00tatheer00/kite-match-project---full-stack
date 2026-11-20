@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { recordVisitorEvent } from '@/lib/store';
-import { connectToDatabase } from '@/lib/db';
-import Analytics from '@/lib/models/Analytics';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 
 function isPublicIp(ip) {
   if (!ip || typeof ip !== 'string') return false;
@@ -51,7 +50,6 @@ export async function POST(req) {
       }
     }
 
-    // Server-side GeoIP fallback if still missing and IP is public
     if ((!detectedCity || detectedCity === 'Pakistan') && isPublicIp(clientIp)) {
       try {
         const geoRes = await fetch(`http://ip-api.com/json/${clientIp}`, {
@@ -64,18 +62,14 @@ export async function POST(req) {
             detectedCountry = geoData.countryCode || detectedCountry;
           }
         }
-      } catch {
-        // timeout or lookup error, proceed with fallback
-      }
+      } catch {}
     }
 
-    // If still missing, pick from major Pakistan hubs for domestic visitor tracking
     if (!detectedCity || detectedCity === 'Pakistan') {
       const hubs = ['Lahore, PK', 'Karachi, PK', 'Islamabad, PK', 'Rawalpindi, PK', 'Faisalabad, PK', 'Peshawar, PK'];
       detectedCity = hubs[Math.floor(Math.random() * hubs.length)];
     }
 
-    // Enrich payload
     payload.city = detectedCity;
     payload.country = detectedCountry;
     payload.region = vercelRegion || '';
@@ -84,50 +78,65 @@ export async function POST(req) {
     // Record in local store
     const storeResult = recordVisitorEvent(payload);
 
-    // Persist to MongoDB
-    try {
-      await connectToDatabase();
-      const src = payload.source || 'direct';
-      const dev = payload.device || 'mobile';
-      const p = payload.path || '/';
+    // Also persist in Supabase
+    if (isSupabaseConfigured()) {
+      try {
+        const sb = getSupabaseAdmin();
+        const src = payload.source || 'direct';
+        const dev = payload.device || 'mobile';
+        const p = payload.path || '/';
 
-      const newVisit = {
-        id: `v_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-        timestamp: new Date().toISOString(),
-        path: p,
-        source: src,
-        device: dev,
-        city: detectedCity,
-        country: detectedCountry,
-        ip: clientIp,
-      };
+        const { data: current } = await sb
+          .from('analytics')
+          .select('*')
+          .eq('key', 'global_summary')
+          .single();
 
-      await Analytics.findOneAndUpdate(
-        { key: 'global_summary' },
-        {
-          $inc: {
-            totalVisitors: 1,
-            todayVisitors: 1,
-            totalPageviews: 1,
-            [`sources.${src}`]: 1,
-            [`devices.${dev}`]: 1,
-            [`cities.${detectedCity}`]: 1,
-            [`countries.${detectedCountry}`]: 1,
-            [`topPages.${p.replace(/\./g, '_')}`]: 1,
-          },
-          $push: {
-            recentVisits: {
-              $each: [newVisit],
-              $position: 0,
-              $slice: 50,
-            },
-          },
-          $set: { lastUpdated: new Date().toISOString() },
-        },
-        { upsert: true, new: true }
-      );
-    } catch (dbErr) {
-      console.warn('MongoDB analytics update deferred:', dbErr.message);
+        if (current) {
+          const sources = current.sources || {};
+          sources[src] = (Number(sources[src]) || 0) + 1;
+
+          const devices = current.devices || {};
+          devices[dev] = (Number(devices[dev]) || 0) + 1;
+
+          const cities = current.cities || {};
+          cities[detectedCity] = (Number(cities[detectedCity]) || 0) + 1;
+
+          const countries = current.countries || {};
+          countries[detectedCountry] = (Number(countries[detectedCountry]) || 0) + 1;
+
+          const topPages = current.topPages || {};
+          topPages[p] = (Number(topPages[p]) || 0) + 1;
+
+          const recent = Array.isArray(current.recentVisits) ? current.recentVisits : [];
+          recent.unshift({
+            id: `v_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+            timestamp: new Date().toISOString(),
+            path: p,
+            source: src,
+            device: dev,
+            city: detectedCity,
+            country: detectedCountry,
+            ip: clientIp,
+          });
+
+          await sb.from('analytics').update({
+            totalVisitors: (Number(current.totalVisitors) || 0) + 1,
+            todayVisitors: (Number(current.todayVisitors) || 0) + 1,
+            totalPageviews: (Number(current.totalPageviews) || 0) + 1,
+            sources,
+            devices,
+            cities,
+            countries,
+            topPages,
+            recentVisits: recent.slice(0, 50),
+            lastUpdated: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }).eq('key', 'global_summary');
+        }
+      } catch (sbErr) {
+        // Fire-and-forget
+      }
     }
 
     return NextResponse.json(storeResult);

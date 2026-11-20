@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getAllProducts, getAllOrders, getAnalyticsSummary, getAllPromotions } from '@/lib/store';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { verifyAdminAuth } from '@/lib/auth';
-import { connectToDatabase } from '@/lib/db';
-import PromotionPackage from '@/lib/models/PromotionPackage';
-import Analytics from '@/lib/models/Analytics';
+import { getAllProducts, getAllOrders, getAnalyticsSummary, getAllPromotions } from '@/lib/store';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -15,87 +13,63 @@ export async function GET(request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const products = getAllProducts();
-    let orders = getAllOrders();
-    try {
-      await connectToDatabase();
-      const dbOrders = await Order.find().sort({ createdAt: -1 }).lean();
-      if (dbOrders && dbOrders.length > 0) {
-        const orderMap = new Map();
-        [...dbOrders, ...orders].forEach((o) => {
-          const key = o.orderNumber || o._id || o.id;
-          if (key && !orderMap.has(key)) orderMap.set(key, o);
-        });
-        orders = Array.from(orderMap.values()).sort(
-          (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-        );
-      }
-    } catch {}
-
-    // Persistent Analytics from DB with Store fallback
-    let analytics = getAnalyticsSummary();
-    try {
-      await connectToDatabase();
-      const dbAnalytics = await Analytics.findOne({ key: 'global_summary' }).lean();
-      if (dbAnalytics && dbAnalytics.totalVisitors > 0) {
-        analytics = {
-          ...dbAnalytics,
-          sources: dbAnalytics.sources || analytics.sources,
-          devices: dbAnalytics.devices || analytics.devices,
-          cities: dbAnalytics.cities || analytics.cities,
-          countries: dbAnalytics.countries || analytics.countries,
-          recentVisits: dbAnalytics.recentVisits?.length ? dbAnalytics.recentVisits : analytics.recentVisits,
-        };
-      } else {
-        await Analytics.findOneAndUpdate(
-          { key: 'global_summary' },
-          { $set: analytics },
-          { upsert: true }
-        );
-      }
-    } catch {
-      // local store
-    }
-
-    // Promotions data
+    let products = [];
+    let orders = [];
     let promotions = [];
-    try {
-      await connectToDatabase();
-      const dbPromos = await PromotionPackage.find().sort({ displayOrder: 1, createdAt: -1 }).lean();
-      if (dbPromos && dbPromos.length >= 9) {
-        promotions = dbPromos;
-      } else {
-        const storePromos = getAllPromotions();
-        // Upsert missing store promos to db
-        for (const p of storePromos) {
-          await PromotionPackage.findOneAndUpdate({ id: p.id }, { $set: p }, { upsert: true });
-        }
-        promotions = storePromos;
+    let analytics = null;
+
+    if (isSupabaseConfigured()) {
+      try {
+        const sb = getSupabaseAdmin();
+        const [pRes, oRes, prRes, aRes] = await Promise.all([
+          sb.from('products').select('*').order('createdAt', { ascending: false }),
+          sb.from('orders').select('*').order('createdAt', { ascending: false }),
+          sb.from('promotions').select('*').order('displayOrder', { ascending: true }),
+          sb.from('analytics').select('*').eq('key', 'global_summary').single(),
+        ]);
+
+        if (!pRes.error && pRes.data) products = pRes.data;
+        if (!oRes.error && oRes.data) orders = oRes.data;
+        if (!prRes.error && prRes.data) promotions = prRes.data;
+        if (!aRes.error && aRes.data) analytics = aRes.data;
+      } catch (e) {
+        console.warn('Supabase dashboard fetch note:', e.message);
       }
-    } catch {
-      promotions = getAllPromotions();
     }
 
-    if (!promotions || promotions.length === 0) {
-      promotions = getAllPromotions();
+    // Fallbacks
+    if (!products.length) products = getAllProducts();
+    if (!promotions.length) promotions = getAllPromotions();
+
+    const storeOrders = getAllOrders();
+    const orderMap = new Map();
+    [...orders, ...storeOrders].forEach((o) => {
+      const key = o.orderNumber || o.id || o._id;
+      if (key && !orderMap.has(key)) orderMap.set(key, o);
+    });
+    orders = Array.from(orderMap.values()).sort(
+      (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+    );
+
+    if (!analytics) {
+      analytics = getAnalyticsSummary();
     }
 
     // Order statistics
     const totalOrders = orders.length;
-    const pendingOrders = orders.filter(o => o.status === 'pending' || !o.status).length;
-    const approvedOrders = orders.filter(o => o.status === 'confirmed' || o.status === 'dispatched' || o.status === 'completed').length;
-    const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
+    const pendingOrders = orders.filter((o) => o.status === 'pending' || !o.status).length;
+    const approvedOrders = orders.filter((o) => o.status === 'confirmed' || o.status === 'dispatched' || o.status === 'completed' || o.status === 'shipped').length;
+    const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.totalAmount || o.totalPrice) || 0), 0);
 
     // Product statistics
-    const matchesProducts = products.filter(p => p.category === 'Safety Matches' || p.productType === 'safety-matches').length;
-    const detergentProducts = products.filter(p => p.category === 'Detergents' || p.category === 'Dish Wash').length;
+    const matchesProducts = products.filter((p) => p.category === 'Safety Matches' || p.productType === 'safety-matches').length;
+    const detergentProducts = products.filter((p) => p.category === 'Detergents' || p.category === 'Dish Wash').length;
 
     // Promotion statistics
     const totalPromotions = promotions.length;
-    const activePromotions = promotions.filter(p => p.isActive !== false).length;
-    const freeShippingPromotions = promotions.filter(p => p.shippingCost === 0).length;
+    const activePromotions = promotions.filter((p) => p.isActive !== false).length;
+    const freeShippingPromotions = promotions.filter((p) => p.shippingCost === 0).length;
 
-    // Geographic / Cities tracking
     const cities = analytics.cities || {};
     const countries = analytics.countries || {};
 

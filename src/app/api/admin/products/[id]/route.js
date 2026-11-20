@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import Product from '@/lib/models/Product';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { verifyAdminAuth } from '@/lib/auth';
 import { parseProductRequest } from '../route';
 
@@ -23,51 +22,73 @@ export async function PUT(request, context) {
 
     const { payload, hasBodyVariantImages } = await parseProductRequest(request);
 
-    // Update in local persistent store
-    const { updateProduct, getProductById } = await import('@/lib/store');
-    const existingInStore = getProductById(id);
+    // Get existing product for merging
+    let existing = null;
+    if (isSupabaseConfigured()) {
+      try {
+        const sb = getSupabaseAdmin();
+        const { data } = await sb.from('products').select('*').eq('id', id).single();
+        if (data) existing = data;
+      } catch {}
+    }
+    if (!existing) {
+      try {
+        const { getProductById } = await import('@/lib/store');
+        existing = getProductById(id);
+      } catch {}
+    }
 
-    if (existingInStore) {
-      payload.image = payload.image || existingInStore.image || "";
+    if (existing) {
+      payload.image = payload.image || existing.image || '';
       payload.images = Array.isArray(payload.images) && payload.images.length
         ? payload.images
-        : existingInStore.images || [];
+        : existing.images || [];
 
-      if (Array.isArray(payload.variantImages) && Array.isArray(existingInStore.variantImages)) {
+      if (Array.isArray(payload.variantImages) && Array.isArray(existing.variantImages)) {
         payload.variantImages = payload.variantImages.map((v, idx) => {
           const match =
-            existingInStore.variantImages.find(
-              (ev) =>
-                ev?.name?.trim().toLowerCase() === v?.name?.trim().toLowerCase()
-            ) || existingInStore.variantImages[idx];
+            existing.variantImages.find(
+              (ev) => ev?.name?.trim().toLowerCase() === v?.name?.trim().toLowerCase()
+            ) || existing.variantImages[idx];
           return {
-            name: v?.name || match?.name || "",
-            image: v?.image || match?.image || "",
+            name: v?.name || match?.name || '',
+            image: v?.image || match?.image || '',
           };
         });
       } else if (!hasBodyVariantImages && (!payload.variantImages || !payload.variantImages.length)) {
-        payload.variantImages = existingInStore.variantImages || [];
+        payload.variantImages = existing.variantImages || [];
       }
     }
 
-    const updatedInStore = updateProduct(id, payload);
-
-    // Also attempt updating in MongoDB if available
-    try {
-      await connectToDatabase();
-      await Product.findOneAndUpdate(
-        { $or: [{ id }, { _id: id }] },
-        { $set: payload },
-        { upsert: true, new: true }
-      );
-    } catch (dbErr) {
-      console.warn('Could not update MongoDB, updated local store:', dbErr.message);
+    // Update in Supabase
+    if (isSupabaseConfigured()) {
+      try {
+        const sb = getSupabaseAdmin();
+        const { data, error } = await sb
+          .from('products')
+          .update({ ...payload, updatedAt: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
+        if (!error && data) {
+          try {
+            const { updateProduct } = await import('@/lib/store');
+            updateProduct(id, payload);
+          } catch {}
+          return NextResponse.json(data);
+        }
+        if (error) console.warn('Supabase update failed:', error.message);
+      } catch (sbErr) {
+        console.warn('Supabase error:', sbErr.message);
+      }
     }
 
+    // Fallback: local store
+    const { updateProduct } = await import('@/lib/store');
+    const updatedInStore = updateProduct(id, payload);
     if (updatedInStore) {
       return NextResponse.json(updatedInStore);
     }
-
     return NextResponse.json({ message: 'Product updated successfully', ...payload });
   } catch (err) {
     console.error('Error updating product:', err);
@@ -89,17 +110,21 @@ export async function DELETE(request, context) {
       return NextResponse.json({ message: 'Product ID required' }, { status: 400 });
     }
 
-    // Delete from local persistent store
-    const { deleteProduct } = await import('@/lib/store');
-    deleteProduct(id);
-
-    // Also attempt deletion in MongoDB if available
-    try {
-      await connectToDatabase();
-      await Product.findOneAndDelete({ $or: [{ id }, { _id: id }] });
-    } catch (dbErr) {
-      console.warn('Could not delete from MongoDB, deleted from local store:', dbErr.message);
+    // Delete from Supabase
+    if (isSupabaseConfigured()) {
+      try {
+        const sb = getSupabaseAdmin();
+        await sb.from('products').delete().eq('id', id);
+      } catch (sbErr) {
+        console.warn('Supabase delete failed:', sbErr.message);
+      }
     }
+
+    // Also delete from local store
+    try {
+      const { deleteProduct } = await import('@/lib/store');
+      deleteProduct(id);
+    } catch {}
 
     return NextResponse.json({ message: 'Product deleted' });
   } catch (err) {

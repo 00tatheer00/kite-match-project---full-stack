@@ -2,6 +2,7 @@ import { v2 as cloudinary } from "cloudinary";
 import sharp from "sharp";
 import fs from "fs";
 import path from "path";
+import { getSupabaseAdmin, isSupabaseConfigured, supabaseUrl } from "./supabase";
 
 const CLOUDINARY_CLOUD_NAME = (process.env.CLOUDINARY_CLOUD_NAME || "").trim();
 const CLOUDINARY_API_KEY = (process.env.CLOUDINARY_API_KEY || "").trim();
@@ -91,34 +92,63 @@ export async function uploadImageBuffer(file, options = {}) {
     .toLowerCase();
   const uniqueName = `${Date.now()}-${filename}.webp`;
 
-  if (!isConfigured) {
+  // Priority 1: Supabase Storage
+  if (isSupabaseConfigured()) {
     try {
-      const folderSanitized = folder.replace(/[^a-zA-Z0-9-_/]/g, "");
-      const publicDir = path.join(process.cwd(), "public", "uploads", folderSanitized);
-      fs.mkdirSync(publicDir, { recursive: true });
-      const targetPath = path.join(publicDir, uniqueName);
-      fs.writeFileSync(targetPath, optimizedFile.buffer);
-      return `/uploads/${folderSanitized}/${uniqueName}`;
-    } catch (localErr) {
-      console.warn("Could not save to local filesystem, returning data URI:", localErr.message);
-      return `data:image/webp;base64,${optimizedFile.buffer.toString("base64")}`;
+      const sb = getSupabaseAdmin();
+      if (sb) {
+        const storagePath = `${folder.replace(/[^a-zA-Z0-9-_/]/g, "")}/${uniqueName}`;
+        const { error: uploadError } = await sb.storage
+          .from("kite-images")
+          .upload(storagePath, optimizedFile.buffer, {
+            contentType: "image/webp",
+            upsert: true,
+          });
+        if (!uploadError) {
+          const { data: urlData } = sb.storage
+            .from("kite-images")
+            .getPublicUrl(storagePath);
+          if (urlData?.publicUrl) {
+            return urlData.publicUrl;
+          }
+        } else {
+          console.warn("Supabase Storage upload failed:", uploadError.message);
+        }
+      }
+    } catch (sbErr) {
+      console.warn("Supabase Storage error:", sbErr.message);
     }
   }
 
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder,
-        resource_type: "image",
-        format: "webp",
-        public_id: `${Date.now()}-${filename}`,
-      },
-      (err, result) => {
-        if (err) return reject(err);
-        resolve(result?.secure_url || "");
-      },
-    );
+  // Priority 2: Cloudinary
+  if (isConfigured) {
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder,
+          resource_type: "image",
+          format: "webp",
+          public_id: `${Date.now()}-${filename}`,
+        },
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result?.secure_url || "");
+        },
+      );
+      uploadStream.end(optimizedFile.buffer);
+    });
+  }
 
-    uploadStream.end(optimizedFile.buffer);
-  });
+  // Priority 3: Local filesystem
+  try {
+    const folderSanitized = folder.replace(/[^a-zA-Z0-9-_/]/g, "");
+    const publicDir = path.join(process.cwd(), "public", "uploads", folderSanitized);
+    fs.mkdirSync(publicDir, { recursive: true });
+    const targetPath = path.join(publicDir, uniqueName);
+    fs.writeFileSync(targetPath, optimizedFile.buffer);
+    return `/uploads/${folderSanitized}/${uniqueName}`;
+  } catch (localErr) {
+    console.warn("Could not save to local filesystem, returning data URI:", localErr.message);
+    return `data:image/webp;base64,${optimizedFile.buffer.toString("base64")}`;
+  }
 }

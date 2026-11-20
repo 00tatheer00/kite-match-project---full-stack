@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import PromotionPackage from '@/lib/models/PromotionPackage';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { verifyAdminAuth } from '@/lib/auth';
-import { uploadImageBuffer, isCloudinaryConfigured } from '@/lib/cloudinary';
+import { uploadImageBuffer } from '@/lib/cloudinary';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -11,11 +10,7 @@ function parseJsonField(value, fallback = []) {
   if (value == null || value === '') return fallback;
   if (Array.isArray(value)) return value;
   if (typeof value === 'object') return value;
-  try {
-    return JSON.parse(value);
-  } catch {
-    return fallback;
-  }
+  try { return JSON.parse(value); } catch { return fallback; }
 }
 
 function parseImage(value) {
@@ -24,13 +19,9 @@ function parseImage(value) {
 }
 
 function parseImagesField(value) {
-  if (Array.isArray(value)) {
-    return value.map((item) => String(item || '').trim()).filter(Boolean);
-  }
+  if (Array.isArray(value)) return value.map((item) => String(item || '').trim()).filter(Boolean);
   const parsed = parseJsonField(value, []);
-  if (Array.isArray(parsed)) {
-    return parsed.map((item) => String(item || '').trim()).filter(Boolean);
-  }
+  if (Array.isArray(parsed)) return parsed.map((item) => String(item || '').trim()).filter(Boolean);
   return [];
 }
 
@@ -66,14 +57,8 @@ export async function parsePromotionRequest(request) {
   }
 
   const items = parseJsonField(body.items, []);
-  const totalQuantityFromItems = items.reduce(
-    (sum, item) => sum + (Number(item?.quantity) || 0),
-    0
-  );
-  const totalPriceFromItems = items.reduce(
-    (sum, item) => sum + (Number(item?.quantity) || 0) * (Number(item?.price) || 0),
-    0
-  );
+  const totalQuantityFromItems = items.reduce((sum, item) => sum + (Number(item?.quantity) || 0), 0);
+  const totalPriceFromItems = items.reduce((sum, item) => sum + (Number(item?.quantity) || 0) * (Number(item?.price) || 0), 0);
 
   const payload = {
     id: body.id,
@@ -96,7 +81,6 @@ export async function parsePromotionRequest(request) {
   let hasGalleryUpload = false;
 
   if (files.length > 0) {
-
     const promotionImages = files.filter((f) => f.fieldname === 'promotionImages');
     const singleImage = files.find((f) => f.fieldname === 'image');
     const galleryFiles = files.filter((f) => f.fieldname === 'images');
@@ -129,52 +113,32 @@ export async function GET(request) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const { searchParams } = new URL(request.url);
-  const forceSync = searchParams.get('sync') === 'true';
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const sb = getSupabaseAdmin();
+      const { data, error } = await sb
+        .from('promotions')
+        .select('*')
+        .order('displayOrder', { ascending: true })
+        .order('createdAt', { ascending: false });
+      if (!error && data && data.length > 0) {
+        return NextResponse.json(data);
+      }
+    } catch (err) {
+      console.warn('Supabase promotions fetch failed:', err.message);
+    }
+  }
 
-  // Always have local store packages ready as source of truth
-  let storePromos = [];
+  // Fallback to local store
   try {
     const { getAllPromotions } = await import('@/lib/store');
-    storePromos = getAllPromotions();
+    const storePromos = getAllPromotions();
+    if (storePromos && storePromos.length > 0) {
+      return NextResponse.json(storePromos);
+    }
   } catch (e) {
-    console.warn('Store read failed for promotions:', e.message);
-  }
-
-  try {
-    await connectToDatabase();
-
-    // Auto-sync if requested or if database is missing packages
-    const count = await PromotionPackage.countDocuments();
-    const starter = await PromotionPackage.findOne({ id: 'pkg-kite-smart-starter' });
-    const starterStoreImage = storePromos.find((p) => p.id === 'pkg-kite-smart-starter')?.image;
-
-    if (forceSync || count < 9 || !starter || (starterStoreImage && starter.image !== starterStoreImage)) {
-      if (storePromos && storePromos.length > 0) {
-        for (const p of storePromos) {
-          await PromotionPackage.findOneAndUpdate(
-            { id: p.id },
-            { $set: p },
-            { upsert: true, new: true }
-          );
-        }
-      }
-    }
-
-    const promos = await PromotionPackage.find()
-      .sort({ displayOrder: 1, createdAt: -1 })
-      .lean();
-
-    if (promos && promos.length > 0) {
-      return NextResponse.json(promos);
-    }
-  } catch (err) {
-    // MongoDB offline or connecting
-  }
-
-  // Use local persistent store
-  if (storePromos && storePromos.length > 0) {
-    return NextResponse.json(storePromos);
+    console.warn('Store read failed:', e.message);
   }
 
   // Fallback to remote backend
@@ -185,7 +149,7 @@ export async function GET(request) {
       return NextResponse.json(publicPromos);
     }
   } catch (e) {
-    console.warn('Remote fallback failed for admin promotions:', e.message);
+    console.warn('Remote fallback failed:', e.message);
   }
 
   return NextResponse.json([]);
@@ -205,22 +169,36 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
-    // Save in local persistent store
-    const { createPromotion } = await import('@/lib/store');
-    const createdInStore = createPromotion(payload);
-
-    // Also attempt saving to MongoDB if reachable
-    try {
-      await connectToDatabase();
-      await PromotionPackage.findOneAndUpdate(
-        { $or: [{ id: payload.id }, { _id: payload.id }] },
-        { $set: payload },
-        { upsert: true, new: true }
-      );
-    } catch (dbErr) {
-      console.warn('Could not persist to MongoDB, saved to local store:', dbErr.message);
+    // Save to Supabase
+    if (isSupabaseConfigured()) {
+      try {
+        const sb = getSupabaseAdmin();
+        const row = {
+          ...payload,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        const { data, error } = await sb
+          .from('promotions')
+          .upsert(row, { onConflict: 'id' })
+          .select()
+          .single();
+        if (!error && data) {
+          try {
+            const { createPromotion } = await import('@/lib/store');
+            createPromotion(payload);
+          } catch {}
+          return NextResponse.json(data, { status: 201 });
+        }
+        if (error) console.warn('Supabase insert failed:', error.message);
+      } catch (sbErr) {
+        console.warn('Supabase error:', sbErr.message);
+      }
     }
 
+    // Fallback: local store
+    const { createPromotion } = await import('@/lib/store');
+    const createdInStore = createPromotion(payload);
     return NextResponse.json(createdInStore, { status: 201 });
   } catch (err) {
     console.error('Error creating promotion:', err);

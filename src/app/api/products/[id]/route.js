@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import Product from '@/lib/models/Product';
-import { fetchRemoteFallback } from '@/lib/api-fallback';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -34,54 +32,55 @@ export async function GET(request, context) {
   const targetId = PRODUCT_ALIASES[requested] || PRODUCT_ALIASES[normalizedRequested] || requested;
   const targetNormalized = normalizeIdentifier(targetId);
 
-  try {
-    await connectToDatabase();
-    let product = await Product.findOne({
-      $or: [{ id: targetId }, { id: requested }, { slug: targetId }, { slug: requested }, { _id: targetId }, { _id: requested }],
-    }).lean();
-
-    if (!product) {
-      const candidates = await Product.find().lean();
-      product =
-        candidates.find((item) => {
-          const idMatch = normalizeIdentifier(item.id) === targetNormalized || normalizeIdentifier(item.id) === normalizedRequested;
-          const slugMatch = normalizeIdentifier(item.slug) === targetNormalized || normalizeIdentifier(item.slug) === normalizedRequested;
-          const titleMatch = normalizeIdentifier(item.title) === targetNormalized || normalizeIdentifier(item.title) === normalizedRequested;
-          return idMatch || slugMatch || titleMatch;
-        }) || null;
+  // Try Supabase
+  if (isSupabaseConfigured()) {
+    try {
+      const sb = getSupabaseAdmin();
+      // Direct lookup
+      let { data } = await sb.from('products').select('*').eq('id', targetId).single();
+      if (!data && targetId !== requested) {
+        const res = await sb.from('products').select('*').eq('id', requested).single();
+        data = res.data;
+      }
+      // Fuzzy search
+      if (!data) {
+        const { data: all } = await sb.from('products').select('*');
+        if (all) {
+          data = all.find((item) => {
+            const idMatch = normalizeIdentifier(item.id) === targetNormalized || normalizeIdentifier(item.id) === normalizedRequested;
+            const titleMatch = normalizeIdentifier(item.title) === targetNormalized || normalizeIdentifier(item.title) === normalizedRequested;
+            return idMatch || titleMatch;
+          }) || null;
+        }
+      }
+      if (data) return NextResponse.json(data);
+    } catch (err) {
+      console.warn('Supabase product fetch failed:', err.message);
     }
-
-    if (product) {
-      return NextResponse.json(product);
-    }
-  } catch (err) {
-    // Database offline
   }
 
-  // Check persistent store
+  // Fallback to store
   try {
     const { getAllProducts, getProductById } = await import('@/lib/store');
     let product = getProductById(targetId) || getProductById(requested);
     if (!product) {
       const storeProducts = getAllProducts();
-      product =
-        storeProducts.find((item) => {
-          const idMatch = normalizeIdentifier(item.id) === targetNormalized || normalizeIdentifier(item.id) === normalizedRequested;
-          const slugMatch = normalizeIdentifier(item.slug) === targetNormalized || normalizeIdentifier(item.slug) === normalizedRequested;
-          const titleMatch = normalizeIdentifier(item.title) === targetNormalized || normalizeIdentifier(item.title) === normalizedRequested;
-          return idMatch || slugMatch || titleMatch;
-        }) || null;
+      product = storeProducts.find((item) => {
+        const idMatch = normalizeIdentifier(item.id) === targetNormalized || normalizeIdentifier(item.id) === normalizedRequested;
+        const slugMatch = normalizeIdentifier(item.slug) === targetNormalized || normalizeIdentifier(item.slug) === normalizedRequested;
+        const titleMatch = normalizeIdentifier(item.title) === targetNormalized || normalizeIdentifier(item.title) === normalizedRequested;
+        return idMatch || slugMatch || titleMatch;
+      }) || null;
     }
-    if (product) {
-      return NextResponse.json(product);
-    }
+    if (product) return NextResponse.json(product);
   } catch {}
 
-  // Fallback to remote backend
-  const remoteData = await fetchRemoteFallback(`/products/${requested}`);
-  if (remoteData) {
-    return NextResponse.json(remoteData);
-  }
+  // Fallback to remote
+  try {
+    const { fetchRemoteFallback } = await import('@/lib/api-fallback');
+    const remoteData = await fetchRemoteFallback(`/products/${requested}`);
+    if (remoteData) return NextResponse.json(remoteData);
+  } catch {}
 
   return NextResponse.json({ message: 'Product not found' }, { status: 404 });
 }

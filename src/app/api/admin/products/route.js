@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import Product from '@/lib/models/Product';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { verifyAdminAuth } from '@/lib/auth';
-import { uploadImageBuffer, isCloudinaryConfigured } from '@/lib/cloudinary';
+import { uploadImageBuffer } from '@/lib/cloudinary';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -104,9 +103,7 @@ export async function parseProductRequest(request) {
     showInNavbar: toBoolean(body.showInNavbar, true),
   };
 
-  // Upload any attached files (to Cloudinary if configured, or optimized webp fallback)
   if (files.length > 0) {
-
     const productImages = files.filter((f) => f.fieldname === 'productImages');
     const singleImage = files.find((f) => f.fieldname === 'image');
     const galleryFiles = files.filter((f) => f.fieldname === 'images');
@@ -126,7 +123,6 @@ export async function parseProductRequest(request) {
       );
     }
 
-    // Variant images
     const variantFiles = files.filter((f) => /^variantImageFile_\d+$/i.test(f.fieldname));
     if (variantFiles.length > 0) {
       const nextVariantImages = Array.isArray(payload.variantImages)
@@ -143,7 +139,6 @@ export async function parseProductRequest(request) {
       payload.variantImages = nextVariantImages.filter((it) => it?.name || it?.image);
     }
 
-    // Brand images
     const brandFiles = files.filter((f) => /^brandImageFile_\d+$/i.test(f.fieldname));
     if (brandFiles.length > 0) {
       const nextBrands = Array.isArray(payload.brands) ? [...payload.brands] : [];
@@ -169,17 +164,23 @@ export async function GET(request) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  try {
-    await connectToDatabase();
-    const products = await Product.find().sort({ createdAt: -1 }).lean();
-    if (products && products.length > 0) {
-      return NextResponse.json(products);
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const sb = getSupabaseAdmin();
+      const { data, error } = await sb
+        .from('products')
+        .select('*')
+        .order('createdAt', { ascending: false });
+      if (!error && data && data.length > 0) {
+        return NextResponse.json(data);
+      }
+    } catch (err) {
+      console.warn('Supabase products fetch failed:', err.message);
     }
-  } catch (err) {
-    // MongoDB offline or error
   }
 
-  // Use local persistent store
+  // Fallback to local store
   try {
     const { getAllProducts } = await import('@/lib/store');
     const storeProducts = getAllProducts();
@@ -198,7 +199,7 @@ export async function GET(request) {
       return NextResponse.json(publicProducts);
     }
   } catch (e) {
-    console.warn('Remote fallback failed for admin products:', e.message);
+    console.warn('Remote fallback failed:', e.message);
   }
 
   return NextResponse.json([]);
@@ -218,22 +219,37 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
-    // Save in local persistent store
-    const { createProduct } = await import('@/lib/store');
-    const createdInStore = createProduct(payload);
-
-    // Also attempt saving to MongoDB if reachable
-    try {
-      await connectToDatabase();
-      await Product.findOneAndUpdate(
-        { $or: [{ id: payload.id }, { _id: payload.id }] },
-        { $set: payload },
-        { upsert: true, new: true }
-      );
-    } catch (dbErr) {
-      console.warn('Could not persist to MongoDB, saved to local store:', dbErr.message);
+    // Save to Supabase
+    if (isSupabaseConfigured()) {
+      try {
+        const sb = getSupabaseAdmin();
+        const row = {
+          ...payload,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        const { data, error } = await sb
+          .from('products')
+          .upsert(row, { onConflict: 'id' })
+          .select()
+          .single();
+        if (!error && data) {
+          // Also save to local store as backup
+          try {
+            const { createProduct } = await import('@/lib/store');
+            createProduct(payload);
+          } catch {}
+          return NextResponse.json(data, { status: 201 });
+        }
+        if (error) console.warn('Supabase insert failed:', error.message);
+      } catch (sbErr) {
+        console.warn('Supabase error:', sbErr.message);
+      }
     }
 
+    // Fallback: save to local store
+    const { createProduct } = await import('@/lib/store');
+    const createdInStore = createProduct(payload);
     return NextResponse.json(createdInStore, { status: 201 });
   } catch (err) {
     console.error('Error creating product:', err);

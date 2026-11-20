@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import Order from '@/lib/models/Order';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { verifyAdminAuth } from '@/lib/auth';
 import { sendStatusUpdateEmail } from '@/lib/email';
 
@@ -28,72 +27,57 @@ export async function PATCH(request, context) {
     }
 
     let order = null;
-    try {
-      await connectToDatabase();
-      if (id.match(/^[0-9a-fA-F]{24}$/)) {
-        order = await Order.findByIdAndUpdate(
-          id,
-          { status },
-          { new: true }
-        );
-      }
-      if (!order) {
-        order = await Order.findOneAndUpdate(
-          { orderNumber: id },
-          { status },
-          { new: true }
-        );
-      }
-    } catch (dbErr) {
-      // Mongo offline
-    }
 
-    if (!order) {
+    // Try Supabase
+    if (isSupabaseConfigured()) {
       try {
-        const { updateOrderStatus } = await import('@/lib/store');
-        order = updateOrderStatus(id, status);
+        const sb = getSupabaseAdmin();
+        // Try by UUID
+        let res = await sb
+          .from('orders')
+          .update({ status, updatedAt: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
+        if (!res.data) {
+          // Try by orderNumber
+          res = await sb
+            .from('orders')
+            .update({ status, updatedAt: new Date().toISOString() })
+            .eq('orderNumber', id)
+            .select()
+            .single();
+        }
+        if (res.data) order = res.data;
       } catch {}
     }
+
+    // Also update local store
+    try {
+      const { updateOrderStatus } = await import('@/lib/store');
+      const storeOrder = updateOrderStatus(id, status);
+      if (!order) order = storeOrder;
+    } catch {}
 
     if (!order) {
       return NextResponse.json({ message: 'Order not found' }, { status: 404 });
     }
 
     // Fire-and-forget status update email
-    sendStatusUpdateEmail(order.toObject ? order.toObject() : order).catch((err) => {
+    sendStatusUpdateEmail(order).catch((err) => {
       console.error('[Email Error] Failed to send status update email:', err);
     });
 
-    try {
-      const { updateOrderStatus } = await import('@/lib/store');
-      updateOrderStatus(id, status);
-    } catch {}
-
     return NextResponse.json(order);
   } catch (err) {
-    console.warn('Local update failed, checking store or remote fallback for order status:', err.message);
+    console.warn('Order status update error:', err.message);
+    // Fallback to store
     try {
       const { updateOrderStatus } = await import('@/lib/store');
       const updatedInStore = updateOrderStatus(id, status);
-      if (updatedInStore) {
-        return NextResponse.json(updatedInStore);
-      }
+      if (updatedInStore) return NextResponse.json(updatedInStore);
     } catch {}
 
-    try {
-      const { forwardRemoteRequest } = await import('@/lib/api-fallback');
-      const auth = request.headers.get('authorization') || '';
-      const res = await forwardRemoteRequest(`/admin/orders/${id}/status`, {
-        method: 'PATCH',
-        headers: auth ? { Authorization: auth } : {},
-        body: { status },
-      });
-      if (res.ok && res.data) {
-        return NextResponse.json(res.data);
-      }
-    } catch (e) {
-      console.error('Remote status update fallback failed:', e);
-    }
     return NextResponse.json({ message: 'Failed to update order status' }, { status: 500 });
   }
 }

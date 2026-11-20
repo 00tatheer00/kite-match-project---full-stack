@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import Order from '@/lib/models/Order';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { verifyAdminAuth } from '@/lib/auth';
 
 // GET /api/admin/orders/:id
@@ -17,25 +16,27 @@ export async function GET(request, context) {
       return NextResponse.json({ message: 'Order ID required' }, { status: 400 });
     }
 
-    try {
-      await connectToDatabase();
-      let order = null;
-      if (id.match(/^[0-9a-fA-F]{24}$/)) {
-        order = await Order.findById(id).lean();
-      }
-      if (!order) {
-        order = await Order.findOne({ orderNumber: id }).lean();
-      }
-      if (order) {
-        return NextResponse.json(order);
-      }
-    } catch {}
-
-    const { getOrderById } = await import('@/lib/store');
-    const stored = getOrderById(id);
-    if (stored) {
-      return NextResponse.json(stored);
+    // Try Supabase
+    if (isSupabaseConfigured()) {
+      try {
+        const sb = getSupabaseAdmin();
+        // Try by UUID id
+        let { data } = await sb.from('orders').select('*').eq('id', id).single();
+        if (!data) {
+          // Try by orderNumber
+          const res = await sb.from('orders').select('*').eq('orderNumber', id).single();
+          data = res.data;
+        }
+        if (data) return NextResponse.json(data);
+      } catch {}
     }
+
+    // Fallback to store
+    try {
+      const { getOrderById } = await import('@/lib/store');
+      const stored = getOrderById(id);
+      if (stored) return NextResponse.json(stored);
+    } catch {}
 
     return NextResponse.json({ message: 'Order not found' }, { status: 404 });
   } catch (err) {

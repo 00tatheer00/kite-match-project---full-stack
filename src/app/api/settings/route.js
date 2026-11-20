@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import Settings from '@/lib/models/Settings';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { verifyAdminAuth } from '@/lib/auth';
 import { fetchRemoteFallback } from '@/lib/api-fallback';
 import { uploadImageBuffer } from '@/lib/cloudinary';
@@ -25,17 +24,16 @@ const DEFAULT_SETTINGS = {
 
 // GET /api/settings (public for checkout & frontend)
 export async function GET() {
-  try {
-    const conn = await connectToDatabase();
-    if (conn) {
-      let settings = await Settings.findOne();
-      if (!settings) {
-        settings = await Settings.create(DEFAULT_SETTINGS);
+  if (isSupabaseConfigured()) {
+    try {
+      const sb = getSupabaseAdmin();
+      const { data, error } = await sb.from('settings').select('*').eq('id', 1).single();
+      if (!error && data) {
+        return NextResponse.json({ ...DEFAULT_SETTINGS, ...data });
       }
-      return NextResponse.json(settings);
+    } catch (e) {
+      console.warn('Supabase getSettings error:', e.message);
     }
-  } catch (error) {
-    // Database offline
   }
 
   try {
@@ -94,7 +92,7 @@ export async function PUT(request) {
       payload.smallPackageShippingCost = Number(payload.smallPackageShippingCost) || 200;
     }
 
-    // Always update store file (db.json) for persistence across reloads
+    // Always update local store file as backup
     try {
       const { updateSettings } = await import('@/lib/store');
       updateSettings(payload);
@@ -102,20 +100,28 @@ export async function PUT(request) {
       console.warn('Could not update local store:', e.message);
     }
 
-    try {
-      const conn = await connectToDatabase();
-      if (conn) {
-        let settings = await Settings.findOne();
-        if (!settings) {
-          settings = new Settings({ ...DEFAULT_SETTINGS, ...payload });
-        } else {
-          Object.assign(settings, payload);
+    // Update in Supabase
+    if (isSupabaseConfigured()) {
+      try {
+        const sb = getSupabaseAdmin();
+        const updateData = {
+          ...payload,
+          id: 1,
+          updatedAt: new Date().toISOString(),
+        };
+        const { data, error } = await sb
+          .from('settings')
+          .upsert(updateData, { onConflict: 'id' })
+          .select()
+          .single();
+
+        if (!error && data) {
+          return NextResponse.json({ ...DEFAULT_SETTINGS, ...data });
         }
-        await settings.save();
-        return NextResponse.json(settings);
+        if (error) console.warn('Supabase settings update error:', error.message);
+      } catch (dbErr) {
+        console.warn('Could not persist settings to Supabase:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('Could not persist settings to MongoDB:', dbErr.message);
     }
 
     try {

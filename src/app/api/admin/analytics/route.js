@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { getAnalyticsSummary } from '@/lib/store';
-import { connectToDatabase } from '@/lib/db';
-import Analytics from '@/lib/models/Analytics';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -9,27 +8,37 @@ export const revalidate = 0;
 export async function GET() {
   try {
     let summary = getAnalyticsSummary();
-    try {
-      await connectToDatabase();
-      const dbAnalytics = await Analytics.findOne({ key: 'global_summary' }).lean();
-      if (dbAnalytics && dbAnalytics.totalVisitors > 0) {
-        summary = {
-          ...dbAnalytics,
-          sources: dbAnalytics.sources || summary.sources,
-          devices: dbAnalytics.devices || summary.devices,
-          cities: dbAnalytics.cities || summary.cities,
-          countries: dbAnalytics.countries || summary.countries,
-          recentVisits: dbAnalytics.recentVisits?.length ? dbAnalytics.recentVisits : summary.recentVisits,
-        };
-      } else {
-        await Analytics.findOneAndUpdate(
-          { key: 'global_summary' },
-          { $set: summary },
-          { upsert: true }
-        );
+
+    if (isSupabaseConfigured()) {
+      try {
+        const sb = getSupabaseAdmin();
+        const { data, error } = await sb
+          .from('analytics')
+          .select('*')
+          .eq('key', 'global_summary')
+          .single();
+
+        if (!error && data && data.totalVisitors > 0) {
+          summary = {
+            ...data,
+            sources: data.sources || summary.sources,
+            devices: data.devices || summary.devices,
+            cities: data.cities || summary.cities,
+            countries: data.countries || summary.countries,
+            recentVisits: data.recentVisits?.length ? data.recentVisits : summary.recentVisits,
+          };
+        } else {
+          // Upsert current summary into Supabase
+          await sb.from('analytics').upsert({
+            id: 1,
+            key: 'global_summary',
+            ...summary,
+            updatedAt: new Date().toISOString(),
+          }, { onConflict: 'id' });
+        }
+      } catch (e) {
+        console.warn('Supabase analytics fetch note:', e.message);
       }
-    } catch {
-      // local store is fallback
     }
 
     return NextResponse.json(summary);
