@@ -79,7 +79,7 @@ const KiteMatchesPage = () => {
           {/* Product Image */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             className="sticky top-24 h-fit"
           >
@@ -95,7 +95,7 @@ const KiteMatchesPage = () => {
           {/* Product Details */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <div className="flex items-center mb-6">
@@ -142,7 +142,7 @@ const KiteMatchesPage = () => {
         {/* Additional Information Sections */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           className="space-y-12"
         >
@@ -218,7 +218,7 @@ const KiteMatchesPage = () => {
         {/* CTA Section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-16 bg-gradient-to-r from-[#00AEEF] to-[#0095CC] rounded-3xl p-8 md:p-12 text-center shadow-2xl"
         >

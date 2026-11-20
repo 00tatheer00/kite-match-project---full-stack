@@ -433,9 +433,9 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
           {product.productType === 'matches' ? (
             <div className="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
               <Motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.8 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
               >
                 <div
                   className="inline-block px-4 py-1.5 rounded-full text-white text-sm font-bold tracking-wider uppercase mb-4"
@@ -463,9 +463,9 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
             <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 mb-12 sm:mb-16">
               {/* Product Image */}
               <Motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.8 }}
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
                 className="lg:sticky lg:top-24 h-fit"
               >
                 <div className="relative mx-auto w-full bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-[#E0E0E0]">
@@ -541,9 +541,9 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
 
               {/* Product Details */}
               <Motion.div
-                initial={{ opacity: 0, x: 50 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.8, delay: 0.2 }}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
               >
                 <div className="flex items-center mb-4 sm:mb-6">
                   <div className="mr-4" style={{ color: product.color }}>
@@ -683,9 +683,9 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
 
           {/* Additional Information Sections */}
           <Motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
             className="space-y-12"
           >
             {/* Brands (for matches) */}
@@ -873,9 +873,9 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
 
           {/* CTA Section */}
           <Motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.6 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
             <div className="mt-12 sm:mt-16 bg-gradient-to-r from-[#00AEEF] to-[#0095CC] rounded-3xl p-6 sm:p-8 md:p-12 text-center shadow-2xl">
               <h3 className="text-white text-2xl sm:text-3xl md:text-4xl font-bold mb-6 drop-shadow-lg">
