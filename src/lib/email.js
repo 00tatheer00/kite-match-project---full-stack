@@ -123,7 +123,7 @@ async function sendViaResend({ to, subject, html, text }) {
     return false;
   }
 
-  const primaryFrom = (process.env.RESEND_FROM || 'Kite FMCG Orders <orders@kitepk.com>').trim();
+  const primaryFrom = (process.env.RESEND_FROM || 'Kite FMCG Orders <orders@send.kitepk.com>').trim();
   const recipients = Array.isArray(to) ? to.filter(Boolean) : [to].filter(Boolean);
   if (recipients.length === 0) return false;
 

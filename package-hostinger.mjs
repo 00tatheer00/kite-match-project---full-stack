@@ -97,7 +97,7 @@ try {
   if (fs.existsSync(zipFile)) {
     fs.unlinkSync(zipFile);
   }
-  execSync(`powershell -Command "Compress-Archive -Path '${distDir}\\*' -DestinationPath '${zipFile}' -Force"`, {
+  execSync(`tar.exe -a -c -f "${zipFile}" -C "${distDir}" .`, {
     stdio: 'inherit'
   });
   console.log('🎉 ZIP file created successfully at:', zipFile);
