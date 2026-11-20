@@ -32,6 +32,23 @@ const emptyForm = {
 
 const AdminPromotionsPage = () => {
   const { isDark } = useAdminTheme();
+
+  const inputCls = isDark
+    ? "w-full px-3 py-2 border border-slate-700 rounded-lg text-sm bg-[#0B0F19] text-white placeholder:text-slate-500 focus:outline-none focus:border-pink-500 transition-colors"
+    : "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-pink-500 transition-colors";
+
+  const labelCls = isDark
+    ? "block mb-1.5 font-semibold text-xs text-slate-300"
+    : "block mb-1.5 font-semibold text-xs text-slate-700";
+
+  const removeBtnCls = isDark
+    ? "px-3 py-1.5 rounded-lg border border-red-900/50 text-red-400 hover:bg-red-950/40 text-xs font-semibold cursor-pointer transition-colors"
+    : "px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 bg-white text-xs font-semibold cursor-pointer transition-colors";
+
+  const addSubBtnCls = isDark
+    ? "px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-semibold cursor-pointer transition-colors"
+    : "px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold cursor-pointer shadow-2xs transition-colors";
+
   const [showForm, setShowForm] = useState(false);
   const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +58,25 @@ const AdminPromotionsPage = () => {
   const [editingId, setEditingId] = useState(null);
   const [promotionImages, setPromotionImages] = useState([]);
   const [syncing, setSyncing] = useState(false);
+
+  useEffect(() => {
+    if (showForm) {
+      document.body.style.overflow = "hidden";
+      const handleKeyDown = (e) => {
+        if (e.key === "Escape") {
+          setShowForm(false);
+          setEditingId(null);
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = "unset";
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [showForm]);
 
   const load = async () => {
     try {
@@ -558,321 +594,357 @@ const AdminPromotionsPage = () => {
           )}
 
           {showForm && (
-            <div className={`border rounded-2xl p-5 md:p-7 shadow-xl transition-all ${
-              isDark ? "bg-[#111726] border-[#1E293B] text-slate-100" : "bg-white border-slate-200 text-slate-900 shadow-sm"
-            }`}>
-              <div className={`flex items-center justify-between mb-5 border-b pb-4 ${
-                isDark ? "border-[#1E293B]" : "border-slate-200"
-              }`}>
-                <div>
-                  <h2 className={`text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                    {editingId ? "Edit Promotion Details" : "Add New Promotion"}
-                  </h2>
-                  <p className={`text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    {editingId ? `Updating promotion: ${form.title || form.id}` : "Configure bundle package, items, and pricing"}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowForm(false);
-                    setEditingId(null);
-                    setForm(emptyForm);
-                  }}
-                  className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/75 backdrop-blur-xs animate-fade-in"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setShowForm(false);
+                  setEditingId(null);
+                }
+              }}
+            >
+              <div
+                className={`relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl shadow-2xl border overflow-hidden ${
+                  isDark
+                    ? "bg-[#111726] border-slate-800 text-slate-100"
+                    : "bg-white border-slate-200 text-slate-900"
+                }`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div
+                  className={`sticky top-0 z-20 flex items-center justify-between px-6 py-4 border-b ${
                     isDark
-                      ? "border-[#1E293B] text-slate-400 hover:text-white hover:bg-[#161D2E]"
-                      : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                      ? "bg-[#111726]/95 backdrop-blur-sm border-slate-800"
+                      : "bg-white/95 backdrop-blur-sm border-slate-200"
                   }`}
                 >
-                  ✕ Close Form
-                </button>
-              </div>
-            {error && (
-              <div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-sm font-semibold flex items-center justify-between">
-                <span>{error}</span>
-                {String(error).toLowerCase().includes("unauthorized") && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse" />
+                    <div>
+                      <h2 className={`text-lg sm:text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+                        {editingId ? "Edit Promotion Details" : "Add New Promotion"}
+                      </h2>
+                      <p className={`text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                        {editingId ? `Updating promotion: ${form.title || form.id}` : "Configure bundle package, items, and pricing"}
+                      </p>
+                    </div>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {
-                      if (typeof window !== 'undefined') {
-                        localStorage.removeItem('adminToken');
-                        window.location.href = '/admin/login';
-                      }
-                    }}
-                    className="px-3 py-1 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 cursor-pointer ml-3"
-                  >
-                    Re-Login
-                  </button>
-                )}
-              </div>
-            )}
-            <form
-              onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm"
-            >
-              <div>
-                <label className="block mb-1.5 font-medium">ID (slug)</label>
-                <input
-                  name="id"
-                  value={form.id}
-                  onChange={handleChange}
-                  required
-                  disabled={!!editingId}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
-                />
-              </div>
-              <div>
-                <label className="block mb-1.5 font-medium">Title</label>
-                <input
-                  name="title"
-                  value={form.title}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
-                />
-              </div>
-              <div>
-                <label className="block mb-1.5 font-medium">Category</label>
-                <input
-                  name="category"
-                  value={form.category}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block mb-1.5 font-medium">
-                  Description (optional)
-                </label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block mb-1.5 font-medium">
-                  Primary Image URL (optional)
-                </label>
-                <input
-                  name="image"
-                  value={form.image}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
-                />
-              </div>
-              <div>
-                <label className="block mb-1.5 font-medium">
-                  Upload Promotion Image(s)
-                </label>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={(e) =>
-                    setPromotionImages(Array.from(e.target.files || []))
-                  }
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg"
-                />
-                <p className="text-xs text-[#666666] mt-1">
-                  Upload one or many. First image is used as primary.
-                </p>
-              </div>
-              <div>
-                <label className="block mb-1.5 font-medium">Original / MRP Price (Rs)</label>
-                <input
-                  name="originalPrice"
-                  type="number"
-                  min="0"
-                  placeholder="e.g. 470"
-                  value={form.originalPrice}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
-                />
-              </div>
-              <div>
-                <label className="block mb-1.5 font-medium">Discount / Save Amount (Rs)</label>
-                <input
-                  name="discount"
-                  type="number"
-                  min="0"
-                  placeholder="e.g. 70"
-                  value={form.discount}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
-                />
-              </div>
-              <div>
-                <label className="block mb-1.5 font-medium">Shipping Cost (Rs)</label>
-                <input
-                  name="shippingCost"
-                  type="number"
-                  min="0"
-                  placeholder="Leave empty for default"
-                  value={form.shippingCost}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
-                />
-              </div>
-              <div>
-                <label className="block mb-1.5 font-medium">
-                  Display Order
-                </label>
-                <input
-                  name="displayOrder"
-                  value={form.displayOrder}
-                  onChange={handleChange}
-                  type="number"
-                  min="0"
-                  className="w-full px-3 py-2 border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
-                />
-              </div>
-              <div>
-                <label className="inline-flex items-center gap-2 mt-8">
-                  <input
-                    type="checkbox"
-                    name="isActive"
-                    checked={form.isActive}
-                    onChange={handleChange}
-                  />
-                  Active
-                </label>
-              </div>
-
-              <div className="md:col-span-3">
-                <label className="block mb-1.5 font-medium">
-                  Extra Image URLs
-                </label>
-                <div className="space-y-2">
-                  {form.imageUrls.map((url, idx) => (
-                    <div key={`u-${idx}`} className="flex gap-2">
-                      <input
-                        value={url}
-                        onChange={(e) => updateImageUrl(idx, e.target.value)}
-                        placeholder="https://..."
-                        className="flex-1 px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImageUrl(idx)}
-                        className="px-3 py-2 rounded-lg border border-red-200 text-red-600"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={addImageUrl}
-                    className={`px-3 py-2 rounded-lg border text-sm font-semibold transition-colors ${
-                      isDark
-                        ? "border-[#1E293B] bg-[#161D2E] text-slate-200 hover:bg-[#1E293B]"
-                        : "border-[#E0E0E0] bg-white text-slate-700 hover:bg-[#F9F9F9]"
-                    }`}
-                  >
-                    + Add URL
-                  </button>
-                </div>
-              </div>
-
-              <div className="md:col-span-3">
-                <label className="block mb-1.5 font-medium">
-                  Promotion Items
-                </label>
-                <div className="space-y-2">
-                  {form.items.map((item, idx) => (
-                    <div
-                      key={`i-${idx}`}
-                      className="grid grid-cols-1 md:grid-cols-4 gap-2"
-                    >
-                      <input
-                        value={item.product}
-                        onChange={(e) =>
-                          updateItem(idx, "product", e.target.value)
-                        }
-                        placeholder="Product name"
-                        className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
-                      />
-                      <input
-                        value={item.quantity}
-                        type="number"
-                        min="1"
-                        onChange={(e) =>
-                          updateItem(idx, "quantity", e.target.value)
-                        }
-                        placeholder="Quantity"
-                        className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
-                      />
-                      <input
-                        value={item.price}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        onChange={(e) =>
-                          updateItem(idx, "price", e.target.value)
-                        }
-                        placeholder="Price"
-                        className="px-3 py-2 border border-[#E0E0E0] rounded-lg text-sm"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeItem(idx)}
-                        className="px-3 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-500/10"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={addItem}
-                    className={`px-3 py-2 rounded-lg border text-sm font-semibold transition-colors ${
-                      isDark
-                        ? "border-[#1E293B] bg-[#161D2E] text-slate-200 hover:bg-[#1E293B]"
-                        : "border-[#E0E0E0] bg-white text-slate-700 hover:bg-[#F9F9F9]"
-                    }`}
-                  >
-                    + Add Item
-                  </button>
-                </div>
-              </div>
-              <div className="flex items-end md:col-span-3 gap-2 pt-1">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-[#00AEEF] to-[#0095CC] hover:shadow-lg hover:shadow-[#00AEEF]/30 transition-all disabled:opacity-60 cursor-pointer"
-                >
-                  {saving
-                    ? "Saving..."
-                    : editingId
-                      ? "Update Promotion"
-                      : "Create Promotion"}
-                </button>
-                {editingId && (
-                  <button
-                    type="button"
-                    onClick={() => {
+                      setShowForm(false);
                       setEditingId(null);
                       setForm(emptyForm);
-                      setPromotionImages([]);
-                      setShowForm(false);
                     }}
-                    className={`px-5 py-2 rounded-lg text-sm font-semibold border transition-colors cursor-pointer ${
+                    className={`p-2 rounded-xl border transition-all cursor-pointer ${
                       isDark
-                        ? "border-[#1E293B] bg-[#161D2E] text-slate-300 hover:bg-[#1E293B]"
-                        : "border-[#E0E0E0] bg-white text-slate-700 hover:bg-[#F9F9F9]"
+                        ? "border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800/80"
+                        : "border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                    }`}
+                    title="Close (Esc)"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Form wrapper */}
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex-1 flex flex-col min-h-0"
+                >
+                  {/* Scrollable Form Body */}
+                  <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
+                    {error && (
+                      <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm font-semibold flex items-center justify-between">
+                        <span>{error}</span>
+                        {String(error).toLowerCase().includes("unauthorized") && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (typeof window !== 'undefined') {
+                                localStorage.removeItem('adminToken');
+                                window.location.href = '/admin/login';
+                              }
+                            }}
+                            className="px-3 py-1 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 cursor-pointer ml-3"
+                          >
+                            Re-Login
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm">
+                      <div>
+                        <label className={labelCls}>ID (slug)</label>
+                        <input
+                          name="id"
+                          value={form.id}
+                          onChange={handleChange}
+                          required
+                          disabled={!!editingId}
+                          className={inputCls}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Title</label>
+                        <input
+                          name="title"
+                          value={form.title}
+                          onChange={handleChange}
+                          required
+                          className={inputCls}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Category</label>
+                        <input
+                          name="category"
+                          value={form.category}
+                          onChange={handleChange}
+                          required
+                          className={inputCls}
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className={labelCls}>
+                          Description (optional)
+                        </label>
+                        <textarea
+                          name="description"
+                          value={form.description}
+                          onChange={handleChange}
+                          rows={3}
+                          className={inputCls}
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className={labelCls}>
+                          Primary Image URL (optional)
+                        </label>
+                        <input
+                          name="image"
+                          value={form.image}
+                          onChange={handleChange}
+                          className={inputCls}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelCls}>
+                          Upload Promotion Image(s)
+                        </label>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) =>
+                            setPromotionImages(Array.from(e.target.files || []))
+                          }
+                          className={inputCls}
+                        />
+                        <p className={`text-xs mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                          Upload one or many. First image is used as primary.
+                        </p>
+                      </div>
+                      <div>
+                        <label className={labelCls}>Original / MRP Price (Rs)</label>
+                        <input
+                          name="originalPrice"
+                          type="number"
+                          min="0"
+                          placeholder="e.g. 470"
+                          value={form.originalPrice}
+                          onChange={handleChange}
+                          className={inputCls}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Discount / Save Amount (Rs)</label>
+                        <input
+                          name="discount"
+                          type="number"
+                          min="0"
+                          placeholder="e.g. 70"
+                          value={form.discount}
+                          onChange={handleChange}
+                          className={inputCls}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Shipping Cost (Rs)</label>
+                        <input
+                          name="shippingCost"
+                          type="number"
+                          min="0"
+                          placeholder="Leave empty for default"
+                          value={form.shippingCost}
+                          onChange={handleChange}
+                          className={inputCls}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelCls}>
+                          Display Order
+                        </label>
+                        <input
+                          name="displayOrder"
+                          value={form.displayOrder}
+                          onChange={handleChange}
+                          type="number"
+                          min="0"
+                          className={inputCls}
+                        />
+                      </div>
+                      <div>
+                        <label className={`inline-flex items-center gap-2 mt-8 font-semibold text-xs cursor-pointer ${isDark ? "text-slate-200" : "text-slate-700"}`}>
+                          <input
+                            type="checkbox"
+                            name="isActive"
+                            checked={form.isActive}
+                            onChange={handleChange}
+                            className="w-4 h-4 rounded text-pink-600 focus:ring-pink-500"
+                          />
+                          Active
+                        </label>
+                      </div>
+
+                      <div className="md:col-span-3">
+                        <label className={labelCls}>
+                          Extra Image URLs
+                        </label>
+                        <div className="space-y-2">
+                          {form.imageUrls.map((url, idx) => (
+                            <div key={`u-${idx}`} className="flex gap-2">
+                              <input
+                                value={url}
+                                onChange={(e) => updateImageUrl(idx, e.target.value)}
+                                placeholder="https://..."
+                                className={`flex-1 ${inputCls}`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeImageUrl(idx)}
+                                className={removeBtnCls}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={addImageUrl}
+                            className={addSubBtnCls}
+                          >
+                            + Add URL
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="md:col-span-3">
+                        <label className={labelCls}>
+                          Promotion Items
+                        </label>
+                        <div className="space-y-2">
+                          {form.items.map((item, idx) => (
+                            <div
+                              key={`i-${idx}`}
+                              className="grid grid-cols-1 md:grid-cols-4 gap-2"
+                            >
+                              <input
+                                value={item.product}
+                                onChange={(e) =>
+                                  updateItem(idx, "product", e.target.value)
+                                }
+                                placeholder="Product name"
+                                className={`px-3 py-2 rounded-lg text-sm ${inputCls}`}
+                              />
+                              <input
+                                value={item.quantity}
+                                type="number"
+                                min="1"
+                                onChange={(e) =>
+                                  updateItem(idx, "quantity", e.target.value)
+                                }
+                                placeholder="Quantity"
+                                className={`px-3 py-2 rounded-lg text-sm ${inputCls}`}
+                              />
+                              <input
+                                value={item.price}
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                onChange={(e) =>
+                                  updateItem(idx, "price", e.target.value)
+                                }
+                                placeholder="Price"
+                                className={`px-3 py-2 rounded-lg text-sm ${inputCls}`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeItem(idx)}
+                                className={removeBtnCls}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={addItem}
+                            className={addSubBtnCls}
+                          >
+                            + Add Item
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sticky Footer */}
+                  <div
+                    className={`sticky bottom-0 z-20 flex items-center justify-end gap-3 px-6 py-3.5 border-t ${
+                      isDark
+                        ? "bg-[#111726]/95 backdrop-blur-sm border-slate-800"
+                        : "bg-slate-50/95 backdrop-blur-sm border-slate-200"
                     }`}
                   >
-                    Cancel Edit
-                  </button>
-                )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingId(null);
+                        setForm(emptyForm);
+                        setPromotionImages([]);
+                        setShowForm(false);
+                      }}
+                      className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer ${
+                        isDark
+                          ? "border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white"
+                          : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-2xs"
+                      }`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-md shadow-pink-500/25 transition-all cursor-pointer disabled:opacity-60 flex items-center gap-2"
+                    >
+                      {saving && <span className="animate-spin">↻</span>}
+                      <span>
+                        {saving
+                          ? "Saving..."
+                          : editingId
+                            ? "Update Promotion"
+                            : "Create Promotion"}
+                      </span>
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
-          </div>
+            </div>
           )}
         </div>
       </AdminLayout>

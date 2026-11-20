@@ -265,6 +265,25 @@ const AdminProductsPage = () => {
   }, []);
 
   useEffect(() => {
+    if (showForm) {
+      document.body.style.overflow = "hidden";
+      const handleKeyDown = (e) => {
+        if (e.key === "Escape") {
+          setShowForm(false);
+          setEditingId(null);
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = "unset";
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [showForm]);
+
+  useEffect(() => {
     setForm((prev) => {
       const variantNames = (prev.variants || [])
         .map((variant) => String(variant?.name || "").trim())
@@ -1040,41 +1059,75 @@ const AdminProductsPage = () => {
           )}
 
           {showForm && (
-            <div className={`border rounded-2xl p-5 md:p-7 shadow-xl transition-all ${
-              isDark ? "bg-[#111726] border-[#1E293B] text-slate-100" : "bg-white border-slate-200 text-slate-900 shadow-sm"
-            }`}>
-              <div className={`flex items-center justify-between mb-5 border-b pb-4 ${
-                isDark ? "border-[#1E293B]" : "border-slate-200"
-              }`}>
-                <div>
-                  <h2 className={`text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                    {editingId ? "Edit Product Details" : "Add New Product"}
-                  </h2>
-                  <p className={`text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    {editingId ? `Updating product: ${form.title || form.id}` : "Fill out details to publish a new product"}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowForm(false);
-                    setEditingId(null);
-                    setForm(emptyForm);
-                  }}
-                  className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/75 backdrop-blur-xs animate-fade-in"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setShowForm(false);
+                  setEditingId(null);
+                }
+              }}
+            >
+              <div
+                className={`relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl shadow-2xl border overflow-hidden ${
+                  isDark
+                    ? "bg-[#111726] border-slate-800 text-slate-100"
+                    : "bg-white border-slate-200 text-slate-900"
+                }`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Sticky Header */}
+                <div
+                  className={`sticky top-0 z-20 flex items-center justify-between px-6 py-4 border-b ${
                     isDark
-                      ? "border-[#1E293B] text-slate-400 hover:text-white hover:bg-[#161D2E]"
-                      : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                      ? "bg-[#111726]/95 backdrop-blur-sm border-slate-800"
+                      : "bg-white/95 backdrop-blur-sm border-slate-200"
                   }`}
                 >
-                  ✕ Close Form
-                </button>
-              </div>
-            {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
-            <form
-              onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm"
-            >
+                  <div className="flex items-center gap-3">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#00AEEF] animate-pulse" />
+                    <div>
+                      <h2 className={`text-lg sm:text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+                        {editingId ? "Edit Product Details" : "Add New Product"}
+                      </h2>
+                      <p className={`text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                        {editingId ? `Updating product: ${form.title || form.id}` : "Fill out details to publish a new product"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForm(false);
+                      setEditingId(null);
+                      setForm(emptyForm);
+                    }}
+                    className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                      isDark
+                        ? "border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800/80"
+                        : "border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                    }`}
+                    title="Close (Esc)"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Form wrapper */}
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex-1 flex flex-col min-h-0"
+                >
+                  {/* Scrollable Form Body */}
+                  <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
+                    {error && (
+                      <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm font-semibold">
+                        {error}
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
               <div>
                 <label className={labelCls}>ID (slug)</label>
                 <input
@@ -1748,40 +1801,52 @@ const AdminProductsPage = () => {
                 </div>
               </div>
 
-              <div className="flex items-end gap-3 pt-3 md:col-span-2">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[#00AEEF] hover:bg-[#0095CC] shadow-md shadow-sky-500/20 transition-all cursor-pointer disabled:opacity-60"
-                >
-                  {saving
-                    ? "Saving..."
-                    : editingId
-                      ? "Update Product"
-                      : "Create Product"}
-                </button>
-                {editingId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingId(null);
-                      setForm(emptyForm);
-                      setProductImages([]);
-                      setVariantImageFiles({});
-                      setShowForm(false);
-                    }}
-                    className={`px-6 py-2.5 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
+                    </div>
+                  </div>
+
+                  {/* Sticky Footer */}
+                  <div
+                    className={`sticky bottom-0 z-20 flex items-center justify-end gap-3 px-6 py-3.5 border-t ${
                       isDark
-                        ? "border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700"
-                        : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs"
+                        ? "bg-[#111726]/95 backdrop-blur-sm border-slate-800"
+                        : "bg-slate-50/95 backdrop-blur-sm border-slate-200"
                     }`}
                   >
-                    Cancel Edit
-                  </button>
-                )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingId(null);
+                        setForm(emptyForm);
+                        setProductImages([]);
+                        setVariantImageFiles({});
+                        setShowForm(false);
+                      }}
+                      className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer ${
+                        isDark
+                          ? "border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white"
+                          : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-2xs"
+                      }`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#00AEEF] hover:bg-[#0095CC] shadow-md shadow-sky-500/25 transition-all cursor-pointer disabled:opacity-60 flex items-center gap-2"
+                    >
+                      {saving && <span className="animate-spin">↻</span>}
+                      <span>
+                        {saving
+                          ? "Saving..."
+                          : editingId
+                            ? "Update Product"
+                            : "Create Product"}
+                      </span>
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
-          </div>
+            </div>
           )}
         </div>
       </AdminLayout>
