@@ -410,33 +410,33 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                       {/* Package Details */}
                       <div className="flex-1 flex flex-col justify-between w-full h-full">
                         <div>
-                          <h3 className="text-2xl sm:text-3xl font-bold text-[#222222] mb-2">
+                          <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mb-2.5 leading-tight">
                             {pkg.title}
                           </h3>
                           {pkg.description && (
-                            <p className="text-sm text-[#666666] mb-4">
+                            <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-5 font-normal">
                               {pkg.description}
                             </p>
                           )}
 
                           {/* Included Items List */}
                           <div className="mb-6">
-                            <h4 className="text-xs font-bold text-[#777777] uppercase tracking-wider mb-3">
+                            <h4 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wider mb-3">
                               Items Included in this Package:
                             </h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               {(pkg.items || []).map((item, itemIdx) => (
                                 <div
                                   key={itemIdx}
-                                  className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#FAFAFA] border border-[#EAEAEA]"
+                                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-50/90 border border-slate-200/80 shadow-2xs"
                                 >
-                                  <FaCheckCircle className="text-[#00AEEF] text-sm flex-shrink-0" />
+                                  <FaCheckCircle className="text-[#00AEEF] text-base flex-shrink-0" />
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-semibold text-[#222222] truncate">
+                                    <p className="text-sm sm:text-base font-bold text-slate-900 truncate">
                                       {item.product}
                                     </p>
-                                    <p className="text-[11px] text-[#777777]">
-                                      Quantity: <span className="font-bold text-[#333333]">{item.quantity}</span>
+                                    <p className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
+                                      Quantity: <span className="font-black text-[#00AEEF] text-sm px-1.5 py-0.5 rounded bg-sky-50 border border-sky-100">{item.quantity}</span>
                                     </p>
                                   </div>
                                 </div>
@@ -446,60 +446,60 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                         </div>
 
                         {/* Price & Add to Cart Action */}
-                        <div className="pt-6 border-t border-[#EAEAEA] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                           <div>
-                            <p className="text-xs text-[#777777] mb-1">
-                              Total Quantity: <strong className="text-[#222222]">{totals.totalQuantity} items</strong>
+                            <p className="text-sm font-bold text-slate-700 mb-1.5">
+                              Total Quantity: <strong className="text-slate-950 font-black">{totals.totalQuantity} items</strong>
                             </p>
-                            <div className="flex flex-wrap items-baseline gap-2 mb-1">
+                            <div className="flex flex-wrap items-baseline gap-2.5 mb-2">
                               {pkg.originalPrice && (
-                                <span className="text-sm font-semibold text-gray-400 line-through">
+                                <span className="text-base sm:text-lg font-bold text-slate-400 line-through">
                                   Original Price: {formatPrice(pkg.originalPrice)}
                                 </span>
                               )}
                               {(pkg.discount || (pkg.originalPrice && totals.totalPrice && pkg.originalPrice > totals.totalPrice)) && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs">
+                                <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs sm:text-sm font-black bg-emerald-100 text-emerald-800 border-2 border-emerald-400 shadow-xs">
                                   You Save: {formatPrice(pkg.discount || (pkg.originalPrice - totals.totalPrice))}
                                 </span>
                               )}
                             </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Final Price:</span>
-                              <p className="text-2xl sm:text-3xl font-black text-[#00AEEF]">
+                            <div className="flex flex-wrap items-center gap-3">
+                              <span className="text-sm sm:text-base font-black text-slate-800 uppercase tracking-wider">Final Price:</span>
+                              <p className="text-3xl sm:text-4xl md:text-5xl font-black text-[#00AEEF] tracking-tight">
                                 {formatPrice(totals.totalPrice)}
                               </p>
                               {pkg.shippingCost === 0 ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                  <FaTruck className="text-[10px]" />
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs">
+                                  <FaTruck className="text-xs" />
                                   <span>Free Delivery</span>
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-700 border border-gray-200">
-                                  <FaTruck className="text-[10px] text-gray-500" />
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-bold bg-slate-100 text-slate-800 border border-slate-300">
+                                  <FaTruck className="text-xs text-slate-500" />
                                   <span>Delivery: Rs. {pkg.shippingCost || 200}</span>
                                 </span>
                               )}
                             </div>
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                             {/* Quantity Selector */}
-                            <div className="flex items-center border border-[#E0E0E0] rounded-lg bg-white overflow-hidden shadow-xs">
+                            <div className="flex items-center border-2 border-slate-200 rounded-xl bg-white overflow-hidden shadow-xs h-11">
                               <button
                                 type="button"
                                 onClick={() => handleQtyChange(pkgKey, -1)}
-                                className="w-8 h-9 flex items-center justify-center text-gray-600 hover:bg-gray-100 font-bold transition-colors cursor-pointer"
+                                className="w-10 h-full flex items-center justify-center text-slate-700 hover:bg-slate-100 font-black text-lg transition-colors cursor-pointer"
                                 aria-label="Decrease quantity"
                               >
                                 -
                               </button>
-                              <span className="w-8 text-center text-xs font-bold text-[#222222]">
+                              <span className="w-10 text-center text-sm sm:text-base font-black text-slate-900 font-mono">
                                 {getItemQty(pkgKey)}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => handleQtyChange(pkgKey, 1)}
-                                className="w-8 h-9 flex items-center justify-center text-gray-600 hover:bg-gray-100 font-bold transition-colors cursor-pointer"
+                                className="w-10 h-full flex items-center justify-center text-slate-700 hover:bg-slate-100 font-black text-lg transition-colors cursor-pointer"
                                 aria-label="Increase quantity"
                               >
                                 +
@@ -510,14 +510,14 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                             <button
                               type="button"
                               onClick={() => handleBuyPromotion(pkg)}
-                              className={`px-6 py-2.5 rounded-lg font-bold text-xs sm:text-sm text-white flex items-center gap-2 transition-all shadow-sm cursor-pointer ${
+                              className={`px-8 py-3 rounded-xl font-black text-sm sm:text-base text-white flex items-center gap-2.5 transition-all shadow-md cursor-pointer ${
                                 isJustAdded
                                   ? "bg-emerald-600 hover:bg-emerald-700"
-                                  : "bg-[#00AEEF] hover:bg-[#0095CC] active:scale-95"
+                                  : "bg-[#00AEEF] hover:bg-[#0095CC] active:scale-95 shadow-sky-500/20"
                               }`}
                               title="Add package to cart"
                             >
-                              <FaShoppingCart className="text-xs" />
+                              <FaShoppingCart className="text-sm" />
                               <span>{isJustAdded ? "Added to Cart!" : "Add to Cart"}</span>
                             </button>
                           </div>
@@ -585,7 +585,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                         {/* Top Category Badge */}
                         <div className="absolute top-2.5 left-2.5">
                           <span
-                            className="text-[10px] font-bold px-2 py-0.5 rounded-md text-white shadow-xs"
+                            className="text-xs font-black px-2.5 py-1 rounded-lg text-white shadow-xs uppercase tracking-wider"
                             style={{ backgroundColor: sku.color || "#00AEEF" }}
                           >
                             {sku.category}
@@ -594,8 +594,8 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
 
                         {/* Packing pill if available */}
                         {sku.variant.packing && (
-                          <div className="absolute bottom-2 left-2.5 right-2.5">
-                            <span className="text-[10px] bg-white/95 backdrop-blur-xs text-[#555555] font-semibold px-2 py-0.5 rounded border border-[#E0E0E0] shadow-xs inline-block truncate max-w-full">
+                          <div className="absolute bottom-2.5 left-2.5 right-2.5">
+                            <span className="text-xs bg-white/95 backdrop-blur-xs text-slate-700 font-black px-2.5 py-1 rounded-lg border border-slate-200 shadow-xs inline-block truncate max-w-full">
                               📦 {sku.variant.packing}
                             </span>
                           </div>
@@ -604,23 +604,23 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
 
                       {/* Content Details */}
                       <div className="p-4">
-                        <p className="text-[11px] font-semibold text-[#888888] uppercase tracking-wider mb-1">
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
                           {sku.brandName}
                         </p>
                         
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <h3 className="text-base font-bold text-[#222222] leading-snug">
+                          <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
                             {sku.variant.name}
                           </h3>
                           {sku.variant.detail && (
-                            <span className="text-xs font-semibold px-2 py-0.5 bg-[#F0F0F0] text-[#444444] rounded">
+                            <span className="text-xs sm:text-sm font-bold px-2.5 py-0.5 bg-slate-100 text-slate-800 rounded-lg border border-slate-200">
                               {sku.variant.detail}
                             </span>
                           )}
                         </div>
 
                         {sku.tagline && (
-                          <p className="text-[11px] text-[#777777] italic line-clamp-1 mb-2">
+                          <p className="text-xs sm:text-sm text-slate-600 italic line-clamp-1 mb-2 font-medium">
                             {sku.tagline}
                           </p>
                         )}
@@ -629,9 +629,9 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
 
                     {/* Bottom Pricing & Actions */}
                     <div className="p-4 pt-0">
-                      <div className="flex items-baseline justify-between mb-3 border-t border-[#F0F0F0] pt-3">
-                        <span className="text-xs text-[#777777]">Factory Price:</span>
-                        <span className="text-lg font-black text-[#00AEEF]">
+                      <div className="flex items-baseline justify-between mb-3 border-t border-slate-100 pt-3">
+                        <span className="text-sm font-black text-slate-700">Factory Price:</span>
+                        <span className="text-2xl sm:text-3xl font-black text-[#00AEEF] tracking-tight">
                           {formatPrice(sku.variant.price)}
                         </span>
                       </div>
@@ -641,14 +641,14 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                         <button
                           type="button"
                           onClick={() => handleBuySku(sku.product, sku.variant, sku.brandName)}
-                          className={`w-full py-2.5 px-3 rounded-lg font-bold text-xs text-white flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer ${
+                          className={`w-full py-3 px-4 rounded-xl font-black text-sm text-white flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg cursor-pointer ${
                             isJustAdded
                               ? "bg-emerald-600 hover:bg-emerald-700"
-                              : "bg-[#00AEEF] hover:bg-[#0095CC] active:scale-95"
+                              : "bg-[#00AEEF] hover:bg-[#0095CC] active:scale-95 shadow-sky-500/20"
                           }`}
                           title="Add SKU to cart"
                         >
-                          <FaShoppingCart className="text-xs" />
+                          <FaShoppingCart className="text-sm" />
                           <span>{isJustAdded ? "Added to Cart!" : "Add to Cart"}</span>
                         </button>
                       </div>
