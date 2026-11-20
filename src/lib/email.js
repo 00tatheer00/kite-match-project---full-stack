@@ -117,6 +117,68 @@ function createSmtpTransporter() {
   return null;
 }
 
+async function sendViaResend({ to, subject, html, text }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+
+  const defaultFrom = process.env.RESEND_FROM || 'Kite FMCG Orders <orders@kitepk.com>';
+  const recipients = Array.isArray(to) ? to.filter(Boolean) : [to].filter(Boolean);
+  if (recipients.length === 0) return false;
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: defaultFrom,
+        to: recipients,
+        subject,
+        html,
+        text,
+      }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      console.log(`[Resend] Successfully sent email to ${recipients.join(', ')}:`, data.id);
+      return true;
+    }
+
+    console.warn(`[Resend Warning] ${res.status}:`, data.message || data);
+
+    // If custom domain is awaiting DNS verification, deliver to registered owner
+    if (res.status === 403 && data.message?.includes('verify a domain')) {
+      const ownerRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Kite Orders <onboarding@resend.dev>',
+          to: ['kitematchpk@gmail.com'],
+          subject: `[Kite Order Alert] ${subject}`,
+          html,
+          text,
+        }),
+      });
+      const ownerData = await ownerRes.json().catch(() => ({}));
+      if (ownerRes.ok) {
+        console.log(`[Resend] Successfully alerted owner kitematchpk@gmail.com:`, ownerData.id);
+        return true;
+      }
+    }
+
+    return false;
+  } catch (err) {
+    console.error(`[Resend Error]:`, err.message);
+    return false;
+  }
+}
+
 async function sendViaEmailJS(templateId, templateParams) {
   if (!process.env.EMAILJS_SERVICE_ID || !templateId || !process.env.EMAILJS_PUBLIC_KEY || !process.env.EMAILJS_PRIVATE_KEY) {
     return false;
@@ -212,7 +274,28 @@ export async function sendOrderEmail(order, productOrPromotion) {
   const customerSubject = `Order Confirmation #${orderNumber} - Kite FMCG`;
   const customerHtml = buildHtml("Your Order is Confirmed (#" + orderNumber + ")", false);
 
-  // 1. Try Nodemailer SMTP / Gmail
+  // 1. Try Resend
+  let resendSent = await sendViaResend({
+    to: adminOrderEmail,
+    subject: subject,
+    html: adminHtml,
+    text: `New Order Received\n\n${orderDetailsText}\n\nCustomer: ${order.customerName} (${order.phone})\nAddress: ${order.address}, ${order.city}`,
+  });
+
+  if (order.email) {
+    await sendViaResend({
+      to: order.email,
+      subject: customerSubject,
+      html: customerHtml,
+      text: `Thank you for your order!\n\n${orderDetailsText}\n\nWe will deliver your order soon via Cash on Delivery.`,
+    });
+  }
+
+  if (resendSent) {
+    return;
+  }
+
+  // 2. Try Nodemailer SMTP / Gmail
   const smtp = createSmtpTransporter();
   if (smtp) {
     try {
@@ -321,6 +404,16 @@ export async function sendStatusUpdateEmail(order) {
 
   const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER || process.env.GMAIL_USER || `Kite FMCG <orders@kitepk.com>`;
 
+  // 1. Try Resend
+  const resendSent = await sendViaResend({
+    to: order.email,
+    subject,
+    html,
+    text: `Update on your Kite Order (${orderNumber}): ${order.status}`,
+  });
+  if (resendSent) return;
+
+  // 2. Try Nodemailer SMTP / Gmail
   const smtp = createSmtpTransporter();
   if (smtp) {
     try {
