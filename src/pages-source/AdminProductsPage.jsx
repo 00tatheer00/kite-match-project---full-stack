@@ -1061,10 +1061,10 @@ This cannot be undone.`)) return;
                                       ? "bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
                                       : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400"
                                   }`}
-                                  title="Edit this SKU / price in parent product"
+                                  title="Change name, price, weight or packing of this size"
                                 >
                                   <FaEdit className="text-slate-400 text-xs" />
-                                  <span>Edit Price</span>
+                                  <span>Edit</span>
                                 </button>
                                 <button
                                   type="button"
