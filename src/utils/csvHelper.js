@@ -87,7 +87,7 @@ export function downloadCSV(filename, csvContent) {
   URL.revokeObjectURL(url);
 }
 
-function escapeCSV(val) {
+export function escapeCSV(val) {
   if (val == null) return '""';
   let str = String(val);
   // Spreadsheet formula injection guard: a cell starting with = + - @ (or tab/CR) would be

@@ -7,21 +7,16 @@ import OrderDetailPanel from "../components/admin/OrderDetailPanel";
 import { adminGetOrders, adminGetOrder, adminUpdateOrderStatus, adminDeleteOrder } from "../services/api";
 import { SkeletonTable } from "../components/admin/AdminSkeleton";
 
-const orderKeyOf = (o) => o?.id || o?._id || o?.orderNumber;
-import { colors } from "../theme";
 import toast from "react-hot-toast";
-import { Search, SlidersHorizontal, RefreshCw, ShoppingCart, Clock } from "lucide-react";
+import { Search, RefreshCw, Download, Phone, MessageCircle, Check, Truck, Inbox, ChevronRight } from "lucide-react";
+import { downloadCSV, escapeCSV } from "@/utils/csvHelper";
+import {
+  ALL_STATUSES, STATUS_META, NEXT_STEP, orderKeyOf, rs, formatDateTime, relativeTime,
+  karachiDay, whatsappNumber, initials, itemCount, orderSummaryLine,
+} from "../components/admin/orderUi";
 import { useAdminTheme } from "../context/AdminThemeContext";
 import Pusher from "pusher-js";
 
-const statuses = ["pending", "confirmed", "shipped", "cancelled"];
-
-const statusColors = {
-  pending:   "bg-yellow-500/10 text-yellow-500 border-yellow-500/30",
-  confirmed: "bg-blue-500/10   text-blue-500   border-blue-500/30",
-  shipped:   "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",
-  cancelled: "bg-red-500/10    text-red-500    border-red-500/30",
-};
 
 const AdminOrdersPage = () => {
   const { isDark } = useAdminTheme();
@@ -35,6 +30,12 @@ const AdminOrdersPage = () => {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [dateRange, setDateRange] = useState("all"); // all | today | 7d | 30d
+  const [nowTs, setNowTs] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNowTs(Date.now()), 30000);
+    return () => clearInterval(t);
+  }, []);
 
   // Detail panel
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -127,7 +128,7 @@ const AdminOrdersPage = () => {
     setError("");
     try {
       const updated = await adminUpdateOrderStatus(orderId, status);
-      toast.success(`Order status updated to ${status}`);
+      toast.success(`${orders.find((x) => orderKeyOf(x) === orderId)?.orderNumber || "Order"} marked as ${STATUS_META[status]?.label || status}`);
       // Update in list + panel
       setOrders((prev) => prev.map((o) => (orderKeyOf(o) === orderId ? { ...o, ...updated, status } : o)));
       if (orderKeyOf(selectedOrder) === orderId) setSelectedOrder({ ...selectedOrder, ...updated, status });
@@ -159,270 +160,282 @@ Use this only for test or duplicate orders. For real orders, set the status to "
     }
   };
 
-  const formatDateTime = (value) => {
-    if (!value) return "—";
-    return new Date(value).toLocaleString("en-PK", {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: "Asia/Karachi",
-    });
+  // ---------------- Filtering ----------------
+  const todayKey = karachiDay(nowTs);
+  const inRange = (o) => {
+    if (dateRange === "all") return true;
+    if (dateRange === "today") return karachiDay(o.createdAt) === todayKey;
+    const days = dateRange === "7d" ? 7 : 30;
+    return o.createdAt && nowTs - new Date(o.createdAt).getTime() <= days * 86400000;
   };
-
-  const filteredOrders = orders.filter((o) => {
-    // Type filter
+  const baseFiltered = orders.filter((o) => {
     if (filterType && o.type !== filterType) return false;
-    // Status filter
-    if (filterStatus && o.status !== filterStatus) return false;
-    // Text search
+    if (!inRange(o)) return false;
     const q = search.trim().toLowerCase();
     if (!q) return true;
-    const haystack = [
-      o.id,
-      o.orderNumber,          // KT-001 searchable
-      o.type,
-      o.productId,
-      o.promotionId,
-      o.selectedSkuOrSize,
-      o.quantity,
-      o.customerName,
-      o.phone,
-      o.email,
-      o.address,
-      o.city,
-      o.note,
-      o.paymentMethod,
-      o.status,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    return haystack.includes(q);
+    return [o.orderNumber, o.customerName, o.phone, o.email, o.address, o.city, o.note, o.selectedSkuOrSize,
+      ...(Array.isArray(o.items) ? o.items.map((it) => `${it.title || ""} ${it.brandName || ""} ${it.selectedVariant || ""}`) : [])]
+      .filter(Boolean).join(" ").toLowerCase().includes(q);
   });
+  const countFor = (status) => baseFiltered.filter((o) => (o.status || "pending") === status).length;
+  const filteredOrders = filterStatus ? baseFiltered.filter((o) => (o.status || "pending") === filterStatus) : baseFiltered;
+
+  // ---------------- Summary numbers ----------------
+  const ordersToday = orders.filter((o) => karachiDay(o.createdAt) === todayKey).length;
+  const pendingList = orders.filter((o) => (o.status || "pending") === "pending");
+  const pendingValue = pendingList.reduce((s, o) => s + (Number(o.totalAmount) || 0), 0);
+  const confirmedSales = orders
+    .filter((o) => o.status === "confirmed" || o.status === "shipped")
+    .reduce((s, o) => s + (Number(o.totalAmount) || 0), 0);
+
+  const exportCsv = () => {
+    const header = ["Order", "Date", "Status", "Customer", "Phone", "Email", "City", "Address", "Items", "Quantity", "Delivery", "Total", "Note"];
+    const rows = filteredOrders.map((o) => [
+      o.orderNumber, formatDateTime(o.createdAt), STATUS_META[o.status]?.label || o.status, o.customerName, o.phone, o.email,
+      o.city, o.address, orderSummaryLine(o), itemCount(o), o.shippingCost ?? "", o.totalAmount ?? "", o.note || "",
+    ]);
+    downloadCSV(`kite-orders-${todayKey}.csv`, [header.join(","), ...rows.map((r) => r.map(escapeCSV).join(","))].join("\r\n"));
+    toast.success(`${rows.length} order(s) exported`);
+  };
+
+  // ---------------- Styles ----------------
+  const card = isDark ? "bg-[#111726] border-white/5" : "bg-white border-slate-200";
+  const sub = isDark ? "text-slate-400" : "text-slate-500";
+  const strong = isDark ? "text-white" : "text-slate-900";
+  const field = `w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-colors focus:border-[#00AEEF] ${
+    isDark ? "bg-[#0B0F19] border-white/10 text-slate-100 placeholder:text-slate-500" : "bg-white border-slate-200 text-slate-800 placeholder:text-slate-400"
+  }`;
+
+  const StatusBadge = ({ status }) => {
+    const m = STATUS_META[status] || STATUS_META.pending;
+    return (
+      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ring-inset ${isDark ? m.dark : m.light}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${m.dot}`} />
+        {m.label}
+      </span>
+    );
+  };
+
+  const QuickAction = ({ o }) => {
+    const next = NEXT_STEP[o.status || "pending"];
+    if (!next) return null;
+    const key = orderKeyOf(o);
+    return (
+      <button
+        type="button"
+        disabled={updatingId === key}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleStatusChange(key, next.status);
+        }}
+        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-colors cursor-pointer disabled:opacity-60 ${
+          next.status === "confirmed"
+            ? "bg-[#00AEEF] text-white hover:bg-[#0095CC]"
+            : isDark ? "bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+        }`}
+      >
+        {next.status === "confirmed" ? <Check size={13} /> : <Truck size={13} />}
+        {updatingId === key ? "Saving…" : next.status === "confirmed" ? "Confirm" : "Ship"}
+      </button>
+    );
+  };
+
+  const ContactIcons = ({ o }) => (
+    <span className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+      <a href={`tel:${o.phone}`} title="Call" className={`p-1.5 rounded-lg ${isDark ? "text-slate-400 hover:bg-white/10 hover:text-sky-300" : "text-slate-400 hover:bg-sky-50 hover:text-sky-600"}`}>
+        <Phone size={15} />
+      </a>
+      <a href={`https://wa.me/${whatsappNumber(o.phone)}`} target="_blank" rel="noopener noreferrer" title="WhatsApp" className={`p-1.5 rounded-lg ${isDark ? "text-slate-400 hover:bg-white/10 hover:text-emerald-300" : "text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"}`}>
+        <MessageCircle size={15} />
+      </a>
+    </span>
+  );
+
+  const tabs = [{ id: "", label: "All", count: baseFiltered.length }, ...ALL_STATUSES.map((s) => ({ id: s, label: STATUS_META[s].label, count: countFor(s) }))];
 
   return (
     <RequireAdminAuth>
       <AdminLayout>
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-5">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h1 className={`text-2xl sm:text-3xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
-                Orders Management
-              </h1>
-              <p className={`mt-1 text-sm ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-                Click any row to view full order details. Real-time Pusher &amp; local sync enabled.
-              </p>
+              <h1 className={`text-2xl sm:text-3xl font-black tracking-tight ${strong}`}>Orders</h1>
+              <p className={`mt-1 text-sm ${sub}`}>Confirm, ship and track customer orders. New orders appear automatically.</p>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleManualRefresh}
-                disabled={refreshing}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm ${
-                  isDark
-                    ? "bg-[#1E293B] hover:bg-[#283548] text-white border border-[#334155]"
-                    : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200"
-                }`}
-                title="Sync and refresh orders"
-              >
-                <RefreshCw size={16} className={`text-[#00AEEF] ${refreshing ? "animate-spin" : ""}`} />
-                <span>{refreshing ? "Refreshing..." : "Refresh Orders"}</span>
+            <div className="flex items-center gap-2">
+              <button onClick={exportCsv} disabled={filteredOrders.length === 0} className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 ${isDark ? "border-white/10 text-slate-200 hover:bg-white/5" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
+                <Download size={15} /> Export Excel
+              </button>
+              <button onClick={handleManualRefresh} disabled={refreshing} className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-60 ${isDark ? "border-white/10 text-slate-200 hover:bg-white/5" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
+                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> Refresh
               </button>
             </div>
           </div>
 
-          {/* Search & Filters */}
-          <div className={`border rounded-2xl p-4 space-y-3 transition-colors ${
-            isDark ? "bg-[#111726] border-[#1E293B]" : "bg-white border-slate-200 shadow-sm"
-          }`}>
-            <div className="flex items-center justify-between">
-              <div className={`flex items-center gap-2 text-sm font-bold ${
-                isDark ? "text-slate-200" : "text-slate-700"
-              }`}>
-                <SlidersHorizontal size={16} className="text-[#00AEEF]" />
-                Filter Orders
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${
-                  isDark ? "bg-[#161D2E] text-slate-300 border-[#1E293B]" : "bg-slate-100 text-slate-700 border-slate-200"
-                }`}>
-                  Total: {orders.length}
-                </span>
-                <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-yellow-500/10 text-yellow-500 border border-yellow-500/30">
-                  Pending: {orders.filter(o => o.status === 'pending').length}
-                </span>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Text search */}
-              <div className="relative sm:col-span-1">
-                <Search size={15} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? "text-slate-400" : "text-slate-400"}`} />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Name, phone, KT-001, city…"
-                  className={`w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF] ${
-                    isDark
-                      ? "bg-[#0B0F19] border-[#1E293B] text-slate-100 placeholder:text-slate-500"
-                      : "bg-white border-slate-200 text-slate-800 placeholder:text-slate-400"
-                  }`}
-                />
-              </div>
-              {/* Type dropdown */}
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className={`px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF] ${
-                  isDark
-                    ? "bg-[#0B0F19] border-[#1E293B] text-slate-100"
-                    : "bg-white border-slate-200 text-slate-800"
-                }`}
+          {/* Summary */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              { label: "Orders today", value: ordersToday, tone: "text-sky-500" },
+              { label: "Waiting for confirmation", value: pendingList.length, tone: "text-amber-500", onClick: () => setFilterStatus("pending") },
+              { label: "Pending value", value: rs(pendingValue), tone: "text-amber-500" },
+              { label: "Confirmed sales", value: rs(confirmedSales), tone: "text-emerald-500" },
+            ].map((k) => (
+              <button
+                key={k.label}
+                type="button"
+                onClick={k.onClick}
+                className={`text-left rounded-2xl border p-4 transition-shadow ${card} ${k.onClick ? "cursor-pointer hover:shadow-md" : "cursor-default"}`}
               >
-                <option value="">All Types</option>
-                <option value="product">Product</option>
-                <option value="promotion">Promotion</option>
-                <option value="cart">Cart</option>
-              </select>
-              {/* Status dropdown */}
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className={`px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF] ${
-                  isDark
-                    ? "bg-[#0B0F19] border-[#1E293B] text-slate-100"
-                    : "bg-white border-slate-200 text-slate-800"
-                }`}
-              >
-                <option value="">All Statuses</option>
-                {statuses.map((s) => (
-                  <option key={s} value={s}>
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-              Showing {filteredOrders.length} of {orders.length} orders
-            </p>
+                <p className={`text-[11px] font-bold uppercase tracking-wider ${sub}`}>{k.label}</p>
+                <p className={`mt-1.5 text-2xl font-black ${k.tone}`}>{k.value}</p>
+              </button>
+            ))}
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {/* Toolbar */}
+          <div className={`rounded-2xl border p-3 sm:p-4 space-y-3 ${card}`}>
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+              {tabs.map((t) => {
+                const active = filterStatus === t.id;
+                return (
+                  <button
+                    key={t.id || "all"}
+                    type="button"
+                    onClick={() => setFilterStatus(t.id)}
+                    className={`shrink-0 inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors cursor-pointer ${
+                      active
+                        ? "bg-[#00AEEF] text-white shadow-sm"
+                        : isDark ? "text-slate-300 hover:bg-white/5" : "text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    {t.id && <span className={`w-2 h-2 rounded-full ${STATUS_META[t.id].dot}`} />}
+                    {t.label}
+                    <span className={`rounded-md px-1.5 text-xs font-bold ${active ? "bg-white/25" : isDark ? "bg-white/10" : "bg-slate-100"}`}>{t.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2.5">
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, phone, KT-001, city, product…" className={`${field} pl-9`} />
+              </div>
+              <select value={dateRange} onChange={(e) => setDateRange(e.target.value)} className={field} aria-label="Date range">
+                <option value="all">All dates</option>
+                <option value="today">Today</option>
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+              </select>
+              <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className={field} aria-label="Order type">
+                <option value="">All order types</option>
+                <option value="cart">Cart</option>
+                <option value="product">Single product</option>
+                <option value="promotion">Package</option>
+              </select>
+            </div>
+          </div>
+
+          {error && <p className="text-sm text-rose-500">{error}</p>}
 
           {loading ? (
             <SkeletonTable rows={6} label="Loading orders" />
+          ) : filteredOrders.length === 0 ? (
+            <div className={`rounded-2xl border p-12 text-center ${card}`}>
+              <span className={`mx-auto mb-3 w-14 h-14 rounded-2xl flex items-center justify-center ${isDark ? "bg-white/5 text-slate-400" : "bg-slate-100 text-slate-400"}`}>
+                <Inbox size={26} />
+              </span>
+              <p className={`font-bold ${strong}`}>{orders.length === 0 ? "No orders yet" : "No orders match these filters"}</p>
+              <p className={`mt-1 text-sm ${sub}`}>
+                {orders.length === 0 ? "New orders from the website will appear here automatically." : "Try another status tab, date range or search."}
+              </p>
+            </div>
           ) : (
-            <div className={`border rounded-2xl overflow-hidden shadow-sm transition-colors ${
-              isDark ? "bg-[#111726] border-[#1E293B]" : "bg-white border-slate-200"
-            }`}>
-              {/* Desktop Table */}
-              <div className="hidden md:block overflow-x-auto">
+            <div className={`rounded-2xl border overflow-hidden ${card}`}>
+              {/* Desktop table */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className={`border-b text-xs font-bold uppercase tracking-wider ${
-                      isDark ? "border-[#1E293B] bg-[#161D2E]/60 text-slate-300" : "border-slate-200 bg-slate-50 text-slate-600"
-                    }`}>
-                      <th className="text-left py-3.5 px-4">Order No.</th>
-                      <th className="text-left py-3.5 px-4">Date</th>
-                      <th className="text-left py-3.5 px-4">Type</th>
-                      <th className="text-left py-3.5 px-4">Customer</th>
-                      <th className="text-left py-3.5 px-4">City</th>
-                      <th className="text-left py-3.5 px-4">Payment</th>
-                      <th className="text-left py-3.5 px-4">Total</th>
-                      <th className="text-left py-3.5 px-4">Status</th>
+                    <tr className={`text-left text-[11px] font-bold uppercase tracking-wider ${isDark ? "bg-white/[0.03] text-slate-400" : "bg-slate-50 text-slate-500"}`}>
+                      <th className="py-3 pl-5 pr-3">Order</th>
+                      <th className="py-3 px-3">Customer</th>
+                      <th className="py-3 px-3">Items</th>
+                      <th className="py-3 px-3">City</th>
+                      <th className="py-3 px-3 text-right">Total</th>
+                      <th className="py-3 px-3">Status</th>
+                      <th className="py-3 pl-3 pr-5 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className={`divide-y ${isDark ? "divide-[#1E293B]" : "divide-slate-100"}`}>
+                  <tbody className={`divide-y ${isDark ? "divide-white/5" : "divide-slate-100"}`}>
                     {filteredOrders.map((o) => (
-                      <tr
-                        key={orderKeyOf(o)}
-                        onClick={() => handleRowClick(o)}
-                        className={`cursor-pointer transition-colors ${
-                          isDark
-                            ? "hover:bg-[#161D2E]/70 text-slate-200"
-                            : "hover:bg-sky-50/60 text-slate-800"
-                        }`}
-                      >
-                        <td className="py-3 px-4 font-mono font-semibold text-[#00AEEF]">
-                          {o.orderNumber || <span className={isDark ? "text-slate-500 text-xs" : "text-slate-400 text-xs"}>{String(orderKeyOf(o) || "").slice(-6)}</span>}
+                      <tr key={orderKeyOf(o)} onClick={() => handleRowClick(o)} className={`cursor-pointer transition-colors ${isDark ? "hover:bg-white/[0.03]" : "hover:bg-sky-50/50"}`}>
+                        <td className="py-3.5 pl-5 pr-3">
+                          <p className="font-mono font-bold text-[#00AEEF]">{o.orderNumber || String(orderKeyOf(o)).slice(-6)}</p>
+                          <p className={`text-xs ${sub}`} title={formatDateTime(o.createdAt)}>{relativeTime(o.createdAt, nowTs)}</p>
                         </td>
-                        <td className={`py-3 px-4 text-xs whitespace-nowrap ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                          {formatDateTime(o.createdAt)}
+                        <td className="py-3.5 px-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black shrink-0 ${isDark ? "bg-white/10 text-slate-200" : "bg-slate-100 text-slate-600"}`}>{initials(o.customerName)}</span>
+                            <div className="min-w-0">
+                              <p className={`font-semibold truncate max-w-[180px] ${strong}`}>{o.customerName}</p>
+                              <div className={`flex items-center gap-1 text-xs ${sub}`}>
+                                <span>{o.phone}</span>
+                                <ContactIcons o={o} />
+                              </div>
+                            </div>
+                          </div>
                         </td>
-                        <td className="py-3 px-4">
-                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold border ${
-                            isDark
-                              ? "bg-sky-950/40 border-sky-800/60 text-sky-400"
-                              : "bg-[#F0FAFF] border-[#B3E5FC] text-[#0095CC]"
-                          }`}>
-                            {o.type === "cart" ? "Cart" : o.type === "product" ? "Product" : "Promotion"}
-                          </span>
+                        <td className="py-3.5 px-3">
+                          <p className={`truncate max-w-[220px] ${isDark ? "text-slate-200" : "text-slate-700"}`}>{orderSummaryLine(o)}</p>
+                          <p className={`text-xs ${sub}`}>{itemCount(o)} item{itemCount(o) === 1 ? "" : "s"}</p>
                         </td>
-                        <td className="py-3 px-4">
-                          <p className={`font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>{o.customerName}</p>
-                          <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>{o.phone}</p>
-                        </td>
-                        <td className={`py-3 px-4 ${isDark ? "text-slate-300" : "text-slate-600"}`}>{o.city}</td>
-                        <td className={`py-3 px-4 ${isDark ? "text-slate-300" : "text-slate-600"}`}>{o.paymentMethod}</td>
-                        <td className={`py-3 px-4 font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>
-                          {o.totalAmount != null ? `Rs. ${o.totalAmount.toLocaleString()}` : "—"}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${statusColors[o.status] || (isDark ? "bg-slate-800 text-slate-300 border-slate-700" : "bg-gray-50 text-gray-600 border-gray-200")}`}>
-                            {o.status}
-                          </span>
+                        <td className={`py-3.5 px-3 ${isDark ? "text-slate-300" : "text-slate-600"}`}>{o.city}</td>
+                        <td className={`py-3.5 px-3 text-right font-bold whitespace-nowrap ${strong}`}>{rs(o.totalAmount)}</td>
+                        <td className="py-3.5 px-3"><StatusBadge status={o.status || "pending"} /></td>
+                        <td className="py-3.5 pl-3 pr-5">
+                          <div className="flex items-center justify-end gap-2">
+                            <QuickAction o={o} />
+                            <ChevronRight size={16} className="text-slate-400" />
+                          </div>
                         </td>
                       </tr>
                     ))}
-                    {filteredOrders.length === 0 && (
-                      <tr>
-                        <td className={`py-10 text-center ${isDark ? "text-slate-400" : "text-slate-500"}`} colSpan={8}>
-                          No orders match your filters.
-                        </td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
 
-              {/* Mobile Cards */}
-              <div className={`md:hidden divide-y ${isDark ? "divide-[#1E293B]" : "divide-slate-100"}`}>
+              {/* Mobile / tablet cards */}
+              <ul className={`lg:hidden divide-y ${isDark ? "divide-white/5" : "divide-slate-100"}`}>
                 {filteredOrders.map((o) => (
-                  <div
-                    key={orderKeyOf(o)}
-                    onClick={() => handleRowClick(o)}
-                    className={`p-4 cursor-pointer transition-colors ${
-                      isDark ? "hover:bg-[#161D2E]/70" : "hover:bg-sky-50/60"
-                    }`}
-                  >
+                  <li key={orderKeyOf(o)} onClick={() => handleRowClick(o)} className={`p-4 cursor-pointer ${isDark ? "active:bg-white/5" : "active:bg-slate-50"}`}>
                     <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-mono font-bold text-[#00AEEF]">
-                          {o.orderNumber || `#${String(orderKeyOf(o) || "").slice(-6)}`}
-                        </p>
-                        <p className={`text-sm font-semibold mt-0.5 ${isDark ? "text-white" : "text-slate-900"}`}>{o.customerName}</p>
-                        <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>{formatDateTime(o.createdAt)}</p>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-[#00AEEF]">{o.orderNumber}</span>
+                          <span className={`text-xs ${sub}`}>· {relativeTime(o.createdAt, nowTs)}</span>
+                        </div>
+                        <p className={`mt-0.5 font-semibold truncate ${strong}`}>{o.customerName}</p>
+                        <p className={`text-xs truncate ${sub}`}>{o.city} · {orderSummaryLine(o)}</p>
                       </div>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border flex-shrink-0 ${statusColors[o.status] || (isDark ? "bg-slate-800 text-slate-300 border-slate-700" : "bg-gray-50 text-gray-600 border-gray-200")}`}>
-                        {o.status}
-                      </span>
+                      <div className="text-right shrink-0">
+                        <p className={`font-black ${strong}`}>{rs(o.totalAmount)}</p>
+                        <div className="mt-1"><StatusBadge status={o.status || "pending"} /></div>
+                      </div>
                     </div>
-                    <div className={`mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      <span>📍 {o.city}</span>
-                      <span>💳 {o.paymentMethod}</span>
-                      {o.totalAmount != null && <span className="font-semibold text-[#00AEEF]">💰 Rs. {o.totalAmount.toLocaleString()}</span>}
-                      <span className="capitalize">📦 {o.type}</span>
+                    <div className="mt-3 flex items-center justify-between">
+                      <ContactIcons o={o} />
+                      <QuickAction o={o} />
                     </div>
-                  </div>
+                  </li>
                 ))}
-                {filteredOrders.length === 0 && (
-                  <p className={`text-center text-sm py-10 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    No orders match your filters.
-                  </p>
-                )}
-              </div>
+              </ul>
+              <p className={`px-5 py-3 text-xs border-t ${isDark ? "border-white/5" : "border-slate-100"} ${sub}`}>
+                Showing {filteredOrders.length} of {orders.length} orders
+              </p>
             </div>
           )}
         </div>
 
-        {/* Order Detail Panel */}
         {selectedOrder && (
           <OrderDetailPanel
             order={selectedOrder}
