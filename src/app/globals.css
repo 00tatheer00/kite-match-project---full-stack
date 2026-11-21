@@ -411,3 +411,75 @@ body.admin-route:has(.admin-dark-theme) {
     min-height: 420px;
   }
 }
+
+/* ========================================================================= */
+/* Animated brand gradient background (public website only)                  */
+/* ========================================================================= */
+.site-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(160deg, #f4fbff 0%, #ffffff 45%, #fff6fb 100%);
+}
+.site-bg__blob {
+  position: absolute;
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.55;
+  will-change: transform;
+}
+.site-bg__blob--blue {
+  top: -20vmax;
+  left: -15vmax;
+  background: radial-gradient(circle, rgba(0, 174, 239, 0.45) 0%, rgba(0, 174, 239, 0) 70%);
+  animation: site-bg-drift-a 26s ease-in-out infinite alternate;
+}
+.site-bg__blob--pink {
+  bottom: -25vmax;
+  right: -20vmax;
+  background: radial-gradient(circle, rgba(237, 2, 140, 0.30) 0%, rgba(237, 2, 140, 0) 70%);
+  animation: site-bg-drift-b 32s ease-in-out infinite alternate;
+}
+.site-bg__blob--green {
+  top: 30vh;
+  left: 35vw;
+  width: 45vmax;
+  height: 45vmax;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(16, 185, 129, 0) 70%);
+  animation: site-bg-drift-c 38s ease-in-out infinite alternate;
+}
+@keyframes site-bg-drift-a {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(25vw, 18vh, 0) scale(1.15); }
+}
+@keyframes site-bg-drift-b {
+  0% { transform: translate3d(0, 0, 0) scale(1.1); }
+  100% { transform: translate3d(-22vw, -20vh, 0) scale(0.95); }
+}
+@keyframes site-bg-drift-c {
+  0% { transform: translate3d(-10vw, 0, 0) scale(0.9); }
+  100% { transform: translate3d(12vw, -15vh, 0) scale(1.1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-bg__blob { animation: none; }
+}
+body:not(.admin-route) { background-color: #ffffff; }
+
+/* Let the gradient show through full-width page sections (cards keep their own white). */
+.site-shell main section.bg-white,
+.site-shell main section[class*="bg-[#F9F9F9]"],
+.site-shell main section[class*="bg-[#FAFAFA]"],
+.site-shell main section[class*="bg-[#F9FAFB]"],
+.site-shell main section[class*="bg-gray-50"],
+.site-shell main section[class*="bg-slate-50"],
+.site-shell main section[class*="bg-neutral-100"],
+.site-shell main section[class*="from-white"],
+.site-shell main div[class*="min-h-screen"][class*="from-white"],
+.site-shell main div[class*="min-h-screen"].bg-white {
+  background-color: transparent !important;
+  background-image: none !important;
+}

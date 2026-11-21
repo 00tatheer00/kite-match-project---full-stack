@@ -13,6 +13,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import VisitorTracker from '@/components/VisitorTracker';
 import NavigationProgress from '@/components/NavigationProgress';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import SiteBackground from '@/components/SiteBackground';
 
 // Same look for every toast on the site and in the admin panel.
 const TOAST_OPTIONS = {
@@ -57,7 +58,8 @@ export default function ClientShell({ children }) {
       <ScrollToTop />
       <Toaster position="top-center" toastOptions={TOAST_OPTIONS} />
       {/* pb on phones leaves room for the bottom tab bar */}
-      <div className="min-h-screen bg-white flex flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+      <SiteBackground />
+      <div className="site-shell relative min-h-screen flex flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
         <Navbar />
         <div className="flex-1 app-page-compact">
           <main id="main-content">
