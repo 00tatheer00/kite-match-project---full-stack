@@ -1,8 +1,10 @@
 'use client';
 
+import { formatRelativeTime } from "@/utils/time";
+
 import { useState, useEffect } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
-import { adminGetAnalytics } from "../services/api";
+import { adminGetAnalytics, adminResetAnalytics } from "../services/api";
 import { useAdminTheme } from "../context/AdminThemeContext";
 import { 
   FaChartLine, 
@@ -25,6 +27,12 @@ const AdminAnalyticsPage = () => {
   const { isDark } = useAdminTheme();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Clock for relative timestamps (kept in state so rendering stays pure).
+  const [nowTs, setNowTs] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNowTs(Date.now()), 30000);
+    return () => clearInterval(t);
+  }, []);
   const [refreshing, setRefreshing] = useState(false);
   const [timeRange, setTimeRange] = useState("30d");
 
@@ -45,14 +53,8 @@ const AdminAnalyticsPage = () => {
     if (!window.confirm("Are you sure you want to reset all visitor analytics to 0?")) return;
     setRefreshing(true);
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem("adminToken") : "";
-      const res = await fetch('/api/admin/analytics/reset', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        await loadData(true);
-      }
+      await adminResetAnalytics();
+      await loadData(true);
     } catch (e) {
       console.error(e);
     } finally {
@@ -153,22 +155,7 @@ const AdminAnalyticsPage = () => {
     return new Intl.NumberFormat().format(num || 0);
   };
 
-  const getRelativeTime = (isoString) => {
-    if (!isoString) return "just now";
-    try {
-      const diffMs = Date.now() - new Date(isoString).getTime();
-      const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return "Just now";
-      if (diffMins === 1) return "1 min ago";
-      if (diffMins < 60) return `${diffMins} mins ago`;
-      const diffHours = Math.floor(diffMins / 60);
-      if (diffHours === 1) return "1 hour ago";
-      if (diffHours < 24) return `${diffHours} hours ago`;
-      return `${Math.floor(diffHours / 24)}d ago`;
-    } catch {
-      return "recently";
-    }
-  };
+  const getRelativeTime = (isoString) => formatRelativeTime(isoString, nowTs);
 
   return (
     <AdminLayout>

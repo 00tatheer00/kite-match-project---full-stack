@@ -1,5 +1,9 @@
 import ProductsPage from "@/pages-source/ProductsPage";
 import { fetchServerProducts } from "@/lib/server-products";
+import { toJsonLd } from "@/lib/json-ld";
+
+// ISR: rebuilt at most every 5 minutes, and immediately after admin edits (revalidatePath).
+export const revalidate = 300;
 
 export const metadata = {
   title: "Products | Kite Brand Safety Matches & Detergents Pakistan",
@@ -67,12 +71,12 @@ export default async function Page() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        dangerouslySetInnerHTML={{ __html: toJsonLd(faqSchema) }}
       />
       {products.length > 0 && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+          dangerouslySetInnerHTML={{ __html: toJsonLd(itemListSchema) }}
         />
       )}
       <ProductsPage initialProducts={products} />

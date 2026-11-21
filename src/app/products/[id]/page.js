@@ -1,5 +1,8 @@
 import ProductDetailPage from "@/pages-source/ProductDetailPage";
 import { fetchServerProductById } from "@/lib/server-products";
+import { toJsonLd } from "@/lib/json-ld";
+
+export const revalidate = 300;
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -73,7 +76,7 @@ export default async function Page({ params }) {
       {productSchema && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+          dangerouslySetInnerHTML={{ __html: toJsonLd(productSchema) }}
         />
       )}
       <ProductDetailPage initialProduct={product} productId={id} />

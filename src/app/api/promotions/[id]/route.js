@@ -1,38 +1,19 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { getPromotionById } from '@/lib/data';
+import { handleRouteError, jsonError } from '@/lib/http';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
+// GET /api/promotions/:id
 export async function GET(request, context) {
-  const { params } = context;
-  const id = (await params)?.id;
-  if (!id) {
-    return NextResponse.json({ message: 'Promotion ID required' }, { status: 400 });
-  }
+  const id = (await context.params)?.id;
+  if (!id) return jsonError('Promotion ID required', 400);
 
-  // Try Supabase
-  if (isSupabaseConfigured()) {
-    try {
-      const sb = getSupabaseAdmin();
-      const { data } = await sb.from('promotions').select('*').eq('id', id).single();
-      if (data) return NextResponse.json(data);
-    } catch {}
-  }
-
-  // Fallback to store
   try {
-    const { getPromotionById } = await import('@/lib/store');
-    const promo = getPromotionById(id);
-    if (promo) return NextResponse.json(promo);
-  } catch {}
-
-  // Fallback to remote
-  try {
-    const { fetchRemoteFallback } = await import('@/lib/api-fallback');
-    const remoteData = await fetchRemoteFallback(`/promotions/${id}`);
-    if (remoteData) return NextResponse.json(remoteData);
-  } catch {}
-
-  return NextResponse.json({ message: 'Promotion not found' }, { status: 404 });
+    const promo = await getPromotionById(String(id).slice(0, 200));
+    if (!promo || promo.isActive === false) return jsonError('Promotion not found', 404);
+    return NextResponse.json(promo);
+  } catch (err) {
+    return handleRouteError(err, 'get promotion');
+  }
 }

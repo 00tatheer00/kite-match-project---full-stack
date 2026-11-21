@@ -1,5 +1,7 @@
 'use client';
 
+import { formatRelativeTime } from "@/utils/time";
+
 import { useState, useEffect } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
 import { adminGetDashboard, getPromotions } from "../services/api";
@@ -28,6 +30,12 @@ function DashboardContent() {
   const { isDark } = useAdminTheme();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Clock for relative timestamps (kept in state so rendering stays pure).
+  const [nowTs, setNowTs] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNowTs(Date.now()), 30000);
+    return () => clearInterval(t);
+  }, []);
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
   const [promotionsList, setPromotionsList] = useState([]);
@@ -107,22 +115,7 @@ function DashboardContent() {
 
   const formatNumber = (num) => new Intl.NumberFormat().format(num || 0);
 
-  const getRelativeTime = (isoString) => {
-    if (!isoString) return "just now";
-    try {
-      const diffMs = Date.now() - new Date(isoString).getTime();
-      const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return "Just now";
-      if (diffMins === 1) return "1 min ago";
-      if (diffMins < 60) return `${diffMins} mins ago`;
-      const diffHours = Math.floor(diffMins / 60);
-      if (diffHours === 1) return "1 hour ago";
-      if (diffHours < 24) return `${diffHours} hours ago`;
-      return `${Math.floor(diffHours / 24)}d ago`;
-    } catch {
-      return "recently";
-    }
-  };
+  const getRelativeTime = (isoString) => formatRelativeTime(isoString, nowTs);
 
   return (
     <div className="space-y-5 sm:space-y-6 font-sans selection:bg-[#8B5CF6] selection:text-white">

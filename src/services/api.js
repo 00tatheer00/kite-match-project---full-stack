@@ -1,405 +1,164 @@
+/**
+ * Frontend API client.
+ *
+ * - The server (Supabase) is the single source of truth. There is no localStorage
+ *   "overlay" any more: if a save fails, the admin sees the error instead of a fake success.
+ * - Admin auth uses an httpOnly cookie set by /api/admin/login; it is sent automatically
+ *   with same-origin requests and is never readable from JavaScript.
+ */
+
 const API_BASE_URL = typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000') + '/api';
 
-function normalizeAssetUrlForHttps(url) {
-  if (typeof url !== "string") return url;
-  if (typeof window === "undefined") return url;
-  const trimmed = url.trim();
-  if (!trimmed) return trimmed;
+export class ApiError extends Error {
+  constructor(message, status, data) {
+    super(message);
+    this.status = status;
+    this.data = data;
+  }
+}
 
-  if (window.location.protocol === "https:" && /^http:\/\//i.test(trimmed)) {
+function normalizeAssetUrlForHttps(url) {
+  if (typeof url !== 'string' || typeof window === 'undefined') return url;
+  const trimmed = url.trim();
+  if (window.location.protocol === 'https:' && /^http:\/\//i.test(trimmed)) {
     try {
       const parsed = new URL(trimmed);
-      const isLocalHost =
-        parsed.hostname === "localhost" ||
-        parsed.hostname === "127.0.0.1" ||
-        parsed.hostname === "::1";
-      if (!isLocalHost) {
-        parsed.protocol = "https:";
+      if (!['localhost', '127.0.0.1', '::1'].includes(parsed.hostname)) {
+        parsed.protocol = 'https:';
         return parsed.toString();
       }
     } catch {
-      return trimmed.replace(/^http:\/\//i, "https://");
+      return trimmed.replace(/^http:\/\//i, 'https://');
     }
   }
-
   return trimmed;
 }
 
 function sanitizePayloadUrls(payload) {
-  if (Array.isArray(payload)) {
-    return payload.map((item) => sanitizePayloadUrls(item));
-  }
-
-  if (!payload || typeof payload !== "object") {
-    return payload;
-  }
-
+  if (Array.isArray(payload)) return payload.map(sanitizePayloadUrls);
+  if (!payload || typeof payload !== 'object') return payload;
   const next = { ...payload };
-  if (typeof next.image === "string") {
-    next.image = normalizeAssetUrlForHttps(next.image);
-  }
-  if (Array.isArray(next.images)) {
-    next.images = next.images.map((item) => normalizeAssetUrlForHttps(item));
-  }
-
+  if (typeof next.image === 'string') next.image = normalizeAssetUrlForHttps(next.image);
+  if (Array.isArray(next.images)) next.images = next.images.map(normalizeAssetUrlForHttps);
   Object.keys(next).forEach((key) => {
-    const value = next[key];
-    if (value && typeof value === "object") {
-      next[key] = sanitizePayloadUrls(value);
-    }
+    if (next[key] && typeof next[key] === 'object') next[key] = sanitizePayloadUrls(next[key]);
   });
-
   return next;
 }
 
 async function handleResponse(res) {
-  if (!res.ok) {
-    let message = "Request failed";
-    try {
-      const data = await res.json();
-      if (data?.message) message = data.message;
-    } catch {
-      // Ignore response parsing errors
-    }
-    throw new Error(message);
+  let data = null;
+  try {
+    data = await res.json();
+  } catch {
+    data = null;
   }
-  const data = await res.json();
+  if (!res.ok) {
+    throw new ApiError(data?.message || `Request failed (${res.status})`, res.status, data);
+  }
   return sanitizePayloadUrls(data);
 }
 
-function getAuthHeaders() {
-  if (typeof window === 'undefined') return {};
-  let token = localStorage.getItem("adminToken");
-  if (!token && typeof document !== 'undefined') {
-    const match = document.cookie.match(/(?:^|;\s*)adminToken=([^;]+)/);
-    if (match) {
-      try {
-        token = decodeURIComponent(match[1]);
-        localStorage.setItem("adminToken", token);
-      } catch {}
-    }
+/**
+ * Admin request helper: sends the session cookie and redirects to the login page on 401.
+ */
+async function adminFetch(path, options = {}) {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    credentials: 'same-origin',
+    cache: 'no-store',
+    ...options,
+  });
+  if (res.status === 401 && typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin/login')) {
+    window.location.href = '/admin/login';
   }
-  if (!token) return {};
-  return {
-    Authorization: `Bearer ${token}`,
-    'x-admin-token': token,
-  };
+  return handleResponse(res);
+}
+
+function jsonBody(method, data) {
+  return { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) };
 }
 
 function buildProductFormData(data = {}) {
   const fd = new FormData();
-  const fields = [
-    "id",
-    "title",
-    "category",
-    "productType",
-    "navGroup",
-    "iconType",
-    "description",
-    "image",
-    "color",
-    "tagline",
-    "services",
-    "displayOrder",
-    "carouselOrder",
-    "isActive",
-    "showOnLanding",
-    "showInProductsPage",
-    "showInNavbar",
-  ];
-
-  fields.forEach((key) => {
-    if (data[key] !== undefined && data[key] !== null && data[key] !== "") {
-      fd.append(key, String(data[key]));
-    }
-  });
-
   [
-    "features",
-    "variants",
-    "variantImages",
-    "brands",
-    "sizes",
-    "skus",
-    "facilities",
-    "images",
+    'id', 'title', 'category', 'productType', 'navGroup', 'iconType', 'description', 'image', 'color',
+    'tagline', 'services', 'displayOrder', 'carouselOrder', 'isActive', 'showOnLanding',
+    'showInProductsPage', 'showInNavbar',
   ].forEach((key) => {
-    if (data[key] !== undefined && data[key] !== null) {
-      fd.append(key, JSON.stringify(data[key]));
-    }
+    if (data[key] !== undefined && data[key] !== null && data[key] !== '') fd.append(key, String(data[key]));
+  });
+  if (data.shippingCost !== undefined) fd.append('shippingCost', data.shippingCost === null ? '' : String(data.shippingCost));
+
+  ['features', 'variants', 'variantImages', 'brands', 'sizes', 'skus', 'facilities', 'images'].forEach((key) => {
+    if (data[key] !== undefined && data[key] !== null) fd.append(key, JSON.stringify(data[key]));
   });
 
   if (Array.isArray(data.productImages)) {
-    data.productImages.forEach((file) => fd.append("productImages", file));
+    data.productImages.forEach((file) => fd.append('productImages', file));
   } else {
-    if (data.imageFile) fd.append("image", data.imageFile);
-    if (Array.isArray(data.galleryFiles)) {
-      data.galleryFiles.forEach((file) => fd.append("images", file));
-    }
+    if (data.imageFile) fd.append('image', data.imageFile);
+    if (Array.isArray(data.galleryFiles)) data.galleryFiles.forEach((file) => fd.append('images', file));
   }
   if (Array.isArray(data.variantImageFiles)) {
-    data.variantImageFiles.forEach((file, index) => {
-      if (file) fd.append(`variantImageFile_${index}`, file);
-    });
+    data.variantImageFiles.forEach((file, index) => file && fd.append(`variantImageFile_${index}`, file));
   }
   if (Array.isArray(data.brandImageFiles)) {
-    data.brandImageFiles.forEach((file, index) => {
-      if (file) fd.append(`brandImageFile_${index}`, file);
-    });
+    data.brandImageFiles.forEach((file, index) => file && fd.append(`brandImageFile_${index}`, file));
   }
   return fd;
 }
 
 function buildPromotionFormData(data = {}) {
   const fd = new FormData();
-  const fields = [
-    "id",
-    "title",
-    "category",
-    "description",
-    "image",
-    "totalQuantity",
-    "totalPrice",
-    "originalPrice",
-    "discount",
-    "shippingCost",
-    "displayOrder",
-    "isActive",
-  ];
-  fields.forEach((key) => {
-    if (data[key] !== undefined && data[key] !== null && data[key] !== "") {
-      fd.append(key, String(data[key]));
+  ['id', 'title', 'category', 'description', 'image', 'totalQuantity', 'totalPrice', 'originalPrice', 'discount', 'shippingCost', 'displayOrder', 'isActive'].forEach(
+    (key) => {
+      if (data[key] !== undefined && data[key] !== null && data[key] !== '') fd.append(key, String(data[key]));
     }
+  );
+  ['items', 'images'].forEach((key) => {
+    if (data[key] !== undefined && data[key] !== null) fd.append(key, JSON.stringify(data[key]));
   });
-
-  ["items", "images"].forEach((key) => {
-    if (data[key] !== undefined && data[key] !== null) {
-      fd.append(key, JSON.stringify(data[key]));
-    }
-  });
-
-  if (Array.isArray(data.promotionImages)) {
-    data.promotionImages.forEach((file) => fd.append("promotionImages", file));
-  }
+  if (Array.isArray(data.promotionImages)) data.promotionImages.forEach((file) => fd.append('promotionImages', file));
   return fd;
 }
 
+// ---------------------------------------------------------------- Auth
+
 export async function adminLogin(email, password) {
   const res = await fetch(`${API_BASE_URL}/admin/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    ...jsonBody('POST', { email, password }),
+    credentials: 'same-origin',
   });
-  const data = await handleResponse(res);
-  if (data?.token && typeof window !== 'undefined') {
-    localStorage.setItem("adminToken", data.token);
-    try {
-      document.cookie = `adminToken=${encodeURIComponent(data.token)}; path=/; max-age=31536000; SameSite=Lax`;
-    } catch {}
-  }
-  return data;
+  return handleResponse(res);
 }
 
-const LS_PRODUCTS_KEY = "kite_admin_products_v2";
-const LS_PROMOTIONS_KEY = "kite_admin_promotions_v2";
-const LS_DELETED_PRODUCTS_KEY = "kite_deleted_products_v2";
-const LS_DELETED_PROMOS_KEY = "kite_deleted_promos_v2";
-const LS_ORDERS_KEY = "kite_admin_orders_v2";
-
-export function getLocalOrders() {
-  if (typeof window === "undefined") return [];
+export async function adminLogout() {
   try {
-    const raw = localStorage.getItem(LS_ORDERS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    await fetch(`${API_BASE_URL}/admin/logout`, { method: 'POST', credentials: 'same-origin' });
   } catch {
-    return [];
+    // ignore network errors on logout
   }
-}
-
-export function saveLocalOrders(orders) {
-  if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(LS_ORDERS_KEY, JSON.stringify(orders));
-  } catch (e) {
-    console.warn("Failed to save orders to localStorage:", e);
-  }
-}
-
-export function mergeOrdersWithLocal(serverOrders = []) {
-  if (typeof window === "undefined") return serverOrders;
-  try {
-    const local = getLocalOrders();
-    const map = new Map();
-
-    // 1. Add server orders first
-    (Array.isArray(serverOrders) ? serverOrders : []).forEach((o) => {
-      const key = o.orderNumber || o._id || o.id;
-      if (key) map.set(String(key), o);
-    });
-
-    // 2. Overlay local orders (preserves newly placed orders & status updates)
-    local.forEach((o) => {
-      const key = o.orderNumber || o._id || o.id;
-      if (key) {
-        const strKey = String(key);
-        if (map.has(strKey)) {
-          map.set(strKey, { ...map.get(strKey), ...o });
-        } else {
-          map.set(strKey, o);
-        }
-      }
-    });
-
-    // 3. Fallback: also check lastOrder from checkout session
-    try {
-      const lastOrderRaw = localStorage.getItem('lastOrder');
-      if (lastOrderRaw) {
-        const lo = JSON.parse(lastOrderRaw);
-        const loKey = lo?.orderNumber || lo?._id || lo?.id;
-        if (loKey && !map.has(String(loKey))) {
-          map.set(String(loKey), lo);
-        }
-      }
-    } catch {}
-
-    const merged = Array.from(map.values()).sort(
-      (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+    // Clean up tokens/caches left by older versions of the admin panel.
+    ['adminToken', 'kite_admin_products_v2', 'kite_admin_promotions_v2', 'kite_deleted_products_v2', 'kite_deleted_promos_v2', 'kite_admin_orders_v2'].forEach(
+      (k) => localStorage.removeItem(k)
     );
-
-    saveLocalOrders(merged);
-    return merged;
   } catch {
-    return serverOrders;
+    // ignore
   }
 }
 
-export function getLocalProducts() {
-  if (typeof window === "undefined") return [];
+/** @returns {Promise<boolean>} */
+export async function adminCheckSession() {
   try {
-    const raw = localStorage.getItem(LS_PRODUCTS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const res = await fetch(`${API_BASE_URL}/admin/session`, { credentials: 'same-origin', cache: 'no-store' });
+    return res.ok;
   } catch {
-    return [];
+    return false;
   }
 }
 
-export function saveLocalProducts(products) {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(LS_PRODUCTS_KEY, JSON.stringify(products));
-  } catch (e) {
-    console.warn("Failed to save products to localStorage:", e);
-  }
-}
-
-export function getLocalPromotions() {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(LS_PROMOTIONS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function saveLocalPromotions(promos) {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(LS_PROMOTIONS_KEY, JSON.stringify(promos));
-  } catch (e) {
-    console.warn("Failed to save promotions to localStorage:", e);
-  }
-}
-
-export function mergeProductsWithLocal(serverProducts = []) {
-  if (typeof window === "undefined") return serverProducts;
-  try {
-    const local = getLocalProducts();
-    const deletedRaw = localStorage.getItem(LS_DELETED_PRODUCTS_KEY);
-    const deletedIds = new Set(deletedRaw ? JSON.parse(deletedRaw) : []);
-
-    if (!local || !local.length) {
-      if (serverProducts && serverProducts.length) {
-        saveLocalProducts(serverProducts);
-      }
-      return serverProducts.filter((p) => !deletedIds.has(p.id));
-    }
-
-    const mergedMap = new Map();
-    (serverProducts || []).forEach((p) => {
-      if (!deletedIds.has(p.id)) {
-        mergedMap.set(p.id, p);
-      }
-    });
-
-    local.forEach((lp) => {
-      if (!deletedIds.has(lp.id)) {
-        const existing = mergedMap.get(lp.id);
-        if (!existing) {
-          mergedMap.set(lp.id, lp);
-        } else {
-          const localTime = lp.updatedAt ? new Date(lp.updatedAt).getTime() : 0;
-          const serverTime = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
-          if (localTime >= serverTime) {
-            mergedMap.set(lp.id, { ...existing, ...lp });
-          }
-        }
-      }
-    });
-
-    const result = Array.from(mergedMap.values());
-    saveLocalProducts(result);
-    return result;
-  } catch (e) {
-    console.warn("mergeProductsWithLocal error:", e);
-    return serverProducts;
-  }
-}
-
-export function mergePromotionsWithLocal(serverPromos = []) {
-  if (typeof window === "undefined") return serverPromos;
-  try {
-    const local = getLocalPromotions();
-    const deletedRaw = localStorage.getItem(LS_DELETED_PROMOS_KEY);
-    const deletedIds = new Set(deletedRaw ? JSON.parse(deletedRaw) : []);
-
-    if (!local || !local.length) {
-      if (serverPromos && serverPromos.length) {
-        saveLocalPromotions(serverPromos);
-      }
-      return serverPromos.filter((p) => !deletedIds.has(p.id));
-    }
-
-    const mergedMap = new Map();
-    (serverPromos || []).forEach((p) => {
-      if (!deletedIds.has(p.id)) {
-        mergedMap.set(p.id, p);
-      }
-    });
-
-    local.forEach((lp) => {
-      if (!deletedIds.has(lp.id)) {
-        const existing = mergedMap.get(lp.id);
-        if (!existing) {
-          mergedMap.set(lp.id, lp);
-        } else {
-          const localTime = lp.updatedAt ? new Date(lp.updatedAt).getTime() : 0;
-          const serverTime = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
-          if (localTime >= serverTime) {
-            mergedMap.set(lp.id, { ...existing, ...lp });
-          }
-        }
-      }
-    });
-
-    const result = Array.from(mergedMap.values());
-    saveLocalPromotions(result);
-    return result;
-  } catch (e) {
-    console.warn("mergePromotionsWithLocal error:", e);
-    return serverPromos;
-  }
-}
+// ---------------------------------------------------------------- Public catalog
 
 let productsCache = null;
 let productsCacheTime = 0;
@@ -412,297 +171,55 @@ export function invalidateProductsCache() {
   productsInFlightPromise = null;
 }
 
-export async function getProducts(options = {}) {
-  const { forceRefresh = false } = options;
+export async function getProducts({ forceRefresh = false } = {}) {
   const now = Date.now();
-
-  if (!forceRefresh && productsCache && now - productsCacheTime < PRODUCTS_CACHE_TTL) {
-    return mergeProductsWithLocal(productsCache);
-  }
-
-  if (productsInFlightPromise && !forceRefresh) {
-    return productsInFlightPromise;
-  }
+  if (!forceRefresh && productsCache && now - productsCacheTime < PRODUCTS_CACHE_TTL) return productsCache;
+  if (productsInFlightPromise && !forceRefresh) return productsInFlightPromise;
 
   productsInFlightPromise = (async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/products`, { cache: 'no-store' });
       const data = await handleResponse(res);
-      if (Array.isArray(data)) {
-        productsCache = data;
-        productsCacheTime = Date.now();
-      }
-      return mergeProductsWithLocal(Array.isArray(data) ? data : []);
+      productsCache = Array.isArray(data) ? data : [];
+      productsCacheTime = Date.now();
+      return productsCache;
     } catch (err) {
-      if (productsCache) return mergeProductsWithLocal(productsCache);
-      const local = getLocalProducts();
-      if (local && local.length) return local;
+      if (productsCache) return productsCache; // serve last good data on a transient failure
       throw err;
     } finally {
       productsInFlightPromise = null;
     }
   })();
-
   return productsInFlightPromise;
 }
 
 function normalizeIdentifier(value) {
-  return String(value || "")
+  return String(value || '')
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 export async function getProduct(id) {
-  const productIdAliases = {
-    tanga: "tanga-matches",
-  };
-
-  const requestedId = productIdAliases[id] || id;
-  const normalizedRequested = normalizeIdentifier(requestedId);
-
+  const normalized = normalizeIdentifier(id);
   try {
     const products = await getProducts();
-    const matched = products.find((item) => {
-      const byId = normalizeIdentifier(item?.id) === normalizedRequested;
-      const bySlug = normalizeIdentifier(item?.slug) === normalizedRequested;
-      const byTitle = normalizeIdentifier(item?.title) === normalizedRequested;
-      return byId || bySlug || byTitle;
-    });
-
-    if (matched) {
-      return matched;
-    }
+    const matched = products.find(
+      (item) => normalizeIdentifier(item?.id) === normalized || normalizeIdentifier(item?.title) === normalized
+    );
+    if (matched) return matched;
   } catch {
-    // Fall back to direct fetch
+    // fall back to direct lookup
   }
-
-  let res = await fetch(`${API_BASE_URL}/products/${requestedId}`);
-  if (res.ok) return handleResponse(res);
-
-  if (requestedId !== id) {
-    res = await fetch(`${API_BASE_URL}/products/${id}`);
-  }
+  const res = await fetch(`${API_BASE_URL}/products/${encodeURIComponent(id)}`);
   return handleResponse(res);
 }
 
-export async function adminGetProducts() {
-  let serverData = [];
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/products`, {
-      headers: { ...getAuthHeaders() },
-      cache: "no-store",
-    });
-    serverData = await handleResponse(res);
-  } catch (err) {
-    console.warn("adminGetProducts network fetch error, will use local overlay:", err.message);
-  }
-  return mergeProductsWithLocal(Array.isArray(serverData) ? serverData : []);
-}
-
-export async function adminCreateProduct(data) {
-  invalidateProductsCache();
-  let result = null;
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/products`, {
-      method: "POST",
-      headers: { ...getAuthHeaders() },
-      body: buildProductFormData(data),
-    });
-    result = await handleResponse(res);
-  } catch (err) {
-    console.warn("adminCreateProduct server error, saving locally:", err.message);
-  }
-
-  const newProduct = {
-    ...data,
-    id: data.id || result?.id,
-    updatedAt: new Date().toISOString(),
-  };
-
-  if (typeof window !== "undefined") {
-    const local = getLocalProducts().filter((p) => p.id !== newProduct.id);
-    local.unshift(newProduct);
-    saveLocalProducts(local);
-  }
-
-  return result || newProduct;
-}
-
-export async function adminUpdateProduct(id, data) {
-  invalidateProductsCache();
-  // Update local storage immediately so it NEVER reverts after 5 seconds
-  if (typeof window !== "undefined") {
-    const local = getLocalProducts();
-    const idx = local.findIndex((p) => p.id === id);
-    const existing = idx >= 0 ? local[idx] : {};
-    const updated = {
-      ...existing,
-      ...data,
-      id,
-      updatedAt: new Date().toISOString(),
-    };
-    if (idx >= 0) {
-      local[idx] = updated;
-    } else {
-      local.push(updated);
-    }
-    saveLocalProducts(local);
-  }
-
-  let result = null;
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
-      method: "PUT",
-      headers: { ...getAuthHeaders() },
-      body: buildProductFormData(data),
-    });
-    result = await handleResponse(res);
-  } catch (err) {
-    console.warn("adminUpdateProduct network warning (saved locally):", err.message);
-  }
-
-  return result || { ...data, id, updatedAt: new Date().toISOString() };
-}
-
-export async function adminDeleteProduct(id) {
-  invalidateProductsCache();
-  if (typeof window !== "undefined") {
-    const local = getLocalProducts().filter((p) => p.id !== id);
-    saveLocalProducts(local);
-    try {
-      const deletedRaw = localStorage.getItem(LS_DELETED_PRODUCTS_KEY);
-      const set = new Set(deletedRaw ? JSON.parse(deletedRaw) : []);
-      set.add(id);
-      localStorage.setItem(LS_DELETED_PRODUCTS_KEY, JSON.stringify(Array.from(set)));
-    } catch {}
-  }
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
-      method: "DELETE",
-      headers: { ...getAuthHeaders() },
-    });
-    return await handleResponse(res);
-  } catch (err) {
-    console.warn("adminDeleteProduct network warning (deleted locally):", err.message);
-    return { message: "Product deleted" };
-  }
-}
-
-export async function adminGetPromotions() {
-  let serverData = [];
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/promotions`, {
-      headers: { ...getAuthHeaders() },
-      cache: "no-store",
-    });
-    serverData = await handleResponse(res);
-  } catch (err) {
-    console.warn("adminGetPromotions network fetch error, will use local overlay:", err.message);
-  }
-  return mergePromotionsWithLocal(Array.isArray(serverData) ? serverData : []);
-}
-
-export async function adminCreatePromotion(data) {
-  invalidateProductsCache();
-  let result = null;
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/promotions`, {
-      method: "POST",
-      headers: { ...getAuthHeaders() },
-      body: buildPromotionFormData(data),
-    });
-    result = await handleResponse(res);
-  } catch (err) {
-    console.warn("adminCreatePromotion server warning, saving locally:", err.message);
-  }
-
-  const newPromo = {
-    ...data,
-    id: data.id || result?.id,
-    updatedAt: new Date().toISOString(),
-  };
-
-  if (typeof window !== "undefined") {
-    const local = getLocalPromotions().filter((p) => p.id !== newPromo.id);
-    local.unshift(newPromo);
-    saveLocalPromotions(local);
-  }
-
-  return result || newPromo;
-}
-
-export async function adminUpdatePromotion(id, data) {
-  invalidateProductsCache();
-  if (typeof window !== "undefined") {
-    const local = getLocalPromotions();
-    const idx = local.findIndex((p) => p.id === id);
-    const existing = idx >= 0 ? local[idx] : {};
-    const updated = {
-      ...existing,
-      ...data,
-      id,
-      updatedAt: new Date().toISOString(),
-    };
-    if (idx >= 0) {
-      local[idx] = updated;
-    } else {
-      local.push(updated);
-    }
-    saveLocalPromotions(local);
-  }
-
-  let result = null;
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/promotions/${id}`, {
-      method: "PUT",
-      headers: { ...getAuthHeaders() },
-      body: buildPromotionFormData(data),
-    });
-    result = await handleResponse(res);
-  } catch (err) {
-    console.warn("adminUpdatePromotion network warning (saved locally):", err.message);
-  }
-
-  return result || { ...data, id, updatedAt: new Date().toISOString() };
-}
-
-export async function adminDeletePromotion(id) {
-  invalidateProductsCache();
-  if (typeof window !== "undefined") {
-    const local = getLocalPromotions().filter((p) => p.id !== id);
-    saveLocalPromotions(local);
-    try {
-      const deletedRaw = localStorage.getItem(LS_DELETED_PROMOS_KEY);
-      const set = new Set(deletedRaw ? JSON.parse(deletedRaw) : []);
-      set.add(id);
-      localStorage.setItem(LS_DELETED_PROMOS_KEY, JSON.stringify(Array.from(set)));
-    } catch {}
-  }
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/promotions/${id}`, {
-      method: "DELETE",
-      headers: { ...getAuthHeaders() },
-    });
-    return await handleResponse(res);
-  } catch (err) {
-    console.warn("adminDeletePromotion network warning (deleted locally):", err.message);
-    return { message: "Promotion deleted" };
-  }
-}
-
 export async function getPromotions() {
-  let serverData = [];
-  try {
-    const res = await fetch(`${API_BASE_URL}/promotions`, { cache: 'no-store' });
-    serverData = await handleResponse(res);
-  } catch (err) {
-    console.warn("getPromotions network warning, using local overlay:", err.message);
-  }
-  return mergePromotionsWithLocal(Array.isArray(serverData) ? serverData : []);
+  const res = await fetch(`${API_BASE_URL}/promotions`, { cache: 'no-store' });
+  const data = await handleResponse(res);
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getSettings() {
@@ -710,109 +227,77 @@ export async function getSettings() {
   return handleResponse(res);
 }
 
-export async function adminUpdateSettings(data) {
-  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
-  const headers = { ...getAuthHeaders() };
-  if (!isFormData) {
-    headers["Content-Type"] = "application/json";
-  }
-  const res = await fetch(`${API_BASE_URL}/settings`, {
-    method: "PUT",
-    headers,
-    body: isFormData ? data : JSON.stringify(data),
-  });
+// ---------------------------------------------------------------- Orders (customer)
+
+/** Authoritative price breakdown from the server. */
+export async function quoteOrder(payload) {
+  const res = await fetch(`${API_BASE_URL}/orders/quote`, jsonBody('POST', payload));
   return handleResponse(res);
 }
 
 export async function createOrder(payload) {
-  let data = null;
+  const res = await fetch(`${API_BASE_URL}/orders`, jsonBody('POST', payload));
+  const data = await handleResponse(res);
   try {
-    const res = await fetch(`${API_BASE_URL}/orders`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    data = await handleResponse(res);
-  } catch (err) {
-    console.warn("Order creation server error:", err);
-    throw err;
+    // Session-scoped (cleared when the tab closes) so customer details don't linger on shared devices.
+    sessionStorage.setItem('lastOrder', JSON.stringify(data));
+    localStorage.removeItem('lastOrder');
+  } catch {
+    // ignore storage errors
   }
-
-  // Immediately mirror into client-side order storage
-  if (data && typeof window !== "undefined") {
-    try {
-      const local = getLocalOrders();
-      const key = data.orderNumber || data._id || data.id;
-      const filtered = local.filter((o) => (o.orderNumber || o._id || o.id) !== key);
-      filtered.unshift(data);
-      saveLocalOrders(filtered);
-      localStorage.setItem('lastOrder', JSON.stringify(data));
-    } catch (e) {
-      console.warn("Failed to cache created order locally:", e);
-    }
-  }
-
   return data;
 }
 
+// ---------------------------------------------------------------- Admin
+
+export const adminGetProducts = () => adminFetch('/admin/products');
+
+export async function adminCreateProduct(data) {
+  invalidateProductsCache();
+  return adminFetch('/admin/products', { method: 'POST', body: buildProductFormData(data) });
+}
+
+export async function adminUpdateProduct(id, data) {
+  invalidateProductsCache();
+  return adminFetch(`/admin/products/${encodeURIComponent(id)}`, { method: 'PUT', body: buildProductFormData(data) });
+}
+
+export async function adminDeleteProduct(id) {
+  invalidateProductsCache();
+  return adminFetch(`/admin/products/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+export const adminGetPromotions = () => adminFetch('/admin/promotions');
+
+export async function adminCreatePromotion(data) {
+  return adminFetch('/admin/promotions', { method: 'POST', body: buildPromotionFormData(data) });
+}
+
+export async function adminUpdatePromotion(id, data) {
+  return adminFetch(`/admin/promotions/${encodeURIComponent(id)}`, { method: 'PUT', body: buildPromotionFormData(data) });
+}
+
+export async function adminDeletePromotion(id) {
+  return adminFetch(`/admin/promotions/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+export async function adminUpdateSettings(data) {
+  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+  return adminFetch('/settings', isFormData ? { method: 'PUT', body: data } : jsonBody('PUT', data));
+}
+
 export async function adminGetOrders() {
-  let serverData = [];
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/orders`, {
-      headers: { ...getAuthHeaders() },
-      cache: 'no-store',
-    });
-    serverData = await handleResponse(res);
-  } catch (err) {
-    console.warn("adminGetOrders network warning, using local overlay:", err.message);
-  }
-  return mergeOrdersWithLocal(Array.isArray(serverData) ? serverData : []);
+  const data = await adminFetch('/admin/orders');
+  return Array.isArray(data) ? data : [];
 }
 
-export async function adminUpdateOrderStatus(id, status) {
-  if (typeof window !== "undefined") {
-    try {
-      const local = getLocalOrders();
-      const idx = local.findIndex((o) => o._id === id || o.id === id || o.orderNumber === id);
-      if (idx >= 0) {
-        local[idx] = { ...local[idx], status, updatedAt: new Date().toISOString() };
-        saveLocalOrders(local);
-      }
-    } catch {}
-  }
+export const adminGetOrder = (id) => adminFetch(`/admin/orders/${encodeURIComponent(id)}`);
 
-  let result = null;
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/orders/${id}/status`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-      body: JSON.stringify({ status }),
-    });
-    result = await handleResponse(res);
-  } catch (err) {
-    console.warn("adminUpdateOrderStatus network warning (updated locally):", err.message);
-  }
+export const adminUpdateOrderStatus = (id, status) =>
+  adminFetch(`/admin/orders/${encodeURIComponent(id)}/status`, jsonBody('PATCH', { status }));
 
-  return result || { _id: id, status, updatedAt: new Date().toISOString() };
-}
+export const adminGetAnalytics = () => adminFetch('/admin/analytics');
 
-export async function adminGetOrder(id) {
-  const res = await fetch(`${API_BASE_URL}/admin/orders/${id}`, {
-    headers: { ...getAuthHeaders() },
-  });
-  return handleResponse(res);
-}
+export const adminResetAnalytics = () => adminFetch('/admin/analytics/reset', { method: 'POST' });
 
-export async function adminGetAnalytics() {
-  const res = await fetch(`${API_BASE_URL}/admin/analytics`, {
-    headers: { ...getAuthHeaders() },
-  });
-  return handleResponse(res);
-}
-
-export async function adminGetDashboard() {
-  const res = await fetch(`${API_BASE_URL}/admin/dashboard`, {
-    headers: { ...getAuthHeaders() },
-  });
-  return handleResponse(res);
-}
+export const adminGetDashboard = () => adminFetch('/admin/dashboard');

@@ -1,5 +1,7 @@
 import { fetchServerProducts } from "@/lib/server-products";
 
+export const revalidate = 3600;
+
 export default async function sitemap() {
   const baseUrl = "https://www.kitepk.com";
   const now = new Date();

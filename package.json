@@ -11,16 +11,12 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@emailjs/nodejs": "^5.0.2",
     "@supabase/supabase-js": "^2.119.2",
     "bcryptjs": "^3.0.3",
-    "cloudinary": "^2.11.0",
     "framer-motion": "^13.4.3",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.48.0",
-    "mongoose": "^9.10.2",
-    "next": "16.3.6",
-    "nodemailer": "^10.6.0",
+    "next": "16.4.6",
     "pusher": "^5.3.4",
     "pusher-js": "^8.6.0",
     "react": "19.2.8",
@@ -34,7 +30,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
-    "eslint-config-next": "16.3.6",
+    "eslint-config-next": "16.4.6",
     "pg": "^8.23.1",
     "tailwindcss": "^4"
   }

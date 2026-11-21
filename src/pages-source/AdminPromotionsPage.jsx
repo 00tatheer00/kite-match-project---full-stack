@@ -19,6 +19,7 @@ import {
   adminUpdatePromotion,
   adminDeletePromotion,
   getPromotions,
+  adminLogout,
 } from "../services/api";
 import {
   parsePromotionsCSV,
@@ -126,18 +127,8 @@ const AdminPromotionsPage = () => {
     try {
       setSyncing(true);
       setError("");
-      const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : '';
-      const res = await fetch('/api/admin/promotions?sync=true', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setPromos(data);
-          return;
-        }
-      }
-      await load();
+      const data = await adminGetPromotions();
+      setPromos(Array.isArray(data) ? data : []);
     } catch (err) {
       await load();
     } finally {
@@ -476,8 +467,7 @@ const AdminPromotionsPage = () => {
                     type="button"
                     onClick={() => {
                       if (typeof window !== 'undefined') {
-                        localStorage.removeItem('adminToken');
-                        window.location.href = '/admin/login';
+                        adminLogout().finally(() => { window.location.href = '/admin/login'; });
                       }
                     }}
                     className="px-3 py-1 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 cursor-pointer"
@@ -793,8 +783,7 @@ const AdminPromotionsPage = () => {
                             type="button"
                             onClick={() => {
                               if (typeof window !== 'undefined') {
-                                localStorage.removeItem('adminToken');
-                                window.location.href = '/admin/login';
+                                adminLogout().finally(() => { window.location.href = '/admin/login'; });
                               }
                             }}
                             className="px-3 py-1 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 cursor-pointer ml-3"

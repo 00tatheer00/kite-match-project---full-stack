@@ -1,146 +1,122 @@
 import { NextResponse } from 'next/server';
-import { recordVisitorEvent } from '@/lib/store';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase';
+import { karachiDay } from '@/lib/analytics';
+import { getClientIp, rateLimit } from '@/lib/rate-limit';
 
-function isPublicIp(ip) {
-  if (!ip || typeof ip !== 'string') return false;
-  const clean = ip.trim();
-  if (clean === '127.0.0.1' || clean === '::1' || clean === 'localhost') return false;
-  if (clean.startsWith('10.') || clean.startsWith('192.168.') || clean.startsWith('172.16.')) return false;
-  return true;
+export const dynamic = 'force-dynamic';
+
+const SOURCES = new Set(['direct', 'whatsapp', 'facebook', 'instagram', 'google', 'tiktok', 'referral']);
+const DEVICES = new Set(['mobile', 'desktop', 'tablet']);
+
+function cleanPath(value) {
+  const p = String(value || '/').split('?')[0].split('#')[0].slice(0, 120);
+  return p.startsWith('/') ? p : '/';
 }
 
+function headerLocation(req) {
+  const decode = (v) => {
+    try {
+      return decodeURIComponent(v);
+    } catch {
+      return v;
+    }
+  };
+  const vercelCity = req.headers.get('x-vercel-ip-city');
+  const country = (req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry') || '').slice(0, 2).toUpperCase();
+  const cfCity = req.headers.get('cf-ipcity');
+  const cityName = vercelCity ? decode(vercelCity) : cfCity || '';
+  return {
+    city: cityName ? `${cityName.slice(0, 60)}, ${country || 'PK'}` : 'Unknown',
+    country: country || 'Unknown',
+  };
+}
+
+function bump(obj, key) {
+  const next = obj && typeof obj === 'object' ? { ...obj } : {};
+  next[key] = (Number(next[key]) || 0) + 1;
+  return next;
+}
+
+// POST /api/analytics/track — anonymous page-view counter (no IP addresses are stored).
 export async function POST(req) {
+  const limit = rateLimit(`track:${getClientIp(req)}`, { limit: 60, windowMs: 60 * 1000 });
+  if (!limit.ok) return NextResponse.json({ ok: false }, { status: 429 });
+
+  let payload = {};
   try {
-    let payload = {};
     const text = await req.text();
-    if (text) {
-      try {
-        payload = JSON.parse(text);
-      } catch {
-        payload = {};
-      }
-    }
-
-    // 1. Detect location from headers
-    const vercelCity = req.headers.get('x-vercel-ip-city');
-    const vercelCountry = req.headers.get('x-vercel-ip-country');
-    const vercelRegion = req.headers.get('x-vercel-ip-country-region');
-    const cfCity = req.headers.get('cf-ipcity');
-    const cfCountry = req.headers.get('cf-ipcountry');
-
-    const forwarded = req.headers.get('x-forwarded-for');
-    const clientIp = (forwarded ? forwarded.split(',')[0].trim() : '') ||
-      req.headers.get('x-real-ip') ||
-      req.headers.get('cf-connecting-ip') ||
-      '';
-
-    let detectedCity = payload.city;
-    let detectedCountry = payload.country || vercelCountry || cfCountry || 'PK';
-
-    if (!detectedCity || detectedCity === 'Pakistan') {
-      if (vercelCity) {
-        try {
-          detectedCity = `${decodeURIComponent(vercelCity)}, ${vercelCountry || 'PK'}`;
-        } catch {
-          detectedCity = `${vercelCity}, ${vercelCountry || 'PK'}`;
-        }
-      } else if (cfCity) {
-        detectedCity = `${cfCity}, ${cfCountry || 'PK'}`;
-      }
-    }
-
-    if ((!detectedCity || detectedCity === 'Pakistan') && isPublicIp(clientIp)) {
-      try {
-        const geoRes = await fetch(`http://ip-api.com/json/${clientIp}`, {
-          signal: AbortSignal.timeout(1200),
-        });
-        if (geoRes.ok) {
-          const geoData = await geoRes.json();
-          if (geoData && geoData.status === 'success' && geoData.city) {
-            detectedCity = `${geoData.city}, ${geoData.countryCode || 'PK'}`;
-            detectedCountry = geoData.countryCode || detectedCountry;
-          }
-        }
-      } catch {}
-    }
-
-    if (!detectedCity || detectedCity === 'Pakistan') {
-      const hubs = ['Lahore, PK', 'Karachi, PK', 'Islamabad, PK', 'Rawalpindi, PK', 'Faisalabad, PK', 'Peshawar, PK'];
-      detectedCity = hubs[Math.floor(Math.random() * hubs.length)];
-    }
-
-    payload.city = detectedCity;
-    payload.country = detectedCountry;
-    payload.region = vercelRegion || '';
-    payload.ip = clientIp;
-
-    // Record in local store
-    const storeResult = recordVisitorEvent(payload);
-
-    // Also persist in Supabase
-    if (isSupabaseConfigured()) {
-      try {
-        const sb = getSupabaseAdmin();
-        const src = payload.source || 'direct';
-        const dev = payload.device || 'mobile';
-        const p = payload.path || '/';
-
-        const { data: current } = await sb
-          .from('analytics')
-          .select('*')
-          .eq('key', 'global_summary')
-          .single();
-
-        if (current) {
-          const sources = current.sources || {};
-          sources[src] = (Number(sources[src]) || 0) + 1;
-
-          const devices = current.devices || {};
-          devices[dev] = (Number(devices[dev]) || 0) + 1;
-
-          const cities = current.cities || {};
-          cities[detectedCity] = (Number(cities[detectedCity]) || 0) + 1;
-
-          const countries = current.countries || {};
-          countries[detectedCountry] = (Number(countries[detectedCountry]) || 0) + 1;
-
-          const topPages = current.topPages || {};
-          topPages[p] = (Number(topPages[p]) || 0) + 1;
-
-          const recent = Array.isArray(current.recentVisits) ? current.recentVisits : [];
-          recent.unshift({
-            id: `v_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-            timestamp: new Date().toISOString(),
-            path: p,
-            source: src,
-            device: dev,
-            city: detectedCity,
-            country: detectedCountry,
-            ip: clientIp,
-          });
-
-          await sb.from('analytics').update({
-            totalVisitors: (Number(current.totalVisitors) || 0) + 1,
-            todayVisitors: (Number(current.todayVisitors) || 0) + 1,
-            totalPageviews: (Number(current.totalPageviews) || 0) + 1,
-            sources,
-            devices,
-            cities,
-            countries,
-            topPages,
-            recentVisits: recent.slice(0, 50),
-            lastUpdated: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }).eq('key', 'global_summary');
-        }
-      } catch (sbErr) {
-        // Fire-and-forget
-      }
-    }
-
-    return NextResponse.json(storeResult);
-  } catch (err) {
-    return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
+    if (text && text.length < 4000) payload = JSON.parse(text);
+  } catch {
+    payload = {};
   }
+
+  const sb = getSupabaseAdmin();
+  if (!sb) return NextResponse.json({ ok: true });
+
+  const path = cleanPath(payload.path);
+  if (path.startsWith('/admin') || path.startsWith('/api')) return NextResponse.json({ ok: true });
+
+  const source = SOURCES.has(payload.source) ? payload.source : 'direct';
+  const device = DEVICES.has(payload.device) ? payload.device : 'desktop';
+  const isNewVisitor = payload.newVisitor !== false; // older clients don't send the flag
+  const { city, country } = headerLocation(req);
+
+  // Preferred: atomic Postgres function (supabase/migrations/20261121_security_hardening.sql).
+  if (!globalThis.__kiteNoTrackRpc) {
+    const visit = { id: `v_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, timestamp: new Date().toISOString(), path, source, device, city, country };
+    const { error: rpcError } = await sb.rpc('track_page_view', {
+      p_path: path,
+      p_source: source,
+      p_device: device,
+      p_city: city,
+      p_country: country,
+      p_new_visitor: isNewVisitor,
+      p_visit: visit,
+    });
+    if (!rpcError) return NextResponse.json({ ok: true });
+    if (rpcError.code === 'PGRST202' || /could not find the function/i.test(rpcError.message || '')) {
+      globalThis.__kiteNoTrackRpc = true; // migration not applied yet → use fallback below
+    } else {
+      console.warn('[analytics] track_page_view failed:', rpcError.message);
+      return NextResponse.json({ ok: true });
+    }
+  }
+
+  try {
+    const { data: current, error } = await sb.from('analytics').select('*').eq('key', 'global_summary').maybeSingle();
+    if (error) throw error;
+
+    const nowIso = new Date().toISOString();
+    const base = current || { id: 1, key: 'global_summary' };
+    const sameDay = karachiDay(base.lastUpdated) === karachiDay(nowIso);
+
+    const recent = Array.isArray(base.recentVisits) ? base.recentVisits : [];
+    const row = {
+      id: base.id ?? 1,
+      key: 'global_summary',
+      totalPageviews: (Number(base.totalPageviews) || 0) + 1,
+      totalVisitors: (Number(base.totalVisitors) || 0) + (isNewVisitor ? 1 : 0),
+      todayVisitors: (sameDay ? Number(base.todayVisitors) || 0 : 0) + (isNewVisitor ? 1 : 0),
+      sources: isNewVisitor ? bump(base.sources, source) : base.sources || {},
+      devices: isNewVisitor ? bump(base.devices, device) : base.devices || {},
+      cities: isNewVisitor ? bump(base.cities, city) : base.cities || {},
+      countries: isNewVisitor ? bump(base.countries, country) : base.countries || {},
+      topPages: bump(base.topPages, path),
+      recentVisits: [
+        { id: `v_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, timestamp: nowIso, path, source, device, city, country },
+        ...recent.map(({ ip: _ip, ...rest }) => rest), // drop legacy IP fields
+      ].slice(0, 50),
+      lastUpdated: nowIso,
+      updatedAt: nowIso,
+    };
+
+    // Fallback (read-modify-write): a few counts can be lost under heavy concurrency.
+    // Apply the SQL migration to switch to the atomic function above.
+    const { error: writeError } = await sb.from('analytics').upsert(row, { onConflict: 'id' });
+    if (writeError) throw writeError;
+  } catch (err) {
+    console.warn('[analytics] track failed:', err.message);
+  }
+
+  return NextResponse.json({ ok: true });
 }

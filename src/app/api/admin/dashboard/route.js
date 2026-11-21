@@ -1,107 +1,78 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
-import { verifyAdminAuth } from '@/lib/auth';
-import { getAllProducts, getAllOrders, getAnalyticsSummary, getAllPromotions } from '@/lib/store';
+import { getSupabaseAdmin } from '@/lib/supabase';
+import { getAnalyticsSummary } from '@/lib/analytics';
+import { REVENUE_STATUSES } from '@/lib/constants';
+import { handleRouteError, jsonError, NO_STORE_HEADERS, requireAdmin } from '@/lib/http';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+// GET /api/admin/dashboard — overview numbers (Supabase only; no demo data).
 export async function GET(request) {
+  const { response } = requireAdmin(request);
+  if (response) return response;
+
   try {
-    const auth = verifyAdminAuth(request);
-    if (!auth) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    const sb = getSupabaseAdmin();
+    if (!sb) return jsonError('Database is not configured', 503);
+
+    const [pRes, oRes, prRes, analytics] = await Promise.all([
+      sb.from('products').select('id,category,productType,isActive'),
+      sb.from('orders').select('*').order('createdAt', { ascending: false }).limit(2000),
+      sb.from('promotions').select('*').order('displayOrder', { ascending: true }),
+      getAnalyticsSummary(),
+    ]);
+    const failed = [pRes, oRes, prRes].find((r) => r.error);
+    if (failed) {
+      console.error('[admin/dashboard] query failed:', failed.error.message);
+      return jsonError('Failed to load dashboard data', 503);
     }
 
-    let products = [];
-    let orders = [];
-    let promotions = [];
-    let analytics = null;
+    const products = pRes.data || [];
+    const orders = oRes.data || [];
+    const promotions = prRes.data || [];
 
-    if (isSupabaseConfigured()) {
-      try {
-        const sb = getSupabaseAdmin();
-        const [pRes, oRes, prRes, aRes] = await Promise.all([
-          sb.from('products').select('*').order('createdAt', { ascending: false }),
-          sb.from('orders').select('*').order('createdAt', { ascending: false }),
-          sb.from('promotions').select('*').order('displayOrder', { ascending: true }),
-          sb.from('analytics').select('*').eq('key', 'global_summary').single(),
-        ]);
+    const countBy = (status) => orders.filter((o) => (o.status || 'pending') === status).length;
+    const revenueOrders = orders.filter((o) => REVENUE_STATUSES.includes(o.status));
+    const totalRevenue = revenueOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+    const pipelineValue = orders
+      .filter((o) => (o.status || 'pending') === 'pending')
+      .reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
 
-        if (!pRes.error && pRes.data) products = pRes.data;
-        if (!oRes.error && oRes.data) orders = oRes.data;
-        if (!prRes.error && prRes.data) promotions = prRes.data;
-        if (!aRes.error && aRes.data) analytics = aRes.data;
-      } catch (e) {
-        console.warn('Supabase dashboard fetch note:', e.message);
-      }
-    }
-
-    // Fallbacks
-    if (!products.length) products = getAllProducts();
-    if (!promotions.length) promotions = getAllPromotions();
-
-    const storeOrders = getAllOrders();
-    const orderMap = new Map();
-    [...orders, ...storeOrders].forEach((o) => {
-      const key = o.orderNumber || o.id || o._id;
-      if (key && !orderMap.has(key)) orderMap.set(key, o);
-    });
-    orders = Array.from(orderMap.values()).sort(
-      (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-    );
-
-    if (!analytics) {
-      analytics = getAnalyticsSummary();
-    }
-
-    // Order statistics
-    const totalOrders = orders.length;
-    const pendingOrders = orders.filter((o) => o.status === 'pending' || !o.status).length;
-    const approvedOrders = orders.filter((o) => o.status === 'confirmed' || o.status === 'dispatched' || o.status === 'completed' || o.status === 'shipped').length;
-    const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.totalAmount || o.totalPrice) || 0), 0);
-
-    // Product statistics
     const matchesProducts = products.filter((p) => p.category === 'Safety Matches' || p.productType === 'safety-matches').length;
     const detergentProducts = products.filter((p) => p.category === 'Detergents' || p.category === 'Dish Wash').length;
 
-    // Promotion statistics
-    const totalPromotions = promotions.length;
-    const activePromotions = promotions.filter((p) => p.isActive !== false).length;
-    const freeShippingPromotions = promotions.filter((p) => p.shippingCost === 0).length;
-
-    const cities = analytics.cities || {};
-    const countries = analytics.countries || {};
-
-    return NextResponse.json({
-      productCount: products.length,
-      orderCount: totalOrders,
-      promotionsCount: totalPromotions,
-      overview: {
-        totalOrders,
-        pendingOrders,
-        approvedOrders,
-        totalRevenue,
-        totalProducts: products.length,
-        totalPromotions,
-        activePromotions,
-        freeShippingPromotions,
-        matchesProducts,
-        detergentProducts,
-        totalVisitors: analytics.totalVisitors || 0,
-        todayVisitors: analytics.todayVisitors || 0,
-        totalPageviews: analytics.totalPageviews || 0,
+    return NextResponse.json(
+      {
+        productCount: products.length,
+        orderCount: orders.length,
+        promotionsCount: promotions.length,
+        overview: {
+          totalOrders: orders.length,
+          pendingOrders: countBy('pending'),
+          approvedOrders: countBy('confirmed') + countBy('shipped'),
+          shippedOrders: countBy('shipped'),
+          cancelledOrders: countBy('cancelled'),
+          totalRevenue, // confirmed + shipped only (cancelled/pending excluded)
+          pipelineValue, // value of pending orders
+          totalProducts: products.length,
+          totalPromotions: promotions.length,
+          activePromotions: promotions.filter((p) => p.isActive !== false).length,
+          freeShippingPromotions: promotions.filter((p) => Number(p.shippingCost) === 0).length,
+          matchesProducts,
+          detergentProducts,
+          totalVisitors: analytics.totalVisitors || 0,
+          todayVisitors: analytics.todayVisitors || 0,
+          totalPageviews: analytics.totalPageviews || 0,
+        },
+        promotions: promotions.slice(0, 9),
+        analytics,
+        recentOrders: orders.slice(0, 10),
+        lastUpdated: new Date().toISOString(),
       },
-      promotions: promotions.slice(0, 9),
-      analytics: {
-        ...analytics,
-        cities,
-        countries,
-      },
-      recentOrders: orders.slice(0, 10),
-      lastUpdated: new Date().toISOString(),
-    });
+      { headers: NO_STORE_HEADERS }
+    );
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return handleRouteError(err, 'dashboard');
   }
 }

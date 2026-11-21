@@ -1,84 +1,53 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
-import { verifyAdminAuth } from '@/lib/auth';
+import { getSupabaseAdmin } from '@/lib/supabase';
+import { findOrder } from '@/lib/orders';
 import { sendStatusUpdateEmail } from '@/lib/email';
+import { ORDER_STATUSES } from '@/lib/constants';
+import { handleRouteError, jsonError, readJson, requireAdmin } from '@/lib/http';
 
-// PATCH /api/admin/orders/:id/status
+export const dynamic = 'force-dynamic';
+
+// PATCH /api/admin/orders/:id/status   body: { status }
 export async function PATCH(request, context) {
-  const admin = verifyAdminAuth(request);
-  if (!admin) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-  }
+  const { response } = requireAdmin(request);
+  if (response) return response;
 
-  let id;
-  let status;
+  const id = (await context.params)?.id;
+  if (!id) return jsonError('Order ID required', 400);
+
   try {
-    const { params } = context;
-    id = (await params)?.id;
-    if (!id) {
-      return NextResponse.json({ message: 'Order ID required' }, { status: 400 });
+    const { status } = await readJson(request);
+    if (!ORDER_STATUSES.includes(status)) {
+      return jsonError(`Invalid status. Allowed: ${ORDER_STATUSES.join(', ')}`, 400);
     }
 
-    const body = await request.json();
-    status = body?.status;
-    const allowed = ['pending', 'confirmed', 'shipped', 'cancelled'];
-    if (!allowed.includes(status)) {
-      return NextResponse.json({ message: 'Invalid status' }, { status: 400 });
+    const existing = await findOrder(id);
+    if (!existing) return jsonError('Order not found', 404);
+
+    // No-op: don't touch the row or email the customer again.
+    if (existing.status === status) return NextResponse.json(existing);
+
+    const sb = getSupabaseAdmin();
+    const { data: order, error } = await sb
+      .from('orders')
+      .update({ status, updatedAt: new Date().toISOString() })
+      .eq('id', existing.id)
+      .select()
+      .single();
+    if (error || !order) {
+      console.error('[admin/orders/status] update failed:', error?.message);
+      return jsonError('Failed to update order status', 503);
     }
 
-    let order = null;
-
-    // Try Supabase
-    if (isSupabaseConfigured()) {
-      try {
-        const sb = getSupabaseAdmin();
-        // Try by UUID
-        let res = await sb
-          .from('orders')
-          .update({ status, updatedAt: new Date().toISOString() })
-          .eq('id', id)
-          .select()
-          .single();
-        if (!res.data) {
-          // Try by orderNumber
-          res = await sb
-            .from('orders')
-            .update({ status, updatedAt: new Date().toISOString() })
-            .eq('orderNumber', id)
-            .select()
-            .single();
-        }
-        if (res.data) order = res.data;
-      } catch {}
-    }
-
-    // Also update local store
-    try {
-      const { updateOrderStatus } = await import('@/lib/store');
-      const storeOrder = updateOrderStatus(id, status);
-      if (!order) order = storeOrder;
-    } catch {}
-
-    if (!order) {
-      return NextResponse.json({ message: 'Order not found' }, { status: 404 });
-    }
-
-    // Fire-and-forget status update email
-    sendStatusUpdateEmail(order).catch((err) => {
-      console.error('[Email Error] Failed to send status update email:', err);
+    // Awaited so the email is not cut off when the serverless function freezes.
+    const emailed = await sendStatusUpdateEmail(order).catch((err) => {
+      console.error('[admin/orders/status] email failed:', err);
+      return false;
     });
 
-    return NextResponse.json(order);
+    return NextResponse.json({ ...order, customerNotified: Boolean(emailed) });
   } catch (err) {
-    console.warn('Order status update error:', err.message);
-    // Fallback to store
-    try {
-      const { updateOrderStatus } = await import('@/lib/store');
-      const updatedInStore = updateOrderStatus(id, status);
-      if (updatedInStore) return NextResponse.json(updatedInStore);
-    } catch {}
-
-    return NextResponse.json({ message: 'Failed to update order status' }, { status: 500 });
+    return handleRouteError(err, 'update order status');
   }
 }
 

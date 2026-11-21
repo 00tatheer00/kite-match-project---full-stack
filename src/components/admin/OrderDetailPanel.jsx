@@ -28,6 +28,8 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
   if (!order) return null;
 
   const isCart = order.type === "cart";
+  const orderKey = order.id || order._id || order.orderNumber;
+  const hasItems = Array.isArray(order.items) && order.items.length > 0;
 
   const subtotal =
     order.totalAmount != null && order.shippingCost != null
@@ -58,7 +60,7 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
               )}
             </div>
             <p className="text-white/80 text-xs mt-0.5 font-mono">
-              ID: {order._id}
+              ID: {orderKey}
             </p>
           </div>
           <button
@@ -100,8 +102,8 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
                 {statuses.map((s) => (
                   <button
                     key={s}
-                    disabled={updatingId === order._id || order.status === s}
-                    onClick={() => onStatusChange(order._id, s)}
+                    disabled={updatingId === orderKey || order.status === s}
+                    onClick={() => onStatusChange(orderKey, s)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer
                       ${order.status === s
                         ? "bg-[#00AEEF] text-white border-[#00AEEF] shadow-sm"
@@ -110,7 +112,7 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
                           : "bg-white text-[#444] border-[#E0E0E0] hover:border-[#00AEEF] hover:text-[#00AEEF]"
                       } disabled:opacity-50`}
                   >
-                    {updatingId === order._id && order.status !== s ? "..." : s}
+                    {updatingId === orderKey && order.status !== s ? "..." : s}
                   </button>
                 ))}
               </div>
@@ -124,7 +126,7 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
               Items Ordered
             </h3>
             <div className="space-y-4">
-              {isCart && order.items && order.items.length > 0 ? (
+              {hasItems ? (
                 order.items.map((item, idx) => (
                   <div key={idx} className={`flex gap-4 items-start rounded-xl p-3 border ${
                     isDark ? "bg-[#161D2E] border-[#1E293B]" : "bg-[#F9F9F9] border-[#E0E0E0]"
@@ -135,7 +137,7 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
                       {item.image ? (
                         <img
                           src={item.image?.src || item.image}
-                          alt={item.itemType === "promotion" ? item.promotionId : item.productId}
+                          alt={item.title || (item.itemType === "promotion" ? item.promotionId : item.productId)}
                           className="w-full h-full object-contain p-1"
                         />
                       ) : (
@@ -144,11 +146,13 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`font-semibold text-sm ${isDark ? "text-white" : "text-[#222222]"}`}>
-                        {item.itemType === "promotion"
-                          ? `Promotion: ${item.promotionId}`
-                          : item.brandName
-                            ? `${item.brandName}`
-                            : `Product: ${item.productId}`}
+                        {item.title
+                          ? (item.brandName && item.brandName !== item.title ? `${item.title} — ${item.brandName}` : item.title)
+                          : item.itemType === "promotion"
+                            ? `Promotion: ${item.promotionId}`
+                            : item.brandName
+                              ? `${item.brandName}`
+                              : `Product: ${item.productId}`}
                       </p>
                       {item.itemType !== "promotion" && item.selectedVariant && (
                         <p className="text-xs text-[#00AEEF] mt-0.5 font-medium">{item.selectedVariant}</p>
@@ -165,7 +169,7 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
                       </div>
                       {item.price > 0 && (
                         <p className={`text-xs mt-0.5 ${isDark ? "text-slate-500" : "text-[#888888]"}`}>
-                          Unit price: Rs. {item.price.toLocaleString()}
+                          Unit price: Rs. {Number(item.price).toLocaleString()}
                         </p>
                       )}
                     </div>
@@ -300,7 +304,7 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
                 isDark ? "bg-[#161D2E] border-[#1E293B]" : "bg-[#F9F9F9] border-[#E0E0E0]"
               }`}>
                 <span className={isDark ? "text-slate-400" : "text-[#666666]"}>MongoDB ID</span>
-                <span className={`font-mono text-xs break-all text-right ${isDark ? "text-slate-400" : "text-[#888888]"}`}>{order._id}</span>
+                <span className={`font-mono text-xs break-all text-right ${isDark ? "text-slate-400" : "text-[#888888]"}`}>{orderKey}</span>
               </div>
             </div>
           </div>

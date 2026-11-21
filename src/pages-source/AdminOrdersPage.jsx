@@ -4,7 +4,9 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
 import RequireAdminAuth from "../components/admin/RequireAdminAuth";
 import OrderDetailPanel from "../components/admin/OrderDetailPanel";
-import { adminGetOrders, adminGetOrder, adminUpdateOrderStatus, saveLocalOrders, getLocalOrders } from "../services/api";
+import { adminGetOrders, adminGetOrder, adminUpdateOrderStatus } from "../services/api";
+
+const orderKeyOf = (o) => o?.id || o?._id || o?.orderNumber;
 import { colors } from "../theme";
 import toast from "react-hot-toast";
 import { Search, SlidersHorizontal, RefreshCw, ShoppingCart, Clock } from "lucide-react";
@@ -62,8 +64,9 @@ const AdminOrdersPage = () => {
 
   // Real-time Pusher listener for new orders
   useEffect(() => {
-    const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY || process.env.VITE_PUSHER_KEY || 'd14edc647970149caa98';
-    const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || process.env.VITE_PUSHER_CLUSTER || 'ap2';
+    // Public (non-secret) Pusher key; the server secret is never sent to the browser.
+    const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY || 'd14edc647970149caa98';
+    const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'ap2';
 
     if (!pusherKey) return;
 
@@ -80,16 +83,8 @@ const AdminOrdersPage = () => {
           { duration: 6000 }
         );
 
-        setOrders((prev) => {
-          const key = newOrderData.orderNumber || newOrderData._id || newOrderData.id;
-          const exists = prev.some((o) => (o.orderNumber || o._id || o.id) === key);
-          if (exists) {
-            return prev.map((o) => ((o.orderNumber || o._id || o.id) === key ? { ...o, ...newOrderData } : o));
-          }
-          const updated = [newOrderData, ...prev];
-          saveLocalOrders(updated);
-          return updated;
-        });
+        // The Pusher payload only carries a summary; fetch full order details from the server.
+        load(true);
       });
     } catch (e) {
       console.warn("Pusher subscription error:", e);
@@ -116,7 +111,7 @@ const AdminOrdersPage = () => {
     setSelectedOrder(order);
     setPanelLoading(true);
     try {
-      const orderLookupId = order._id || order.id || order.orderNumber;
+      const orderLookupId = orderKeyOf(order);
       const full = await adminGetOrder(orderLookupId);
       if (full) setSelectedOrder(full);
     } catch {
@@ -133,8 +128,9 @@ const AdminOrdersPage = () => {
       const updated = await adminUpdateOrderStatus(orderId, status);
       toast.success(`Order status updated to ${status}`);
       // Update in list + panel
-      setOrders((prev) => prev.map((o) => (o._id === orderId ? { ...o, status } : o)));
-      if (selectedOrder?._id === orderId) setSelectedOrder({ ...selectedOrder, ...updated, status });
+      setOrders((prev) => prev.map((o) => (orderKeyOf(o) === orderId ? { ...o, ...updated, status } : o)));
+      if (orderKeyOf(selectedOrder) === orderId) setSelectedOrder({ ...selectedOrder, ...updated, status });
+      if (updated?.customerNotified === false && updated?.email) toast("Status saved, but the customer email could not be sent.", { icon: "⚠️" });
     } catch (err) {
       toast.error(err.message || "Failed to update status");
       setError(err.message || "Failed to update status");
@@ -161,7 +157,7 @@ const AdminOrdersPage = () => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
     const haystack = [
-      o._id,
+      o.id,
       o.orderNumber,          // KT-001 searchable
       o.type,
       o.productId,
@@ -318,7 +314,7 @@ const AdminOrdersPage = () => {
                   <tbody className={`divide-y ${isDark ? "divide-[#1E293B]" : "divide-slate-100"}`}>
                     {filteredOrders.map((o) => (
                       <tr
-                        key={o._id}
+                        key={orderKeyOf(o)}
                         onClick={() => handleRowClick(o)}
                         className={`cursor-pointer transition-colors ${
                           isDark
@@ -327,7 +323,7 @@ const AdminOrdersPage = () => {
                         }`}
                       >
                         <td className="py-3 px-4 font-mono font-semibold text-[#00AEEF]">
-                          {o.orderNumber || <span className={isDark ? "text-slate-500 text-xs" : "text-slate-400 text-xs"}>{o._id?.slice(-6)}</span>}
+                          {o.orderNumber || <span className={isDark ? "text-slate-500 text-xs" : "text-slate-400 text-xs"}>{String(orderKeyOf(o) || "").slice(-6)}</span>}
                         </td>
                         <td className={`py-3 px-4 text-xs whitespace-nowrap ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                           {formatDateTime(o.createdAt)}
@@ -372,7 +368,7 @@ const AdminOrdersPage = () => {
               <div className={`md:hidden divide-y ${isDark ? "divide-[#1E293B]" : "divide-slate-100"}`}>
                 {filteredOrders.map((o) => (
                   <div
-                    key={o._id}
+                    key={orderKeyOf(o)}
                     onClick={() => handleRowClick(o)}
                     className={`p-4 cursor-pointer transition-colors ${
                       isDark ? "hover:bg-[#161D2E]/70" : "hover:bg-sky-50/60"
@@ -381,7 +377,7 @@ const AdminOrdersPage = () => {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="font-mono font-bold text-[#00AEEF]">
-                          {o.orderNumber || `#${o._id?.slice(-6)}`}
+                          {o.orderNumber || `#${String(orderKeyOf(o) || "").slice(-6)}`}
                         </p>
                         <p className={`text-sm font-semibold mt-0.5 ${isDark ? "text-white" : "text-slate-900"}`}>{o.customerName}</p>
                         <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>{formatDateTime(o.createdAt)}</p>
