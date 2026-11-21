@@ -5,6 +5,7 @@ import AdminLayout from "../components/admin/AdminLayout";
 import RequireAdminAuth from "../components/admin/RequireAdminAuth";
 import OrderDetailPanel from "../components/admin/OrderDetailPanel";
 import { adminGetOrders, adminGetOrder, adminUpdateOrderStatus, adminDeleteOrder } from "../services/api";
+import { SkeletonTable } from "../components/admin/AdminSkeleton";
 
 const orderKeyOf = (o) => o?.id || o?._id || o?.orderNumber;
 import { colors } from "../theme";
@@ -306,9 +307,7 @@ Use this only for test or duplicate orders. For real orders, set the status to "
           {error && <p className="text-sm text-red-600">{error}</p>}
 
           {loading ? (
-            <div className={`text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-              Loading orders...
-            </div>
+            <SkeletonTable rows={6} label="Loading orders" />
           ) : (
             <div className={`border rounded-2xl overflow-hidden shadow-sm transition-colors ${
               isDark ? "bg-[#111726] border-[#1E293B]" : "bg-white border-slate-200"

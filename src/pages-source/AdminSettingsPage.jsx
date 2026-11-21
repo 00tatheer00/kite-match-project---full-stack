@@ -6,6 +6,8 @@ import RequireAdminAuth from "../components/admin/RequireAdminAuth";
 import { getSettings, adminUpdateSettings } from "../services/api";
 import { useAdminTheme } from "../context/AdminThemeContext";
 import { FaImage, FaTruck, FaVideo, FaUpload, FaCheck, FaInfoCircle, FaExternalLinkAlt } from "react-icons/fa";
+import { SkeletonForm } from "@/components/admin/AdminSkeleton";
+import { notify } from "@/components/admin/AdminToast";
 
 const ALL_PREMIUM_BUNDLES = [
   { id: "pkg-glow-family-pack", name: "Glow Family Pack", price: 2250, desc: "7 Items • Bottom Bundle #7" },
@@ -20,7 +22,14 @@ const AdminSettingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  useEffect(() => {
+    if (error) notify.error(error);
+  }, [error]);
   const [success, setSuccess] = useState("");
+  // Mirror the on-page messages as pop-up toasts so they are noticed.
+  useEffect(() => {
+    if (success) notify.success(success);
+  }, [success]);
 
   // Shipping form state
   const [defaultShippingCost, setDefaultShippingCost] = useState(200);
@@ -244,10 +253,7 @@ const AdminSettingsPage = () => {
           )}
 
           {loading ? (
-            <div className={`py-12 text-center text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-              <div className="inline-block w-6 h-6 border-2 border-[#00AEEF] border-t-transparent rounded-full animate-spin mb-2" />
-              <p>Loading store settings...</p>
-            </div>
+            <SkeletonForm fields={6} />
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* ============================================================ */}

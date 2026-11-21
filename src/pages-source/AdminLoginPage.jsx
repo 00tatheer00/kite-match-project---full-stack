@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from '@/components/RouterCompat';
 import { adminLogin } from "../services/api";
 import { colors } from "../theme";
+import toast from "react-hot-toast";
 
 const AdminLoginPage = () => {
   const [email, setEmail] = useState("");
@@ -20,9 +21,11 @@ const AdminLoginPage = () => {
     setError("");
     try {
       await adminLogin(email.trim(), password);
+      toast.success("Logged in. Opening the admin panel…", { id: "admin-login" });
       navigate("/admin/products");
     } catch (err) {
       setError(err.message || "Failed to login");
+      toast.error(err.message || "Login failed. Check the email and password.", { id: "admin-login" });
     } finally {
       setLoading(false);
     }

@@ -3,11 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import NextLink from 'next/link';
 import { useRouter, usePathname, useParams as useNextParams } from 'next/navigation';
+import { startNavigationProgress } from '@/components/NavigationProgress';
 
+// Next.js default prefetching (visible links are fetched in the background) so page changes
+// feel instant; pass prefetch={false} to opt a link out.
 export function Link({ to, href, children, prefetch, ...props }) {
   const target = href || to || '#';
   return (
-    <NextLink href={target} prefetch={prefetch !== undefined ? prefetch : false} {...props}>
+    <NextLink href={target} prefetch={prefetch} {...props}>
       {children}
     </NextLink>
   );
@@ -39,6 +42,7 @@ export function useNavigate() {
       }
     }
 
+    startNavigationProgress();
     if (options?.replace) {
       router.replace(to);
     } else {

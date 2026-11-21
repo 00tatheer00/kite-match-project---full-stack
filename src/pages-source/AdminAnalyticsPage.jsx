@@ -23,6 +23,7 @@ import {
   FaSyncAlt, 
   FaCheckCircle 
 } from "react-icons/fa";
+import { SkeletonDashboard } from "../components/admin/AdminSkeleton";
 
 const ACTIVE_WINDOW_MS = 5 * 60 * 1000;
 
@@ -163,6 +164,16 @@ const AdminAnalyticsPage = () => {
   };
 
   const getRelativeTime = (isoString) => formatRelativeTime(isoString, nowTs);
+
+  if (loading && !analytics) {
+    return (
+      <AdminLayout>
+        <div className="max-w-7xl mx-auto">
+          <SkeletonDashboard />
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>

@@ -9,6 +9,7 @@ import { useCart } from "../context/CartContext";
 import { colors } from "../theme";
 import { FaTrash } from "react-icons/fa";
 import OrderConfirmModal from "../components/checkout/OrderConfirmModal";
+import toast from "react-hot-toast";
 
 const PHONE_REGEX = /^(?:\+92|92|0)3\d{9}$/;
 
@@ -29,6 +30,11 @@ const CheckoutPage = () => {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  // Every checkout problem also pops up as a toast, so it is seen even when the
+  // message box is scrolled out of view (common on phones).
+  useEffect(() => {
+    if (error) toast.error(error, { id: "checkout-error" });
+  }, [error]);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [settings, setSettings] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -325,6 +331,7 @@ const CheckoutPage = () => {
       }
 
       setShowConfirmModal(false);
+      toast.success(`Order placed successfully${orderResult.orderNumber ? ` (${orderResult.orderNumber})` : ""}! We will call you to confirm.`, { id: "order-placed", duration: 6000 });
       const orderId = orderResult.id || 'confirmed';
       navigate(`/order-success/${orderId}`, {
         state: { orderDetails: orderResult }

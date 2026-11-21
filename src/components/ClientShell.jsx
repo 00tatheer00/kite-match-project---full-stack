@@ -11,6 +11,15 @@ import FloatingCartButton from '@/components/FloatingCartButton';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ScrollToTop from '@/components/ScrollToTop';
 import VisitorTracker from '@/components/VisitorTracker';
+import NavigationProgress from '@/components/NavigationProgress';
+
+// Same look for every toast on the site and in the admin panel.
+const TOAST_OPTIONS = {
+  duration: 3500,
+  style: { fontWeight: 600, fontSize: '14px', borderRadius: '12px', padding: '12px 16px', maxWidth: '420px' },
+  success: { iconTheme: { primary: '#10B981', secondary: '#fff' } },
+  error: { duration: 6000 },
+};
 
 export default function ClientShell({ children }) {
   const pathname = usePathname() || '/';
@@ -28,8 +37,9 @@ export default function ClientShell({ children }) {
       <CartProvider>
         <Suspense fallback={null}>
           <VisitorTracker />
+          <NavigationProgress />
         </Suspense>
-        <Toaster position="top-right" />
+        <Toaster position="top-right" toastOptions={TOAST_OPTIONS} />
         <div className="min-h-screen w-full flex flex-col">
           {children}
         </div>
@@ -41,9 +51,10 @@ export default function ClientShell({ children }) {
     <CartProvider>
       <Suspense fallback={null}>
         <VisitorTracker />
+        <NavigationProgress />
       </Suspense>
       <ScrollToTop />
-      <Toaster position="top-right" />
+      <Toaster position="top-center" toastOptions={TOAST_OPTIONS} />
       <div className="min-h-screen bg-white flex flex-col">
         <Navbar />
         <div className="flex-1 app-page-compact">

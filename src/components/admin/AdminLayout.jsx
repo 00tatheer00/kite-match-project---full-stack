@@ -11,6 +11,7 @@ import { Menu, X } from "lucide-react";
 import { adminLogout } from "@/services/api";
 import { AdminToaster } from "./AdminToast";
 import DeveloperCredit from "../DeveloperCredit";
+import toast from "react-hot-toast";
 
 const AdminLayoutContent = ({ children, darkOverride }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -32,6 +33,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
 
   const handleLogout = async () => {
     await adminLogout();
+    toast.success("You have been logged out.", { id: "admin-logout" });
     navigate("/admin/login");
   };
 

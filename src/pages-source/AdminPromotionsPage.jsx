@@ -29,6 +29,7 @@ import {
 } from "@/utils/csvHelper";
 import { colors } from "../theme";
 import { notify } from "@/components/admin/AdminToast";
+import { SkeletonTable } from "@/components/admin/AdminSkeleton";
 
 const emptyForm = {
   id: "",
@@ -519,9 +520,7 @@ This cannot be undone.`)) return;
           </div>
 
           {loading ? (
-            <div className={`text-sm ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-              Loading promotions...
-            </div>
+            <SkeletonTable rows={5} label="Loading packages" />
           ) : (
             <div className={`border rounded-2xl p-5 md:p-6 transition-colors shadow-sm ${
               isDark ? "bg-[#111726] border-[#1E293B]" : "bg-white border-slate-200"

@@ -25,6 +25,7 @@ import {
   FaChartBar,
   FaTag
 } from "react-icons/fa";
+import { SkeletonDashboard } from "../components/admin/AdminSkeleton";
 
 function DashboardContent() {
   const { isDark } = useAdminTheme();
@@ -136,6 +137,9 @@ function DashboardContent() {
   const formatNumber = (num) => new Intl.NumberFormat().format(num || 0);
 
   const getRelativeTime = (isoString) => formatRelativeTime(isoString, nowTs);
+
+  // First load: show the page layout in grey instead of misleading zeros.
+  if (loading && !data) return <SkeletonDashboard />;
 
   return (
     <div className="space-y-5 sm:space-y-6 font-sans selection:bg-[#8B5CF6] selection:text-white">

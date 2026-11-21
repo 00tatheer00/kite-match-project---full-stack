@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminCheckSession } from '@/services/api';
+import { SkeletonAdminScreen } from './AdminSkeleton';
 
 /**
  * Client-side guard for admin pages. The real protection is server-side:
@@ -25,11 +26,7 @@ const RequireAdminAuth = ({ children }) => {
   }, [router]);
 
   if (status !== 'ok') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-slate-500 text-sm">
-        Verifying admin session...
-      </div>
-    );
+    return <SkeletonAdminScreen />;
   }
 
   return children;

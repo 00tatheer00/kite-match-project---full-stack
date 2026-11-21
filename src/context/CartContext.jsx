@@ -1,4 +1,5 @@
 'use client';
+import toast from 'react-hot-toast';
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { getProducts, getPromotions } from '@/services/api';
@@ -130,6 +131,8 @@ export const CartProvider = ({ children }) => {
       ];
     });
     openCart();
+    const label = brandName && brandName !== product.title ? brandName : product.title;
+    toast.success(`Added to cart: ${label} (${variant.name}) × ${clampQty(quantity)}`, { id: 'cart-add' });
 
     setTimeout(() => {
       addingRef.current = false;
@@ -166,17 +169,26 @@ export const CartProvider = ({ children }) => {
       ];
     });
     openCart();
+    toast.success(`Added to cart: ${promotion.title}`, { id: 'cart-add' });
 
     setTimeout(() => {
       addingRef.current = false;
     }, 300);
   };
 
+  const itemLabel = (item) => item?.promotionTitle || (item?.selectedVariant ? `${item.brandName || item.productTitle} (${item.selectedVariant})` : item?.productTitle) || 'Item';
+
   const removeFromCart = (index) => {
+    const item = cartItems[index];
     setCartItems(prev => prev.filter((_, i) => i !== index));
+    if (item) toast(`Removed from cart: ${itemLabel(item)}`, { id: 'cart-remove', icon: '🗑️' });
   };
 
   const updateQuantity = (index, delta) => {
+    const current = cartItems[index];
+    if (current && current.quantity + delta <= 0) {
+      toast(`Removed from cart: ${itemLabel(current)}`, { id: 'cart-remove', icon: '🗑️' });
+    }
     setCartItems(prev => {
       const next = [...prev];
       if (!next[index]) return prev;
