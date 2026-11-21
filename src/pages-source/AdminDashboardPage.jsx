@@ -144,9 +144,11 @@ function DashboardContent() {
   const todayLabel = new Date(nowTs).toLocaleDateString("en-PK", { weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Karachi" });
   const lastUpdatedLabel = data?.lastUpdated ? getRelativeTime(data.lastUpdated) : "just now";
   const todayKey = new Date(nowTs).toLocaleDateString("en-CA", { timeZone: "Asia/Karachi" });
-  const ordersToday = recentOrders.filter(
-    (o) => o.createdAt && new Date(o.createdAt).toLocaleDateString("en-CA", { timeZone: "Asia/Karachi" }) === todayKey
-  ).length;
+  const ordersToday =
+    overview.ordersToday ??
+    recentOrders.filter(
+      (o) => o.createdAt && new Date(o.createdAt).toLocaleDateString("en-CA", { timeZone: "Asia/Karachi" }) === todayKey
+    ).length;
   const kpis = [
     {
       label: "Sales (confirmed)",

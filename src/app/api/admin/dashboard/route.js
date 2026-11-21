@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
-import { getAnalyticsSummary } from '@/lib/analytics';
+import { getAnalyticsSummary, karachiDay } from '@/lib/analytics';
 import { REVENUE_STATUSES } from '@/lib/constants';
 import { handleRouteError, jsonError, NO_STORE_HEADERS, requireAdmin } from '@/lib/http';
 
@@ -50,6 +50,7 @@ export async function GET(request) {
         overview: {
           totalOrders: orders.length,
           pendingOrders: countBy('pending'),
+          ordersToday: orders.filter((o) => karachiDay(o.createdAt) === karachiDay(new Date())).length,
           approvedOrders: countBy('confirmed') + countBy('shipped'),
           shippedOrders: countBy('shipped'),
           cancelledOrders: countBy('cancelled'),

@@ -59,7 +59,7 @@ export default function NavigationProgress() {
     // Only show the "Loading…" pill when the wait is noticeable.
     const pill = setTimeout(() => setShowPill(true), 450);
     // Safety: never leave the bar stuck (e.g. navigation cancelled).
-    const safety = setTimeout(() => done(), 15000);
+    const safety = setTimeout(() => done(), 8000);
     timers.current.push(trickle, pill, safety);
   };
 
