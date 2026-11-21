@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import { FaTiktok } from "react-icons/fa6";
 import { Link } from '@/components/RouterCompat';
+import DeveloperCredit from './DeveloperCredit';
 import AJMatch from "../assets/divisions/ajmatch.png";
 import MohsinEnterprises from "../assets/divisions/MohsinEnterprises.png";
 import MohsinMatch from "../assets/divisions/MohsinMatch.png";
@@ -321,20 +322,7 @@ const Footer = () => {
               © {new Date().getFullYear()} Kite Brand - Aziz Group of
               Industries. All Rights Reserved.
             </p>
-            {/* <div className="flex space-x-6">
-              <Link
-                to="/privacy"
-                className="text-white/60 hover:text-[#00AEEF] text-sm transition-colors"
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                to="/terms"
-                className="text-white/60 hover:text-[#00AEEF] text-sm transition-colors"
-              >
-                Terms of Service
-              </Link>
-            </div> */}
+            <DeveloperCredit className="text-white/35" />
           </div>
         </div>
       </div>

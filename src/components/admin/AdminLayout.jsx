@@ -10,6 +10,7 @@ import { AdminThemeContext, AdminThemeProvider, useAdminTheme } from "@/context/
 import { Menu, X } from "lucide-react";
 import { adminLogout } from "@/services/api";
 import { AdminToaster } from "./AdminToast";
+import DeveloperCredit from "../DeveloperCredit";
 
 const AdminLayoutContent = ({ children, darkOverride }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -161,6 +162,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
                 <span>Logout Admin</span>
                 <span>&rarr;</span>
               </button>
+              <DeveloperCredit className="px-1 text-slate-400" />
             </div>
           </div>
         </div>
@@ -269,6 +271,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
             <span>Logout Admin</span>
             <span className="text-xs opacity-60">&rarr;</span>
           </button>
+          <DeveloperCredit className="px-1 pt-1 text-slate-400" />
         </div>
       </aside>
 
