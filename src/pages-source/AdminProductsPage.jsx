@@ -868,10 +868,10 @@ This cannot be undone.`)) return;
                 onClick={openQuickAdd}
                 disabled={saving || products.length === 0}
                 className="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-md flex items-center gap-1.5 cursor-pointer transition-all disabled:opacity-50"
-                title="Add a new size and price to an existing product"
+                title="Add a new size (e.g. 5 KG) with its price to a product that already exists"
               >
                 <FaTag className="text-xs" />
-                <span>+ Add Size / Price</span>
+                <span>Add Size to a Product</span>
               </button>
 
               <button
@@ -888,7 +888,7 @@ This cannot be undone.`)) return;
                 className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white shadow-md shadow-sky-500/20 flex items-center gap-1.5 cursor-pointer transition-all"
               >
                 <FaPlus className="text-xs" />
-                <span>+ Add New Product</span>
+                <span>Add New Product</span>
               </button>
             </div>
           </div>
