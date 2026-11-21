@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 // POST /api/orders/quote — returns the authoritative price breakdown for a cart/product/package
 // so checkout always shows exactly what the customer will be charged.
 export async function POST(request) {
-  const limit = rateLimit(`quote:${getClientIp(request)}`, { limit: 60, windowMs: 60 * 1000 });
+  const limit = rateLimit(`quote:${getClientIp(request)}`, { limit: 300, windowMs: 60 * 1000 });
   if (!limit.ok) return NextResponse.json({ message: 'Too many requests' }, { status: 429 });
 
   try {

@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { getProducts } from "../services/api";
 
 const placeholderImage =
-  "https://via.placeholder.com/400x500/E0E0E0/666666?text=Product";
+  "/logo.png";
 
 const getOrderValue = (product) => {
   if (typeof product?.carouselOrder === "number") return product.carouselOrder;
@@ -41,7 +41,7 @@ const ProductsSection = ({ initialProducts = [] }) => {
   useEffect(() => {
     const load = async () => {
       try {
-        setLoading(true);
+        if (!initialProducts?.length) setLoading(true);
         const data = await getProducts();
         const visible = data
           .filter((p) => p.showInProductsPage !== false)
@@ -55,7 +55,7 @@ const ProductsSection = ({ initialProducts = [] }) => {
           .slice(0, 5);
         setAllProducts(visible);
       } catch {
-        setAllProducts([]);
+        // Keep server-rendered products if the background refresh fails.
       } finally {
         setLoading(false);
       }

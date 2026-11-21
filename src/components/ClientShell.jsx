@@ -12,12 +12,6 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import ScrollToTop from '@/components/ScrollToTop';
 import VisitorTracker from '@/components/VisitorTracker';
 
-const RouteLoadingFallback = () => (
-  <div className="py-16 px-4 text-center text-sm text-slate-500">
-    Loading page...
-  </div>
-);
-
 export default function ClientShell({ children }) {
   const pathname = usePathname() || '/';
   const isAdminRoute = pathname.startsWith('/admin');
@@ -37,9 +31,7 @@ export default function ClientShell({ children }) {
         </Suspense>
         <Toaster position="top-right" />
         <div className="min-h-screen w-full flex flex-col">
-          <Suspense fallback={<RouteLoadingFallback />}>
-            {children}
-          </Suspense>
+          {children}
         </div>
       </CartProvider>
     );
@@ -56,9 +48,7 @@ export default function ClientShell({ children }) {
         <Navbar />
         <div className="flex-1 app-page-compact">
           <main id="main-content">
-            <Suspense fallback={<RouteLoadingFallback />}>
-              {children}
-            </Suspense>
+            {children}
           </main>
           <Footer />
         </div>

@@ -14,6 +14,14 @@ const Navbar = () => {
   const [expandedMobileCategories, setExpandedMobileCategories] = useState({});
   const [navProducts, setNavProducts] = useState([]);
   const location = useLocation();
+
+  // Close the mobile menu / dropdowns whenever the route changes (any link, back/forward).
+  const [lastPath, setLastPath] = useState(location.pathname);
+  if (lastPath !== location.pathname) {
+    setLastPath(location.pathname);
+    setIsMobileMenuOpen(false);
+    setOpenDropdown(null);
+  }
   const { cartItems, openCart } = useCart();
   const cartCount = cartItems?.reduce((total, item) => total + (item.quantity || 1), 0) || 0;
 

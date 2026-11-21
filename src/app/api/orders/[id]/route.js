@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 // Only accepts the unguessable order UUID (not the sequential KT-xxx number)
 // and returns a reduced field set without email/address/full phone.
 export async function GET(request, context) {
-  const limit = rateLimit(`order-lookup:${getClientIp(request)}`, { limit: 30, windowMs: 60 * 1000 });
+  const limit = rateLimit(`order-lookup:${getClientIp(request)}`, { limit: 60, windowMs: 60 * 1000 });
   if (!limit.ok) return jsonError('Too many requests', 429);
 
   const id = (await context.params)?.id;

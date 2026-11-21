@@ -14,82 +14,92 @@ import shipment from "../assets/heroCarousel/1920x640shipment.jpg";
 import world_map_export_destinations from "../assets/Kite-Export-Map1920x640.jpeg";
 import world_map_export_destinations_mobile from "../assets/kite-Map-640x640.jpeg";
 
+import simba from "../assets/export/simba.png";
+import football from "../assets/export/football.png";
+import alMoallam from "../assets/export/al_moallam.png";
+import redMac from "../assets/export/red_mac.png";
+import woodFlower from "../assets/export/wood_flower.png";
+import alKarama from "../assets/export/al_karama.png";
+import theGosse from "../assets/export/the_gosse.png";
+import ziynat from "../assets/export/ziynat.png";
+import alFelaij from "../assets/export/al_felaij.png";
+import magiaBunicii from "../assets/export/magia_bunicii.png";
+import zebra from "../assets/export/zebra.png";
+import zippy from "../assets/export/zippy.png";
+
 const ExportSection = () => {
   const safetyMatches = [
     {
       brand: "Simba",
       country: "Congo",
       flag: "🇨🇬",
-      image: "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=Simba",
+      image: simba,
     },
     {
       brand: "Wood Flower",
       country: "Romania",
       flag: "🇷🇴",
-      image:
-        "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=Wood+Flower",
+      image: woodFlower,
     },
     {
       brand: "Al Felaij",
       country: "UAE",
       flag: "🇦🇪",
-      image: "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=Al+Felaij",
+      image: alFelaij,
     },
     {
       brand: "The Gosse",
       country: "Nigeria",
       flag: "🇳🇬",
-      image: "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=The+Gosse",
+      image: theGosse,
     },
     {
       brand: "Football",
       country: "Saudi Arabia",
       flag: "🇸🇦",
-      image: "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=Football",
+      image: football,
     },
     {
       brand: "Magia bunicii",
       country: "Romania",
       flag: "🇷🇴",
-      image:
-        "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=Magia+bunicii",
+      image: magiaBunicii,
     },
     {
       brand: "Zebra",
       country: "Lebanon",
       flag: "🇱🇧",
-      image: "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=Zebra",
+      image: zebra,
     },
     {
       brand: "Zippy",
       country: "South Africa",
       flag: "🇿🇦",
-      image: "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=Zippy",
+      image: zippy,
     },
     {
       brand: "Al Karama",
       country: "Sudan",
       flag: "🇸🇩",
-      image: "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=Al+Karama",
+      image: alKarama,
     },
     {
       brand: "Al Moallam",
       country: "Sudan",
       flag: "🇸🇩",
-      image:
-        "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=Al+Moallam",
+      image: alMoallam,
     },
     {
       brand: "Ziynat",
       country: "Uzbekistan",
       flag: "🇺🇿",
-      image: "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=Ziynat",
+      image: ziynat,
     },
     {
       brand: "ReD Mac",
       country: "Ukraine",
       flag: "🇺🇦",
-      image: "https://via.placeholder.com/300x400/ED028C/FFFFFF?text=ReD+Mac",
+      image: redMac,
     },
   ];
 

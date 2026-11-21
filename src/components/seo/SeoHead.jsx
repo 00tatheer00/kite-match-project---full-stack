@@ -1,35 +1,28 @@
 'use client';
 
 import { useEffect } from 'react';
-import {
-  DEFAULT_DESCRIPTION,
-  DEFAULT_OG_IMAGE,
-  SITE_NAME,
-  toAbsoluteUrl,
-} from "../../utils/seo";
 
-const SeoHead = ({
-  title,
-  description = DEFAULT_DESCRIPTION,
-  path = "/",
-  image = DEFAULT_OG_IMAGE,
-  type = "website",
-  noindex = false,
-}) => {
-  const canonicalUrl = toAbsoluteUrl(path);
-  const socialImage = toAbsoluteUrl(image);
-  const pageTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
-
+/**
+ * Legacy per-page SEO helper.
+ *
+ * Titles, descriptions, canonical URLs and OpenGraph tags are now rendered on the
+ * server through each route's `metadata` export, so this component no longer
+ * overwrites them from the browser (that used to replace good server titles with
+ * generic ones like "Product Details" after hydration).
+ *
+ * It only adds a robots `noindex` tag for client-side states that must not be
+ * indexed (e.g. "Product Not Found", checkout).
+ */
+const SeoHead = ({ noindex = false }) => {
   useEffect(() => {
-    document.title = pageTitle;
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (!metaDesc) {
-      metaDesc = document.createElement('meta');
-      metaDesc.name = 'description';
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.content = description;
-  }, [pageTitle, description]);
+    if (!noindex) return undefined;
+    const meta = document.createElement('meta');
+    meta.name = 'robots';
+    meta.content = 'noindex, nofollow';
+    meta.setAttribute('data-seohead', 'true');
+    document.head.appendChild(meta);
+    return () => meta.remove();
+  }, [noindex]);
 
   return null;
 };

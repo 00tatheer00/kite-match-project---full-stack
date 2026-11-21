@@ -1,12 +1,39 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { getProducts, getPromotions } from '@/services/api';
 
 const CartContext = createContext();
 
 // Must match MAX_ITEM_QUANTITY on the server (lib/constants.js).
 const MAX_QTY = 1000;
 const clampQty = (n) => Math.max(1, Math.min(MAX_QTY, Math.floor(Number(n) || 1)));
+
+const norm = (v) => String(v ?? '').trim().toLowerCase();
+
+/**
+ * Re-price a saved cart line against the live catalog (same rules as the server's pricing).
+ * Returns the updated line; `unavailable: true` when the item can no longer be ordered.
+ */
+function repriceLine(item, products, promotions) {
+  if (item.itemType === 'promotion') {
+    const promo = promotions.find((p) => p.id === item.promotionId);
+    const price = Number(promo?.totalPrice) || 0;
+    if (!promo || price <= 0) return { ...item, unavailable: true };
+    return { ...item, unavailable: false, price, promotionTitle: promo.title, image: promo.image || item.image };
+  }
+  const product = products.find((p) => p.id === item.productId);
+  if (!product) return { ...item, unavailable: true };
+  const brand = item.brandName ? (product.brands || []).find((b) => norm(b.name) === norm(item.brandName)) : null;
+  const wanted = norm(item.selectedVariant);
+  const match =
+    (brand && (brand.variants || []).find((v) => norm(v.name) === wanted)) ||
+    (product.variants || []).find((v) => norm(v.name) === wanted) ||
+    (product.skus || []).find((v) => norm(v.size) === wanted);
+  const price = Number(match?.price) || 0;
+  if (price <= 0) return { ...item, unavailable: true };
+  return { ...item, unavailable: false, price, productTitle: product.title };
+}
 
 export const useCart = () => {
   return useContext(CartContext);
@@ -16,6 +43,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const repricedRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -37,9 +65,32 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('kite_cart', JSON.stringify(cartItems));
+      try {
+        localStorage.setItem('kite_cart', JSON.stringify(cartItems));
+      } catch {
+        // storage full / private mode
+      }
     }
   }, [cartItems, isLoaded]);
+
+  // Prices saved in localStorage can be days old: refresh them once from the live catalog.
+  useEffect(() => {
+    if (!isLoaded || repricedRef.current || cartItems.length === 0) return;
+    repricedRef.current = true;
+    Promise.all([getProducts(), getPromotions()])
+      .then(([products, promotions]) => {
+        setCartItems((prev) => {
+          const next = prev.map((item) => repriceLine(item, products, promotions));
+          const changed = next.some(
+            (item, i) => item.price !== prev[i].price || Boolean(item.unavailable) !== Boolean(prev[i].unavailable)
+          );
+          return changed ? next : prev;
+        });
+      })
+      .catch(() => {
+        // Offline: keep saved prices; checkout still shows the authoritative server total.
+      });
+  }, [isLoaded, cartItems.length]);
 
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
@@ -142,7 +193,10 @@ export const CartProvider = ({ children }) => {
     setCartItems([]);
   };
 
-  const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const cartTotal = cartItems
+    .filter((item) => !item.unavailable)
+    .reduce((total, item) => total + (Number(item.price) || 0) * item.quantity, 0);
+  const hasUnavailableItems = cartItems.some((item) => item.unavailable);
 
   return (
     <CartContext.Provider value={{
@@ -153,6 +207,8 @@ export const CartProvider = ({ children }) => {
       updateQuantity,
       clearCart,
       cartTotal,
+      hasUnavailableItems,
+      isLoaded,
       isCartOpen,
       openCart,
       closeCart

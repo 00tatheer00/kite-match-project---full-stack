@@ -13,7 +13,11 @@ export function Link({ to, href, children, prefetch, ...props }) {
   );
 }
 
-let inMemoryNavigationState = null;
+// Navigation state (react-router style) is scoped to the destination path, so state meant
+// for one page (e.g. order details for /order-success/x) never leaks into another page.
+let inMemoryNavigationState = null; // { path, state }
+const STATE_KEY = '__router_compat_state';
+const pathOf = (to) => String(to || '').split('?')[0].split('#')[0];
 
 export function useNavigate() {
   const router = useRouter();
@@ -24,14 +28,14 @@ export function useNavigate() {
       return;
     }
 
-    if (options?.state) {
-      inMemoryNavigationState = options.state;
-      if (typeof window !== 'undefined') {
-        try {
-          sessionStorage.setItem('__router_compat_state', JSON.stringify(options.state));
-        } catch {
-          // ignore storage quota issues
-        }
+    const entry = options?.state ? { path: pathOf(to), state: options.state } : null;
+    inMemoryNavigationState = entry;
+    if (typeof window !== 'undefined') {
+      try {
+        if (entry) sessionStorage.setItem(STATE_KEY, JSON.stringify(entry));
+        else sessionStorage.removeItem(STATE_KEY);
+      } catch {
+        // ignore storage quota issues
       }
     }
 
@@ -47,24 +51,24 @@ export function useLocation() {
   const pathname = usePathname() || '/';
   const [search, setSearch] = useState('');
   const [hash, setHash] = useState('');
-  const [state, setState] = useState(() => inMemoryNavigationState);
+  const [state, setState] = useState(() =>
+    inMemoryNavigationState?.path === pathname ? inMemoryNavigationState.state : null
+  );
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setSearch(window.location.search);
       setHash(window.location.hash);
-      if (inMemoryNavigationState != null) {
-        setState(inMemoryNavigationState);
-      } else {
+      let entry = inMemoryNavigationState;
+      if (!entry) {
         try {
-          const stored = sessionStorage.getItem('__router_compat_state');
-          if (stored) {
-            setState(JSON.parse(stored));
-          }
+          const stored = sessionStorage.getItem(STATE_KEY);
+          entry = stored ? JSON.parse(stored) : null;
         } catch {
-          // ignore
+          entry = null;
         }
       }
+      setState(entry && entry.path === pathname ? entry.state : null);
     }
   }, [pathname]);
 

@@ -39,7 +39,7 @@ function bump(obj, key) {
 
 // POST /api/analytics/track — anonymous page-view counter (no IP addresses are stored).
 export async function POST(req) {
-  const limit = rateLimit(`track:${getClientIp(req)}`, { limit: 60, windowMs: 60 * 1000 });
+  const limit = rateLimit(`track:${getClientIp(req)}`, { limit: 300, windowMs: 60 * 1000 });
   if (!limit.ok) return NextResponse.json({ ok: false }, { status: 429 });
 
   let payload = {};

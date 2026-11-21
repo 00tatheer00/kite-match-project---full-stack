@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from '@/components/RouterCompat';
+import { useSearchParams } from 'next/navigation';
 import { createOrder, getSettings, quoteOrder } from "../services/api";
 import SeoHead from "../components/seo/SeoHead";
 import { useCart } from "../context/CartContext";
@@ -18,10 +19,11 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { cartItems, cartTotal, clearCart, updateQuantity, removeFromCart } = useCart();
-  
-  const searchParams = new URLSearchParams(location.search);
-  const isCartCheckout = searchParams.get('type') === 'cart';
+  const { cartItems, cartTotal, clearCart, updateQuantity, removeFromCart, isLoaded: cartLoaded } = useCart();
+
+  // useSearchParams is correct on the first render (location.search from the shim is empty until an effect runs).
+  const searchParams = useSearchParams();
+  const isCartCheckout = searchParams?.get('type') === 'cart';
 
   const orderContext = location.state?.orderContext;
 
@@ -185,6 +187,15 @@ const CheckoutPage = () => {
     : isCartCheckout
       ? checkoutData?.total || 0
       : (Number(checkoutData?.unitPrice) || 0) * (Number(form.quantity) || 1);
+
+  if (!checkoutData && isCartCheckout && !cartLoaded) {
+    // Cart is still being restored from localStorage — avoid flashing "Checkout Not Ready".
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center text-sm text-gray-500" aria-busy="true">
+        Loading your cart...
+      </div>
+    );
+  }
 
   if (!checkoutData) {
     return (
@@ -472,7 +483,7 @@ const CheckoutPage = () => {
                   className="mt-1 w-4 h-4 text-[#00AEEF] border-gray-300 rounded focus:ring-[#00AEEF]"
                 />
                 <span className="text-sm text-gray-600">
-                  I have read and agree to the website's <Link to="/about" className="text-[#00AEEF] hover:underline" target="_blank">Terms & Conditions</Link> and <Link to="/about" className="text-[#00AEEF] hover:underline" target="_blank">Privacy Policy</Link>.
+                  I have read and agree to the website's <Link to="/terms" className="text-[#00AEEF] hover:underline" target="_blank" rel="noopener">Terms &amp; Conditions</Link> and <Link to="/privacy" className="text-[#00AEEF] hover:underline" target="_blank" rel="noopener">Privacy Policy</Link>.
                 </span>
               </label>
             </div>
@@ -633,7 +644,18 @@ const CheckoutPage = () => {
       {showConfirmModal && (
         <OrderConfirmModal
           items={
-            isCartCheckout
+            quote
+              ? quote.items.map((line) => ({
+                  image: line.image,
+                  itemType: line.itemType,
+                  productTitle: line.title,
+                  promotionTitle: line.title,
+                  brandName: line.brandName && line.brandName !== line.title ? line.brandName : null,
+                  selectedVariant: line.selectedVariant,
+                  quantity: line.quantity,
+                  price: line.price,
+                }))
+              : isCartCheckout
               ? checkoutData.items
               : [{
                   image: null,

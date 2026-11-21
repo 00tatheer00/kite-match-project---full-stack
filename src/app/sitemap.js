@@ -25,6 +25,8 @@ export default async function sitemap() {
     { url: `${baseUrl}/products/olympia`, priority: 0.85, changeFrequency: "weekly" },
     { url: `${baseUrl}/products/party`, priority: 0.85, changeFrequency: "weekly" },
     { url: `${baseUrl}/products/bird`, priority: 0.85, changeFrequency: "weekly" },
+    { url: `${baseUrl}/terms`, priority: 0.3, changeFrequency: "yearly" },
+    { url: `${baseUrl}/privacy`, priority: 0.3, changeFrequency: "yearly" },
   ];
 
   let dynamicRoutes = [];

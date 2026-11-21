@@ -1,5 +1,7 @@
 import ProductDetailPage from "@/pages-source/ProductDetailPage";
+import { notFound } from "next/navigation";
 import { fetchServerProductById } from "@/lib/server-products";
+import { resolveProduct } from "@/lib/data";
 import { toJsonLd } from "@/lib/json-ld";
 
 export const revalidate = 300;
@@ -47,7 +49,28 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
   const { id } = await params;
-  const product = await fetchServerProductById(id);
+
+  // Real 404 for unknown/inactive products (no "soft 404" pages in search results).
+  // On a database error we still render and let the client retry.
+  let product = null;
+  let databaseError = false;
+  try {
+    product = await resolveProduct(id);
+  } catch {
+    databaseError = true;
+  }
+  if (!databaseError && (!product || product.isActive === false)) notFound();
+
+  // All purchasable prices (product variants + brand variants), for an accurate AggregateOffer.
+  const prices = product
+    ? [
+        ...(product.variants || []),
+        ...(product.brands || []).flatMap((b) => b?.variants || []),
+        ...(product.skus || []),
+      ]
+        .map((v) => Number(v?.price))
+        .filter((n) => Number.isFinite(n) && n > 0)
+    : [];
 
   const productSchema = product
     ? {
@@ -55,19 +78,24 @@ export default async function Page({ params }) {
         "@type": "Product",
         name: product.title,
         image: product.image || "https://www.kitepk.com/logo.png",
-        description: product.description?.replace(/\r?\n|\r/g, " ")?.trim(),
+        description: product.description?.replace(/\s+/g, " ").trim() || undefined,
+        sku: product.id,
+        category: product.category || undefined,
         brand: {
           "@type": "Brand",
           name: "Kite Brand Pakistan",
         },
-        offers: {
-          "@type": "AggregateOffer",
-          priceCurrency: "PKR",
-          lowPrice: product.variants?.[0]?.price || 10,
-          highPrice: product.variants?.[product.variants.length - 1]?.price || 500,
-          offerCount: product.variants?.length || 1,
-          availability: "https://schema.org/InStock",
-        },
+        ...(prices.length > 0 && {
+          offers: {
+            "@type": "AggregateOffer",
+            priceCurrency: "PKR",
+            lowPrice: Math.min(...prices),
+            highPrice: Math.max(...prices),
+            offerCount: prices.length,
+            availability: "https://schema.org/InStock",
+            url: `https://www.kitepk.com/products/${product.id}`,
+          },
+        }),
       }
     : null;
 

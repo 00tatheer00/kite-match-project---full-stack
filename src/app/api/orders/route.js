@@ -18,7 +18,8 @@ function normalizePaymentMethod(value) {
 // POST /api/orders — place an order (Cash on Delivery)
 export async function POST(request) {
   const ip = getClientIp(request);
-  const limit = rateLimit(`order:${ip}`, { limit: 10, windowMs: 10 * 60 * 1000 });
+  // Generous limit: Pakistani mobile carriers put many customers behind one IP (CGNAT).
+  const limit = rateLimit(`order:${ip}`, { limit: 30, windowMs: 10 * 60 * 1000 });
   if (!limit.ok) {
     return NextResponse.json(
       { message: 'Too many orders from this connection. Please wait a few minutes or call us.' },
@@ -83,7 +84,12 @@ export async function POST(request) {
         .catch((err) => console.error('[orders] Pusher error:', err.message));
     }
 
-    return NextResponse.json(toPublicOrder(order), { status: 201 });
+    // The person who just placed the order can see their own details on the confirmation page;
+    // the public GET /api/orders/:id lookup stays reduced.
+    return NextResponse.json(
+      { ...toPublicOrder(order), phone: order.phone, email: order.email, address: order.address, note: order.note },
+      { status: 201 }
+    );
   } catch (err) {
     return handleRouteError(err, 'create order');
   }

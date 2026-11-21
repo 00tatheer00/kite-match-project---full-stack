@@ -37,15 +37,17 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
   useEffect(() => {
     let mounted = true;
     const loadData = async () => {
-      setLoading(true);
+      // Only show the loading state when the server didn't already render data.
+      if (!(initialPackages?.length || initialProducts?.length)) setLoading(true);
       try {
         const [promoData, prodData] = await Promise.allSettled([
           getPromotions(),
           getProducts()
         ]);
         if (mounted) {
-          setPackages(promoData.status === 'fulfilled' && Array.isArray(promoData.value) ? promoData.value : []);
-          setProducts(prodData.status === 'fulfilled' && Array.isArray(prodData.value) ? prodData.value : []);
+          // On a failed refresh keep what we already have instead of emptying the page.
+          if (promoData.status === 'fulfilled' && Array.isArray(promoData.value)) setPackages(promoData.value);
+          if (prodData.status === 'fulfilled' && Array.isArray(prodData.value)) setProducts(prodData.value);
         }
       } catch (err) {
         console.error("Failed to load online order data:", err);

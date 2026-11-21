@@ -20,14 +20,21 @@ import StructuredData from "../components/seo/StructuredData";
 import { SITE_URL, toAbsoluteUrl } from "../utils/seo";
 import { useCart } from "../context/CartContext";
 
+const firstVariantOf = (p) =>
+  p?.variants?.[0]?.name || p?.variantImages?.[0]?.name || p?.sizes?.[0]?.size || p?.skus?.[0]?.size || "";
+
 const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [product, setProduct] = useState(initialProduct);
   const [loading, setLoading] = useState(!initialProduct);
-  const [selectedVariant, setSelectedVariant] = useState("");
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState(() => firstVariantOf(initialProduct));
+  const [activeImageIndex, setActiveImageIndex] = useState(() => {
+    const first = String(firstVariantOf(initialProduct)).trim().toLowerCase();
+    const idx = (initialProduct?.variantImages || []).findIndex((item) => String(item?.name || "").trim().toLowerCase() === first);
+    return idx >= 0 ? idx : 0;
+  });
   const [quantity, setQuantity] = useState(1);
   const [brandVariantQuantities, setBrandVariantQuantities] = useState({});
   const [brandSelectedVariants, setBrandSelectedVariants] = useState({});
@@ -39,21 +46,19 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
   });
 
   useEffect(() => {
+    // The server already rendered this product: refresh silently in the background
+    // instead of replacing the page with a loading skeleton.
+    const hasServerData = Boolean(initialProduct) && (initialProduct.id === id || initialProduct.id === productId || productId === id);
     const load = async () => {
       try {
-        setLoading(true);
+        if (!hasServerData) setLoading(true);
         setQuantity(1);
         setBrandVariantQuantities({});
         setBrandSelectedVariants({});
         const data = await getProduct(id);
         setProduct(data);
-        const firstVariant =
-          data?.variants?.[0]?.name ||
-          data?.variantImages?.[0]?.name ||
-          data?.sizes?.[0]?.size ||
-          data?.skus?.[0]?.size ||
-          "";
-        setSelectedVariant(firstVariant);
+        const firstVariant = firstVariantOf(data);
+        if (!hasServerData) setSelectedVariant(firstVariant);
         const firstImageIndex = (data?.variantImages || []).findIndex(
           (item) =>
             String(item?.name || "")
@@ -63,14 +68,16 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
               .trim()
               .toLowerCase(),
         );
-        setActiveImageIndex(firstImageIndex >= 0 ? firstImageIndex : 0);
+        if (!hasServerData) setActiveImageIndex(firstImageIndex >= 0 ? firstImageIndex : 0);
       } catch {
-        setProduct(null);
+        // Keep the server-rendered product if the background refresh fails.
+        if (!hasServerData) setProduct(null);
       } finally {
         setLoading(false);
       }
     };
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const icon =
@@ -88,29 +95,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
   const productImage =
     product?.image ||
     product?.images?.[0] ||
-    "https://via.placeholder.com/1200x630";
-
-  const productSchema = product
-    ? {
-        "@context": "https://schema.org",
-        "@type": "Product",
-        name: product.title,
-        description: productDescription,
-        image: [productImage],
-        sku: product.id,
-        category: product.category,
-        brand: {
-          "@type": "Brand",
-          name: "Kite Brand",
-        },
-        offers: {
-          "@type": "Offer",
-          priceCurrency: "PKR",
-          availability: "https://schema.org/InStock",
-          url: canonicalUrl,
-        },
-      }
-    : null;
+    "/logo.png";
 
   const breadcrumbSchema = product
     ? {
@@ -218,7 +203,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
     image:
       product.image ||
       product.images?.[0] ||
-      "https://via.placeholder.com/600x700/E0E0E0/666666?text=Product",
+      "/logo.png",
   };
 
   const displayImage = activeGalleryItem.image;
@@ -315,7 +300,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
   };
 
   const handleMainAddToCart = () => {
-    if (addingToCart) return;
+    if (addingToCart || getSelectedPrice() <= 0) return;
     setAddingToCart(true);
     addToCart(product, null, { name: selectedVariant, price: getSelectedPrice() }, quantity);
     setQuantity(1);
@@ -334,6 +319,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
     if (addingToCart) return;
     const variantName = brandSelectedVariants[brandIndex] || brand.variants?.[0]?.name;
     const variant = brand.variants?.find(v => v.name === variantName) || { name: variantName, price: 0 };
+    if (!(Number(variant.price) > 0)) return;
     const qty = brandVariantQuantities[brandIndex] || 1;
     setAddingToCart(true);
     addToCart(product, brand.name, variant, qty);
@@ -405,7 +391,6 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
         image={productImage}
         type="product"
       />
-      <StructuredData data={productSchema} />
       <StructuredData data={breadcrumbSchema} />
       <div className="min-h-screen bg-gradient-to-b from-white via-[#F9F9F9] to-white">
         {/* Hero Section */}
@@ -621,9 +606,13 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                 {/* Main Add to Cart (Only if NO brands) */}
                 {!(product.brands?.length > 0) && (
                   <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-8 border-t border-[#E0E0E0]">
-                    {getSelectedPrice() > 0 && (
+                    {getSelectedPrice() > 0 ? (
                       <p className="text-xl sm:text-2xl font-bold text-[#00AEEF]">
                         Rs {(getSelectedPrice() * quantity).toLocaleString()}
+                      </p>
+                    ) : (
+                      <p className="text-sm font-semibold text-[#666666]">
+                        Price on request — contact us on WhatsApp to order this variant.
                       </p>
                     )}
                     <div className="flex items-center gap-2">
@@ -664,7 +653,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                       <button
                         type="button"
                         onClick={handleMainAddToCart}
-                        disabled={addingToCart}
+                        disabled={addingToCart || getSelectedPrice() <= 0}
                         className="px-8 py-3 rounded-full text-white font-semibold bg-[#00AEEF] hover:bg-[#0095CC] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
                         title="Add to shopping cart"
                       >
