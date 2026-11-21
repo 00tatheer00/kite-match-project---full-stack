@@ -6,6 +6,7 @@ import HeroVideo from "./HeroVideo";
 import BriefProductsSection from "./BriefProductsSection";
 import AboutSection from "./AboutSection";
 import BriefExport from "./BriefExport";
+import { HomeIntro, HomeFaq } from "./HomeSeoSections";
 
 const BrandsShowcaseSection = lazy(() => import("./BrandsShowcaseSection"));
 const MatchMakingSection = lazy(() => import("./MatchMakingSection"));
@@ -42,12 +43,9 @@ const DeferredSection = ({ SectionComponent, minHeight }) => {
 const HomePageContent = () => {
   return (
     <>
-      {/* Semantic H1 for Top-Tier Search Engine Ranking (Mohsin Match Factory & Kite) */}
-      <h1 className="sr-only">
-        Mohsin Match Factory (Pvt.) Ltd. &amp; Kite Match — Best Match Factory in Pakistan &amp; Premier FMCG Manufacturer
-      </h1>
-
       <HeroVideo />
+      {/* Visible H1 + intro (main search keywords, real facts) */}
+      <HomeIntro />
       <BriefProductsSection />
       <AboutSection />
       <BriefExport />
@@ -55,6 +53,7 @@ const HomePageContent = () => {
       <DeferredSection SectionComponent={MatchMakingSection} minHeight={620} />
       <DeferredSection SectionComponent={CertificationsSlider} minHeight={360} />
       <DeferredSection SectionComponent={TrustSection} minHeight={280} />
+      <HomeFaq />
     </>
   );
 };

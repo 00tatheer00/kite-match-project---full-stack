@@ -388,3 +388,19 @@ body.admin-route:has(.admin-dark-theme) {
 
 
 
+
+/* Home hero (video / image banner).
+   Phones: 16:9. Tablets & desktops: exactly the space between the header and the
+   bottom of the screen. --nav-h is measured by Navbar; pages are zoomed by
+   --home-scale, so the visible height is divided by it. */
+.hero-frame {
+  aspect-ratio: 16 / 9;
+}
+@media (min-width: 768px) {
+  .hero-frame {
+    aspect-ratio: auto;
+    height: calc((100vh - var(--nav-h, 96px)) / var(--home-scale, 1));
+    height: calc((100svh - var(--nav-h, 96px)) / var(--home-scale, 1));
+    min-height: 420px;
+  }
+}

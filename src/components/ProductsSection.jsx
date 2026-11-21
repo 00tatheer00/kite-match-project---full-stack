@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { FaFire, FaLayerGroup, FaArrowRight } from "react-icons/fa";
+import { FaArrowRight } from "react-icons/fa";
 import { Link } from '@/components/RouterCompat';
 import { useEffect, useState } from "react";
 import { getProducts } from "../services/api";
@@ -14,6 +14,20 @@ const getOrderValue = (product) => {
   if (typeof product?.carouselOrder === "number") return product.carouselOrder;
   if (typeof product?.displayOrder === "number") return product.displayOrder;
   return 0;
+};
+
+// Real purchasable prices: product sizes, or each brand's sizes for products sold per brand.
+const priceList = (p) =>
+  [
+    ...((p?.brands?.length ? [] : p?.variants) || []),
+    ...((p?.brands || []).flatMap((b) => b?.variants || [])),
+  ]
+    .map((v) => Number(v?.price))
+    .filter((n) => Number.isFinite(n) && n > 0);
+
+const sizeNames = (p) => {
+  const list = p?.brands?.length ? (p.brands || []).map((b) => b?.name) : (p?.variants || []).map((v) => v?.name);
+  return [...new Set(list.filter(Boolean).map((n) => String(n).replace(/ Safety Matches$/i, "")))];
 };
 
 const ProductsSection = ({ initialProducts = [] }) => {
@@ -32,7 +46,7 @@ const ProductsSection = ({ initialProducts = [] }) => {
           const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           return aTime - bTime;
         })
-        .slice(0, 5);
+        ;
     }
     return [];
   });
@@ -52,7 +66,7 @@ const ProductsSection = ({ initialProducts = [] }) => {
             const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
             return aTime - bTime;
           })
-          .slice(0, 5);
+          ;
         setAllProducts(visible);
       } catch {
         // Keep server-rendered products if the background refresh fails.
@@ -62,11 +76,6 @@ const ProductsSection = ({ initialProducts = [] }) => {
     };
     load();
   }, []);
-
-  const getIcon = (product) => {
-    if (product.iconType === "fire") return <FaFire className="text-5xl" />;
-    return <FaLayerGroup className="text-5xl" />;
-  };
 
   return (
     <section
@@ -105,8 +114,8 @@ const ProductsSection = ({ initialProducts = [] }) => {
           className="mb-16"
         >
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-              {Array.from({ length: 5 }).map((_, index) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {Array.from({ length: 6 }).map((_, index) => (
                 <div
                   key={`product-skeleton-${index}`}
                   className="bg-white rounded-2xl border-2 border-[#E0E0E0] p-4 h-[460px] animate-pulse"
@@ -122,81 +131,84 @@ const ProductsSection = ({ initialProducts = [] }) => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-              {allProducts.map((product) => (
-                <Link
-                  key={product.id}
-                  to={`/products/${product.id}`}
-                  className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-[#E0E0E0] hover:border-[#00AEEF] transform hover:-translate-y-2 flex flex-col h-full"
-                >
-                  {/* Product Image */}
-                  <div className="relative aspect-auto sm:aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden shrink-0">
-                    <img
-                      src={
-                        (product.image?.src || product.image) || (product.images?.[0]?.src || product.images?.[0]) || placeholderImage
-                      }
-                      alt={product.title}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-cover sm:object-contain p-2 sm:p-4 group-hover:scale-105 transition-transform duration-300"
-                    />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {allProducts.map((product) => {
+                const accent = product.color || "#00AEEF";
+                const prices = priceList(product);
+                const fromPrice = prices.length ? Math.min(...prices) : null;
+                const sizes = sizeNames(product);
+                const image =
+                  (product.image?.src || product.image) || (product.images?.[0]?.src || product.images?.[0]) || placeholderImage;
+                return (
+                  <Link
+                    key={product.id}
+                    to={`/products/${product.id}`}
+                    className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300"
+                    aria-label={`${product.title}: view details and prices`}
+                  >
+                    {/* Image on a soft brand-coloured backdrop */}
                     <div
-                      className="absolute top-4 right-4 px-3 py-1 rounded-full text-white text-sm font-semibold shadow-lg"
-                      style={{ backgroundColor: product.color }}
+                      className="relative aspect-[4/3] overflow-hidden flex items-center justify-center"
+                      style={{ background: `radial-gradient(circle at 50% 40%, ${accent}22 0%, ${accent}0d 45%, #f8fafc 80%)` }}
                     >
-                      {product.category || product.productType || "Product"}
+                      <img
+                        src={image}
+                        alt={product.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="max-h-[78%] max-w-[78%] object-contain drop-shadow-xl group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <span
+                        className="absolute top-4 left-4 px-3 py-1 rounded-full text-white text-xs font-bold tracking-wide shadow-md"
+                        style={{ backgroundColor: accent }}
+                      >
+                        {product.category || product.productType || "Product"}
+                      </span>
+                      {fromPrice != null && (
+                        <span className="absolute bottom-4 right-4 rounded-2xl bg-white/95 backdrop-blur px-3.5 py-2 shadow-lg text-right leading-tight">
+                          <span className="block text-[11px] font-semibold text-slate-500">Starting from</span>
+                          <span className="block text-lg font-black text-slate-900">Rs {fromPrice.toLocaleString("en-PK")}</span>
+                        </span>
+                      )}
                     </div>
-                  </div>
 
-                  {/* Product Content */}
-                  <div className="p-6 flex-1 flex flex-col">
-                    <div className="flex items-center mb-4">
-                      <div className="mr-4 shrink-0" style={{ color: product.color }}>
-                        {getIcon(product)}
-                      </div>
-                      <h3 className="text-[#222222] text-xl font-bold group-hover:text-[#00AEEF] transition-colors line-clamp-2">
+                    {/* Details */}
+                    <div className="p-6 flex-1 flex flex-col">
+                      <h3 className="text-slate-900 text-xl md:text-2xl font-extrabold leading-snug group-hover:text-[#00AEEF] transition-colors">
                         {product.title}
                       </h3>
-                    </div>
+                      {product.description && (
+                        <p className="mt-2 text-slate-600 text-sm leading-relaxed line-clamp-2">{product.description}</p>
+                      )}
 
-                    <p className="text-[#666666] text-sm mb-4 line-clamp-3 min-h-[60px]">
-                      {product.description}
-                    </p>
+                      {sizes.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-1.5">
+                          {sizes.slice(0, 4).map((name) => (
+                            <span key={name} className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">
+                              {name}
+                            </span>
+                          ))}
+                          {sizes.length > 4 && (
+                            <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 text-xs font-semibold">
+                              +{sizes.length - 4} more
+                            </span>
+                          )}
+                        </div>
+                      )}
 
-                    {/* Features Preview */}
-                    {product.features && product.features.length > 0 && (
-                      <div className="mb-4 min-h-[52px]">
-                        <ul className="space-y-1">
-                          {product.features
-                            .slice(0, 2)
-                            .map((feature, idx) => (
-                              <li
-                                key={idx}
-                                className="flex items-start text-[#666666] text-xs"
-                              >
-                                <span
-                                  className="w-1.5 h-1.5 rounded-full mr-2 mt-1.5 flex-shrink-0"
-                                  style={{ backgroundColor: product.color }}
-                                ></span>
-                                <span className="line-clamp-1">
-                                  {feature}
-                                </span>
-                              </li>
-                            ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    <div className="mt-auto">
-                      {/* View Details Button */}
-                      <div className="flex items-center text-[#00AEEF] font-semibold group-hover:text-[#ED028C] transition-colors">
-                        <span className="mr-2">View Details</span>
-                        <FaArrowRight className="transform group-hover:translate-x-2 transition-transform" />
+                      <div className="mt-auto pt-6">
+                        <span
+                          className="flex items-center justify-center gap-2 w-full rounded-2xl py-3 font-bold text-white shadow-md group-hover:shadow-lg transition-all"
+                          style={{ backgroundColor: accent }}
+                        >
+                          View details &amp; prices
+                          <FaArrowRight className="text-sm group-hover:translate-x-1 transition-transform" />
+                        </span>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </motion.div>

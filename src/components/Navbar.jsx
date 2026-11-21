@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from '@/components/RouterCompat';
 import { FaBars, FaTimes, FaChevronDown, FaShoppingCart } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
@@ -9,6 +9,19 @@ import kiteLogo2 from "../assets/kite_part2.png";
 import { getProducts } from "../services/api";
 
 const Navbar = () => {
+  // Publish the navbar's on-screen height as --nav-h so the hero can fill exactly
+  // the space between the header and the bottom of the screen.
+  const navRef = useRef(null);
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const publish = () =>
+      document.documentElement.style.setProperty("--nav-h", `${Math.round(el.getBoundingClientRect().height)}px`);
+    publish();
+    const ro = new ResizeObserver(publish);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [expandedMobileCategories, setExpandedMobileCategories] = useState({});
@@ -112,7 +125,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-md z-50 transition-all duration-300">
+    <nav ref={navRef} className="bg-white shadow-md z-50 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center gap-4 py-2.5 sm:py-3 md:py-3.5">
           {/* Logo */}

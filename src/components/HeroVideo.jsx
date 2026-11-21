@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { getSettings } from '../services/api';
 
+// Phones: 16:9 frame. Tablets/desktops: everything between the header and the bottom of the
+// screen. Pages render at zoom var(--home-scale) (globals.css), so the height is divided by it.
+const HERO_SIZE = "hero-frame relative w-full overflow-hidden";
+
 const HeroVideo = () => {
   const videoRef = useRef(null);
   const [settings, setSettings] = useState(null);
@@ -41,7 +45,7 @@ const HeroVideo = () => {
 
   if (isImageBanner) {
     const bannerContent = (
-      <div className="relative w-full overflow-hidden min-h-[45vh] sm:min-h-[60vh] md:min-h-[75vh] max-h-[100vh] bg-slate-900 flex items-center justify-center">
+      <div className={`${HERO_SIZE} bg-slate-900 flex items-center justify-center`}>
         {/* Responsive picture with desktop and optional mobile image */}
         <picture className="w-full h-full block">
           {settings.bannerMobileImage && (
@@ -86,7 +90,7 @@ const HeroVideo = () => {
       className="relative w-full overflow-hidden bg-black"
     >
       {/* Banner-sized video: fills width and height completely with object-fit: cover */}
-      <div className="relative w-full overflow-hidden h-[100vh] min-h-[400px]">
+      <div className={HERO_SIZE}>
         <video
           ref={videoRef}
           autoPlay

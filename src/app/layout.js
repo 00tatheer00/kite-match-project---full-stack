@@ -7,14 +7,14 @@ export const metadata = {
   metadataBase: new URL("https://www.kitepk.com"),
   title: {
     default: "Mohsin Match Factory & Kite | Best Match Factory in Pakistan",
-    template: "%s | Mohsin Match Factory & Kite Brand",
+    // Page titles already name the brand; a suffix made them too long for Google (~60 chars).
+    template: "%s",
   },
   description:
     "Mohsin Match Factory (Pvt.) Ltd. & Kite Brand is Pakistan's #1 best match factory and largest exporter of premium safety matches, wooden splints, and FMCG detergents to 40+ countries. Established in 1974 in Peshawar under Aziz Group of Industries.",
   keywords: [
     "best match factory in pakistan",
     "match factory in pakistan",
-    "nest match factory in pakistan",
     "mohsin match factory",
     "mohsin match factory peshawar",
     "kite match",
