@@ -79,7 +79,12 @@ export function downloadCSV(filename, csvContent) {
 
 function escapeCSV(val) {
   if (val == null) return '""';
-  const str = String(val);
+  let str = String(val);
+  // Spreadsheet formula injection guard: a cell starting with = + - @ (or tab/CR) would be
+  // executed as a formula by Excel/Sheets. Plain negative numbers are left untouched.
+  if (/^[=+\-@\t\r]/.test(str) && !/^-?\d+(\.\d+)?$/.test(str)) {
+    str = `'${str}`;
+  }
   if (
     str.includes(',') ||
     str.includes('"') ||

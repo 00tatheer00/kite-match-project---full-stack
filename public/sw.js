@@ -1,5 +1,5 @@
-// Kite PWA Service Worker - v3.0.0
-const CACHE_NAME = 'kite-pwa-cache-v3';
+// Kite PWA Service Worker - v4.0.0
+const CACHE_NAME = 'kite-pwa-cache-v4';
 
 // Only precache static brand assets, NEVER precache dynamic Next.js bundles or admin pages
 const STATIC_ASSETS = [
@@ -47,7 +47,8 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   if (!url.protocol.startsWith('http')) return;
 
-  // Never cache API routes
+  // Only handle same-origin requests; never cache API routes
+  if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/api/')) {
     return;
   }
@@ -76,7 +77,9 @@ self.addEventListener('fetch', (event) => {
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) return cachedResponse;
           if (event.request.mode === 'navigate') {
-            return caches.match('/') || caches.match('/manifest.json');
+            return caches.match('/').then(
+              (home) => home || new Response('You are offline. Please check your connection.', { status: 503, headers: { 'Content-Type': 'text/plain' } })
+            );
           }
           return new Response('Network error (offline)', { status: 503, statusText: 'Offline' });
         });

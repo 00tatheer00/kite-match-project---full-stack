@@ -110,6 +110,8 @@ function validateIdentity(payload, { requireId }) {
 
 export async function parseProductRequest(request, { requireId = true } = {}) {
   const { body, files } = await readRequest(request);
+  const sentKeys = new Set(Object.keys(body));
+  const uploadedKeys = new Set();
 
   const payload = {
     id: text(body.id, 100),
@@ -159,9 +161,13 @@ export async function parseProductRequest(request, { requireId = true } = {}) {
     const primaryFile = productImages[0]?.file || singleImage?.file;
     const additionalFiles = productImages.length > 1 ? productImages.slice(1).map((f) => f.file) : galleryFiles.map((f) => f.file);
 
-    if (primaryFile) payload.image = await uploadImageBuffer(primaryFile, { folder: 'products' });
+    if (primaryFile) {
+      payload.image = await uploadImageBuffer(primaryFile, { folder: 'products' });
+      uploadedKeys.add('image');
+    }
     if (additionalFiles.length > 0) {
       payload.images = await Promise.all(additionalFiles.map((f) => uploadImageBuffer(f, { folder: 'products/gallery' })));
+      uploadedKeys.add('images');
     }
 
     for (const item of files.filter((f) => /^variantImageFile_\d+$/i.test(f.fieldname))) {
@@ -169,6 +175,7 @@ export async function parseProductRequest(request, { requireId = true } = {}) {
       if (idx > 100) continue;
       const url = await uploadImageBuffer(item.file, { folder: 'products/variants' });
       payload.variantImages[idx] = { name: payload.variantImages[idx]?.name || '', image: url };
+      uploadedKeys.add('variantImages');
     }
     payload.variantImages = payload.variantImages.filter((it) => it?.name || it?.image);
 
@@ -177,18 +184,23 @@ export async function parseProductRequest(request, { requireId = true } = {}) {
       if (idx > 100) continue;
       const url = await uploadImageBuffer(item.file, { folder: 'products/brands' });
       payload.brands[idx] = { ...(payload.brands[idx] || {}), image: url };
+      uploadedKeys.add('brands');
     }
     payload.brands = payload.brands.filter(Boolean);
   }
 
   return {
     payload,
-    hasBodyVariantImages: Object.prototype.hasOwnProperty.call(body, 'variantImages'),
+    sentKeys,
+    uploadedKeys,
+    hasBodyVariantImages: sentKeys.has('variantImages'),
   };
 }
 
 export async function parsePromotionRequest(request, { requireId = true } = {}) {
   const { body, files } = await readRequest(request);
+  const sentKeys = new Set(Object.keys(body));
+  const uploadedKeys = new Set();
 
   const items = asArray(body.items)
     .filter((item) => item && typeof item === 'object')
@@ -235,12 +247,31 @@ export async function parsePromotionRequest(request, { requireId = true } = {}) 
     if (primaryFile) {
       payload.image = await uploadImageBuffer(primaryFile, { folder: 'promotions' });
       hasPrimaryUpload = true;
+      uploadedKeys.add('image');
     }
     if (additionalFiles.length > 0) {
       payload.images = await Promise.all(additionalFiles.map((f) => uploadImageBuffer(f, { folder: 'promotions/gallery' })));
       hasGalleryUpload = true;
+      uploadedKeys.add('images');
     }
   }
 
-  return { payload, hasPrimaryUpload, hasGalleryUpload };
+  // totalQuantity/totalPrice are derived from items, so they count as sent when items are sent.
+  if (sentKeys.has('items')) {
+    sentKeys.add('totalQuantity');
+    sentKeys.add('totalPrice');
+  }
+  return { payload, sentKeys, uploadedKeys, hasPrimaryUpload, hasGalleryUpload };
+}
+
+/**
+ * For partial updates: drop fields the client did not send (and no upload produced),
+ * so existing database values are kept instead of being reset to defaults.
+ */
+export function keepOnlySentFields(payload, sentKeys, uploadedKeys) {
+  for (const key of Object.keys(payload)) {
+    if (key === 'id') continue;
+    if (!sentKeys.has(key) && !uploadedKeys.has(key)) delete payload[key];
+  }
+  return payload;
 }

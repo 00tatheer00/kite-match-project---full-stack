@@ -111,9 +111,23 @@ const AdminSettingsPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
     setError("");
     setSuccess("");
+
+    // An empty field would be saved as Rs 0 (free delivery for every order) — require explicit values.
+    const invalidShipping = [defaultShippingCost, smallPackageShippingCost].some(
+      (v) => String(v ?? "").trim() === "" || !Number.isFinite(Number(v)) || Number(v) < 0
+    );
+    if (invalidShipping) {
+      setError("Please enter valid delivery charges (0 or more). Use 0 only if delivery should be free.");
+      return;
+    }
+    if (bannerLink && !/^(\/(?!\/)|https?:\/\/)/i.test(String(bannerLink).trim())) {
+      setError('Banner link must start with "/" (a page on this site) or "https://".');
+      return;
+    }
+
+    setSaving(true);
 
     try {
       let payload;

@@ -98,7 +98,7 @@ const AdminOrdersPage = () => {
         } catch {}
       }
     };
-  }, []);
+  }, [load]);
 
   const handleManualRefresh = async () => {
     setRefreshing(true);

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { parseProductRequest } from '@/lib/admin-payloads';
+import { keepOnlySentFields, parseProductRequest } from '@/lib/admin-payloads';
 import { createOne, deleteOne, getOne, updateOne } from '@/lib/admin-catalog';
 import { handleRouteError, jsonError, requireAdmin, revalidateCatalog } from '@/lib/http';
 
@@ -15,7 +15,7 @@ export async function PUT(request, context) {
   if (!id) return jsonError('Product ID required', 400);
 
   try {
-    const { payload, hasBodyVariantImages } = await parseProductRequest(request, { requireId: false });
+    const { payload, sentKeys, uploadedKeys, hasBodyVariantImages } = await parseProductRequest(request, { requireId: false });
     const existing = await getOne('products', id);
 
     if (!existing) {
@@ -40,6 +40,8 @@ export async function PUT(request, context) {
       }
     }
 
+    // Fields the form did not send (e.g. sizes/skus) keep their current database values.
+    keepOnlySentFields(payload, sentKeys, uploadedKeys);
     const updated = await updateOne('products', id, payload);
     revalidateCatalog();
     return NextResponse.json(updated);

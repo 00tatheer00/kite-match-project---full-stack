@@ -1,6 +1,5 @@
 import "./globals.css";
 import ClientShell from "@/components/ClientShell";
-import PwaRegister from "@/components/PwaRegister";
 import Script from "next/script";
 import { toJsonLd } from "@/lib/json-ld";
 
@@ -39,7 +38,6 @@ export const metadata = {
   authors: [{ name: "Mohsin Match Factory (Pvt.) Ltd. & Aziz Group of Industries" }],
   creator: "Mohsin Match Factory (Pvt.) Ltd.",
   publisher: "Mohsin Match Factory (Pvt.) Ltd.",
-  manifest: "/manifest.json",
   alternates: {
     canonical: "/",
   },
@@ -203,7 +201,6 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <PwaRegister />
         {GA_ID && (
           <>
             <Script

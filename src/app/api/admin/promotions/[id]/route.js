@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { parsePromotionRequest } from '@/lib/admin-payloads';
+import { keepOnlySentFields, parsePromotionRequest } from '@/lib/admin-payloads';
 import { createOne, deleteOne, getOne, updateOne } from '@/lib/admin-catalog';
 import { handleRouteError, jsonError, requireAdmin, revalidateCatalog } from '@/lib/http';
 
@@ -15,7 +15,7 @@ export async function PUT(request, context) {
   if (!id) return jsonError('Promotion ID required', 400);
 
   try {
-    const { payload, hasPrimaryUpload, hasGalleryUpload } = await parsePromotionRequest(request, { requireId: false });
+    const { payload, sentKeys, uploadedKeys, hasPrimaryUpload, hasGalleryUpload } = await parsePromotionRequest(request, { requireId: false });
     const existing = await getOne('promotions', id);
 
     if (!existing) {
@@ -27,6 +27,7 @@ export async function PUT(request, context) {
     if (!hasPrimaryUpload) payload.image = payload.image || existing.image || '';
     if (!hasGalleryUpload) payload.images = payload.images.length ? payload.images : existing.images || [];
 
+    keepOnlySentFields(payload, sentKeys, uploadedKeys);
     const updated = await updateOne('promotions', id, payload);
     revalidateCatalog();
     return NextResponse.json(updated);

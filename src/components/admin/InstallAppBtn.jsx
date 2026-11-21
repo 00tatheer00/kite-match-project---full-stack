@@ -162,6 +162,7 @@ function IosInstallModal({ isDark, onClose }) {
       }`}>
         <button
           onClick={onClose}
+          aria-label="Close"
           className="absolute right-4 top-4 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
         >
           <X size={18} />

@@ -85,7 +85,7 @@ function buildProductFormData(data = {}) {
     'tagline', 'services', 'displayOrder', 'carouselOrder', 'isActive', 'showOnLanding',
     'showInProductsPage', 'showInNavbar',
   ].forEach((key) => {
-    if (data[key] !== undefined && data[key] !== null && data[key] !== '') fd.append(key, String(data[key]));
+    if (data[key] !== undefined) fd.append(key, data[key] === null ? '' : String(data[key])); // empty values clear the field
   });
   if (data.shippingCost !== undefined) fd.append('shippingCost', data.shippingCost === null ? '' : String(data.shippingCost));
 
@@ -112,7 +112,7 @@ function buildPromotionFormData(data = {}) {
   const fd = new FormData();
   ['id', 'title', 'category', 'description', 'image', 'totalQuantity', 'totalPrice', 'originalPrice', 'discount', 'shippingCost', 'displayOrder', 'isActive'].forEach(
     (key) => {
-      if (data[key] !== undefined && data[key] !== null && data[key] !== '') fd.append(key, String(data[key]));
+      if (data[key] !== undefined) fd.append(key, data[key] === null ? '' : String(data[key])); // empty values clear the field
     }
   );
   ['items', 'images'].forEach((key) => {
