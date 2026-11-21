@@ -115,8 +115,10 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
   const allSkus = useMemo(() => {
     const list = [];
     products.forEach((prod) => {
-      // Main product variants
-      if (Array.isArray(prod.variants) && prod.variants.length > 0) {
+      const hasBrands = Array.isArray(prod.brands) && prod.brands.length > 0;
+      // Main product variants (skipped for products sold per brand, e.g. safety matches,
+      // so there are no generic "collection" cards next to the real brand cards)
+      if (!hasBrands && Array.isArray(prod.variants) && prod.variants.length > 0) {
         prod.variants.forEach((v) => {
           const matchedImg = prod.variantImages?.find(
             (vi) => vi?.name?.trim().toLowerCase() === v?.name?.trim().toLowerCase()

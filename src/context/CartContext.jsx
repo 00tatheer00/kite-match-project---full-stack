@@ -25,11 +25,13 @@ function repriceLine(item, products, promotions) {
   const product = products.find((p) => p.id === item.productId);
   if (!product) return { ...item, unavailable: true };
   const brand = item.brandName ? (product.brands || []).find((b) => norm(b.name) === norm(item.brandName)) : null;
+  // Same rule as the server (lib/pricing.js): products with brands are sold per brand only.
+  if ((product.brands || []).length > 0 && !brand) return { ...item, unavailable: true };
   const wanted = norm(item.selectedVariant);
-  const match =
-    (brand && (brand.variants || []).find((v) => norm(v.name) === wanted)) ||
-    (product.variants || []).find((v) => norm(v.name) === wanted) ||
-    (product.skus || []).find((v) => norm(v.size) === wanted);
+  const match = brand
+    ? (brand.variants || []).find((v) => norm(v.name) === wanted)
+    : (product.variants || []).find((v) => norm(v.name) === wanted) ||
+      (product.skus || []).find((v) => norm(v.size) === wanted);
   const price = Number(match?.price) || 0;
   if (price <= 0) return { ...item, unavailable: true };
   return { ...item, unavailable: false, price, productTitle: product.title };

@@ -39,19 +39,23 @@ function findVariant(list, name, key = 'name') {
  */
 export function resolveProductUnitPrice(product, { brandName, variantName } = {}) {
   const brand = brandName ? findVariant(product.brands, brandName) : null;
+  // Products with sub-brands (safety matches) are only sold per brand: a brand's
+  // own sizes are the only valid options, never the parent product's sizes.
+  if (Array.isArray(product.brands) && product.brands.length > 0 && !brand) {
+    throw new PricingError(`Please choose a brand for ${product.title}.`);
+  }
 
   if (variantName) {
-    const match =
-      (brand && findVariant(brand.variants, variantName)) ||
-      findVariant(product.variants, variantName) ||
-      findVariant(product.skus, variantName, 'size');
+    const match = brand
+      ? findVariant(brand.variants, variantName)
+      : findVariant(product.variants, variantName) || findVariant(product.skus, variantName, 'size');
     if (!match) throw new PricingError(`"${variantName}" is not available for ${product.title}.`);
     const price = toPositiveNumber(match.price);
     if (!price) throw new PricingError(`${product.title} (${variantName}) is not available for online order.`);
     return { unitPrice: price, variantName: match.name ?? match.size ?? variantName, brandName: brand?.name || null };
   }
 
-  const first = (brand?.variants || product.variants || [])[0];
+  const first = ((brand ? brand.variants : product.variants) || [])[0];
   const price = toPositiveNumber(first?.price);
   if (!price) throw new PricingError(`Please select a size/variant for ${product.title}.`);
   return { unitPrice: price, variantName: first.name || null, brandName: brand?.name || null };
