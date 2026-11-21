@@ -87,31 +87,51 @@ function DashboardContent() {
   const totalVisitors = overview.totalVisitors ?? 0;
   const todayVisitors = overview.todayVisitors ?? 0;
   const totalPageviews = overview.totalPageviews ?? 0;
-  const totalPromotions = overview.totalPromotions ?? (promotionsList.length || 9);
-  const activePromotions = overview.activePromotions ?? (promotionsList.length || 9);
-  const freeShippingPromotions = overview.freeShippingPromotions ?? (promotionsList.filter(p => p.shippingCost === 0).length || 3);
+  const totalPromotions = overview.totalPromotions ?? promotionsList.length;
+  const activePromotions = overview.activePromotions ?? promotionsList.length;
+  const freeShippingPromotions = overview.freeShippingPromotions ?? promotionsList.filter((p) => Number(p.shippingCost) === 0).length;
 
-  // Dynamic City breakdown calculation
-  const defaultCities = {
-    "Lahore, PK": cities["Lahore, PK"] || (totalVisitors > 0 ? Math.ceil(totalVisitors * 0.38) : 542),
-    "Karachi, PK": cities["Karachi, PK"] || (totalVisitors > 0 ? Math.ceil(totalVisitors * 0.28) : 400),
-    "Islamabad / RWP, PK": (cities["Islamabad, PK"] || 0) + (cities["Rawalpindi, PK"] || 0) + (cities["Islamabad / RWP, PK"] || 0) || (totalVisitors > 0 ? Math.ceil(totalVisitors * 0.16) : 228),
-    "Peshawar, PK": cities["Peshawar, PK"] || (totalVisitors > 0 ? Math.ceil(totalVisitors * 0.10) : 142),
-    "Faisalabad / Multan, PK": (cities["Faisalabad, PK"] || 0) + (cities["Multan, PK"] || 0) + (cities["Faisalabad / Multan, PK"] || 0) || (totalVisitors > 0 ? Math.ceil(totalVisitors * 0.05) : 72),
-    "International / Exports": (cities["Dubai, UAE"] || 0) + (cities["International / Exports"] || 0) || (totalVisitors > 0 ? Math.ceil(totalVisitors * 0.03) : 44),
+  // ---- Real visitor data only (no estimates or placeholder numbers) ----
+  const countOf = (obj, key) => Number(obj?.[key]) || 0;
+  // Cities as recorded by the tracker ("City, CC"), biggest first; the rest grouped as "Other".
+  const cityEntries = Object.entries(cities || {})
+    .map(([name, count]) => [name, Number(count) || 0])
+    .filter(([name, count]) => count > 0 && name && name !== "Unknown")
+    .sort((a, b) => b[1] - a[1]);
+  const unknownCityVisits = countOf(cities, "Unknown");
+  const topCities = cityEntries.slice(0, 6);
+  const otherCityVisits = cityEntries.slice(6).reduce((s, [, c]) => s + c, 0) + unknownCityVisits;
+  const displayCities = Object.fromEntries(
+    otherCityVisits > 0 ? [...topCities, ["Other / unknown location", otherCityVisits]] : topCities
+  );
+  const totalCityVisits = Object.values(displayCities).reduce((a, b) => a + Number(b), 0);
+
+  // Pakistan vs other countries
+  const countryEntries = Object.entries(analytics?.countries || {}).map(([k, v]) => [k, Number(v) || 0]);
+  const totalCountryVisits = countryEntries.reduce((s, [, c]) => s + c, 0);
+  const pakistanShare = totalCountryVisits > 0 ? Math.round((countOf(analytics?.countries, "PK") / totalCountryVisits) * 100) : 0;
+
+  // Traffic sources
+  const channelRows = [
+    { key: "whatsapp", label: "WhatsApp", hint: "Links shared on WhatsApp", count: countOf(sources, "whatsapp"), color: "text-emerald-500", bg: "bg-emerald-500/15", icon: <FaWhatsapp /> },
+    { key: "social", label: "Facebook / Instagram", hint: "Posts, pages and ads", count: countOf(sources, "facebook") + countOf(sources, "instagram") + countOf(sources, "tiktok"), color: "text-pink-500", bg: "bg-pink-500/15", icon: <FaBoxes /> },
+    { key: "google", label: "Google search", hint: "People who searched and clicked", count: countOf(sources, "google"), color: "text-amber-500", bg: "bg-amber-500/15", icon: <FaGlobeAmericas /> },
+    { key: "direct", label: "Direct / typed address", hint: "Typed kitepk.com or saved link", count: countOf(sources, "direct") + countOf(sources, "referral"), color: "text-blue-500", bg: "bg-blue-500/15", icon: <FaGlobeAmericas /> },
+  ];
+
+  // Devices
+  const mobileCount = countOf(devices, "mobile") + countOf(devices, "tablet");
+  const desktopCount = countOf(devices, "desktop");
+  const deviceTotal = mobileCount + desktopCount;
+  const mobilePct = deviceTotal > 0 ? Math.round((mobileCount / deviceTotal) * 100) : 0;
+  const desktopPct = deviceTotal > 0 ? 100 - mobilePct : 0;
+
+  // "Lahore, PK" -> 🇵🇰 (flag from the 2-letter country code)
+  const flagFor = (name) => {
+    const cc = /,\s*([A-Z]{2})$/.exec(name || "")?.[1];
+    if (!cc) return "🌐";
+    return String.fromCodePoint(...[...cc].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65));
   };
-
-  // Merge any other dynamic cities captured from live telemetry
-  const displayCities = { ...defaultCities };
-  if (cities && typeof cities === 'object') {
-    Object.entries(cities).forEach(([cityName, count]) => {
-      if (count > 0 && !displayCities[cityName] && cityName !== 'Pakistan') {
-        displayCities[cityName] = count;
-      }
-    });
-  }
-
-  const totalCityVisits = Object.values(displayCities).reduce((a, b) => a + Number(b), 0) || 1;
 
   const formatNumber = (num) => new Intl.NumberFormat().format(num || 0);
 
@@ -288,7 +308,7 @@ function DashboardContent() {
               Dispatched / Processed
             </div>
             <div className="text-[11px] sm:text-xs text-emerald-500 font-bold mt-0.5">
-              &uarr; 100% factory confirmation rate
+              {totalOrders > 0 ? `${Math.round((approvedOrders / totalOrders) * 100)}% of orders confirmed or shipped` : "No orders yet"}
             </div>
           </div>
 
@@ -525,53 +545,66 @@ function DashboardContent() {
                       isDark ? "text-white" : "text-slate-900"
                     }`}
                   >
-                    Real-Time Visitor Location &amp; City Tracing
-                    <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
-                      LIVE GPS / IP
+                    Visitor Cities
+                    <span className="flex items-center gap-1 text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      LIVE
                     </span>
                   </h3>
                   <p className={`text-xs sm:text-sm font-medium mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    Automated geographical origin detection across Pakistan &amp; International markets
+                    Where your website visitors are (approximate city from their internet connection). Updates every 25 seconds.
                   </p>
                 </div>
               </div>
 
               <div className="sm:text-right">
                 <div className="text-xl lg:text-2xl font-black text-emerald-500">
-                  {totalVisitors > 0 ? "100%" : "Live"}
+                  {formatNumber(totalVisitors)}
                 </div>
                 <div className={`text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                  Detection Accuracy
+                  Visitors counted
                 </div>
               </div>
             </div>
 
-            {/* Progress bar showing dominant province/region */}
-            <div className="space-y-2 pt-2">
-              <div
-                className={`flex justify-between text-xs sm:text-sm font-bold ${
-                  isDark ? "text-slate-300" : "text-slate-700"
-                }`}
-              >
-                <span>Pakistan Domestic Coverage (Punjab &bull; Sindh &bull; KPK)</span>
-                <span className="text-purple-600 dark:text-purple-400 font-black">96% Traffic Share</span>
+            {/* Share of visitors per city (real proportions) */}
+            {totalCityVisits > 0 && (
+              <div className="space-y-2 pt-2">
+                <div
+                  className={`flex justify-between text-xs sm:text-sm font-bold ${
+                    isDark ? "text-slate-300" : "text-slate-700"
+                  }`}
+                >
+                  <span>Visitors from Pakistan</span>
+                  <span className="text-purple-600 dark:text-purple-400 font-black">{pakistanShare}%</span>
+                </div>
+                <div className="w-full h-3.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex shadow-inner">
+                  {Object.entries(displayCities).map(([name, count], i) => (
+                    <div
+                      key={name}
+                      className={`h-full transition-all duration-500 ${["bg-emerald-500", "bg-sky-500", "bg-purple-500", "bg-amber-500", "bg-pink-500", "bg-teal-500", "bg-slate-400"][i % 7]}`}
+                      style={{ width: `${(Number(count) / totalCityVisits) * 100}%` }}
+                      title={`${name}: ${count}`}
+                    ></div>
+                  ))}
+                </div>
               </div>
-              <div className="w-full h-3.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex shadow-inner">
-                <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" style={{ width: "42%" }} title="Punjab (Lahore/Faisalabad/RWP)"></div>
-                <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500" style={{ width: "32%" }} title="Sindh (Karachi)"></div>
-                <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-400 transition-all duration-500" style={{ width: "16%" }} title="KPK (Peshawar)"></div>
-                <div className="h-full bg-gradient-to-r from-amber-500 to-orange-400 transition-all duration-500" style={{ width: "10%" }} title="International / Exports"></div>
+            )}
+
+            {totalCityVisits === 0 && (
+              <div className={`rounded-xl border border-dashed p-6 text-center text-sm font-medium ${
+                isDark ? "border-slate-700 text-slate-400" : "border-slate-300 text-slate-500"
+              }`}>
+                No visitors recorded yet. Cities will appear here as people open kitepk.com.
               </div>
-            </div>
+            )}
 
             {/* Cities Grid Breakdown (Clear, High Contrast Cards) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
               {Object.entries(displayCities).map(([cityName, count], idx) => {
                 const countNum = Number(count) || 0;
                 const pct = totalCityVisits > 0 ? Math.round((countNum / totalCityVisits) * 100) : 0;
-                const isUAE = cityName.includes("UAE") || cityName.includes("Dubai");
-                const isUK = cityName.includes("UK") || cityName.includes("London");
-                const flag = isUAE ? "🇦🇪" : isUK ? "🇬🇧" : "🇵🇰";
+                const flag = flagFor(cityName);
 
                 return (
                   <div 
@@ -591,7 +624,7 @@ function DashboardContent() {
                           {cityName}
                         </div>
                         <div className={`text-xs font-medium mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                          {formatNumber(countNum)} visitors captured
+                          {formatNumber(countNum)} {countNum === 1 ? "visitor" : "visitors"}
                         </div>
                       </div>
                     </div>
@@ -627,72 +660,29 @@ function DashboardContent() {
               </p>
             </div>
 
-            {/* Channels list */}
+            {/* Channels list (real counts from the visitor tracker) */}
             <div className="space-y-3.5">
-              <div
-                className={`flex items-center justify-between p-4 rounded-xl border ${
-                  isDark ? "bg-[#161D2E] border-[#1E293B]" : "bg-slate-50 border-slate-200"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-500/15 text-emerald-500 flex items-center justify-center text-lg">
-                    <FaWhatsapp />
-                  </div>
-                  <div>
-                    <div className={`text-sm font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                      WhatsApp Orders
+              {channelRows.map((row) => (
+                <div
+                  key={row.key}
+                  className={`flex items-center justify-between p-4 rounded-xl border ${
+                    isDark ? "bg-[#161D2E] border-[#1E293B]" : "bg-slate-50 border-slate-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-lg ${row.bg} ${row.color} flex items-center justify-center text-lg`}>
+                      {row.icon}
                     </div>
-                    <div className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      Direct chat catalog inquiries
+                    <div>
+                      <div className={`text-sm font-bold ${isDark ? "text-white" : "text-slate-900"}`}>{row.label}</div>
+                      <div className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>{row.hint}</div>
                     </div>
                   </div>
+                  <span className={`text-sm font-black ${row.color}`}>
+                    {formatNumber(row.count)} {row.count === 1 ? "visitor" : "visitors"}
+                  </span>
                 </div>
-                <span className="text-sm font-black text-emerald-500">{sources.whatsapp || 0} visits</span>
-              </div>
-
-              <div
-                className={`flex items-center justify-between p-4 rounded-xl border ${
-                  isDark ? "bg-[#161D2E] border-[#1E293B]" : "bg-slate-50 border-slate-200"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-blue-500/15 text-blue-500 flex items-center justify-center text-lg">
-                    <FaGlobeAmericas />
-                  </div>
-                  <div>
-                    <div className={`text-sm font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                      Direct Web Store
-                    </div>
-                    <div className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      www.kitepk.com domain
-                    </div>
-                  </div>
-                </div>
-                <span className="text-sm font-black text-blue-500">{sources.direct || 0} visits</span>
-              </div>
-
-              <div
-                className={`flex items-center justify-between p-4 rounded-xl border ${
-                  isDark ? "bg-[#161D2E] border-[#1E293B]" : "bg-slate-50 border-slate-200"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-pink-500/15 text-pink-500 flex items-center justify-center text-lg">
-                    <FaBoxes />
-                  </div>
-                  <div>
-                    <div className={`text-sm font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                      Social Media
-                    </div>
-                    <div className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      Facebook &bull; Instagram ads
-                    </div>
-                  </div>
-                </div>
-                <span className="text-sm font-black text-pink-500">
-                  {(sources.facebook || 0) + (sources.instagram || 0)} visits
-                </span>
-              </div>
+              ))}
             </div>
 
             {/* Hardware Split */}
@@ -708,10 +698,10 @@ function DashboardContent() {
                 >
                   <FaMobileAlt className="text-sky-500 mx-auto mb-1.5 text-lg" />
                   <div className={`text-sm font-black ${isDark ? "text-white" : "text-slate-900"}`}>
-                    82% Mobile
+                    {mobilePct}% Mobile
                   </div>
                   <div className={`text-xs font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    Android &bull; iPhone
+                    {formatNumber(mobileCount)} phones / tablets
                   </div>
                 </div>
                 <div
@@ -721,10 +711,10 @@ function DashboardContent() {
                 >
                   <FaDesktop className="text-purple-500 mx-auto mb-1.5 text-lg" />
                   <div className={`text-sm font-black ${isDark ? "text-white" : "text-slate-900"}`}>
-                    18% Desktop
+                    {desktopPct}% Desktop
                   </div>
                   <div className={`text-xs font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    Bulk Distributors
+                    {formatNumber(desktopCount)} computers
                   </div>
                 </div>
               </div>
