@@ -4,6 +4,10 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 
 const CartContext = createContext();
 
+// Must match MAX_ITEM_QUANTITY on the server (lib/constants.js).
+const MAX_QTY = 1000;
+const clampQty = (n) => Math.max(1, Math.min(MAX_QTY, Math.floor(Number(n) || 1)));
+
 export const useCart = () => {
   return useContext(CartContext);
 };
@@ -19,19 +23,9 @@ export const CartProvider = ({ children }) => {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          const normalized = parsed.map((item) => {
-            if (item.itemType === 'promotion') {
-              if (item.promotionId === 'pkg-kite-smart-starter') {
-                return {
-                  ...item,
-                  promotionTitle: 'Kite Affordable for All',
-                  price: 400,
-                  shippingCost: 200,
-                };
-              }
-            }
-            return item;
-          });
+          const normalized = parsed
+            .filter((item) => item && (item.productId || item.promotionId))
+            .map((item) => ({ ...item, quantity: clampQty(item.quantity) }));
           setCartItems(normalized);
         }
       }
@@ -64,7 +58,7 @@ export const CartProvider = ({ children }) => {
         const next = [...prev];
         next[existingIdx] = { 
           ...next[existingIdx], 
-          quantity: next[existingIdx].quantity + quantity 
+          quantity: clampQty(next[existingIdx].quantity + quantity)
         };
         return next;
       }
@@ -76,7 +70,7 @@ export const CartProvider = ({ children }) => {
           brandName: brandName,
           selectedVariant: variant.name,
           price: variant.price || 0,
-          quantity,
+          quantity: clampQty(quantity),
           image: product.image,
           shippingCost: product.shippingCost !== undefined && product.shippingCost !== null ? Number(product.shippingCost) : 200
         }
@@ -101,7 +95,7 @@ export const CartProvider = ({ children }) => {
         const next = [...prev];
         next[existingIdx] = { 
           ...next[existingIdx], 
-          quantity: next[existingIdx].quantity + quantity 
+          quantity: clampQty(next[existingIdx].quantity + quantity)
         };
         return next;
       }
@@ -112,7 +106,7 @@ export const CartProvider = ({ children }) => {
           promotionId: promotion.id,
           promotionTitle: promotion.title,
           price: price || 0,
-          quantity,
+          quantity: clampQty(quantity),
           image: promotion.image,
           shippingCost: promotion.shippingCost !== undefined && promotion.shippingCost !== null ? Number(promotion.shippingCost) : 200
         }
@@ -139,7 +133,7 @@ export const CartProvider = ({ children }) => {
         return next.filter((_, i) => i !== index);
       }
       
-      next[index] = { ...next[index], quantity: newQty };
+      next[index] = { ...next[index], quantity: Math.min(MAX_QTY, newQty) };
       return next;
     });
   };

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from '@/components/RouterCompat';
-import { createOrder, getSettings } from "../services/api";
+import { createOrder, getSettings, quoteOrder } from "../services/api";
 import SeoHead from "../components/seo/SeoHead";
 import { useCart } from "../context/CartContext";
 import { colors } from "../theme";
@@ -12,6 +12,8 @@ import OrderConfirmModal from "../components/checkout/OrderConfirmModal";
 const PHONE_REGEX = /^(?:\+92|92|0)3\d{9}$/;
 
 const normalizePhone = (value = "") => value.replace(/[\s()-]/g, "");
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -130,6 +132,60 @@ const CheckoutPage = () => {
     return ((Number(checkoutData?.unitPrice) || 0) * (Number(form.quantity) || 1)) + applicableShippingCost;
   }, [isCartCheckout, checkoutData, form.quantity, applicableShippingCost]);
 
+  // ---- Authoritative server quote (what the customer will actually be charged) ----
+  const quotePayload = useMemo(() => {
+    if (!checkoutData) return null;
+    if (isCartCheckout) {
+      return {
+        type: "cart",
+        items: checkoutData.items.map((item) => ({
+          itemType: item.itemType || "product",
+          productId: item.productId,
+          promotionId: item.promotionId,
+          brandName: item.brandName,
+          selectedVariant: item.selectedVariant,
+          quantity: item.quantity,
+        })),
+      };
+    }
+    return {
+      type: checkoutData.type,
+      productId: checkoutData.productId,
+      promotionId: checkoutData.promotionId,
+      selectedSkuOrSize: checkoutData.selectedSkuOrSize,
+      quantity: Number(form.quantity) || 1,
+    };
+  }, [checkoutData, isCartCheckout, form.quantity]);
+
+  const [quoteState, setQuoteState] = useState({ data: null, error: "", loading: false });
+
+  useEffect(() => {
+    if (!quotePayload) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setQuoteState((prev) => ({ ...prev, loading: true }));
+      try {
+        const data = await quoteOrder(quotePayload);
+        if (!cancelled) setQuoteState({ data, error: "", loading: false });
+      } catch (err) {
+        if (!cancelled) setQuoteState({ data: null, error: err.message || "Could not calculate the total", loading: false });
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [quotePayload]);
+
+  const quote = quoteState.data;
+  const displayShipping = quote ? quote.shippingCost : applicableShippingCost;
+  const displayTotal = quote ? quote.totalAmount : grandTotal;
+  const displaySubtotal = quote
+    ? quote.subtotal
+    : isCartCheckout
+      ? checkoutData?.total || 0
+      : (Number(checkoutData?.unitPrice) || 0) * (Number(form.quantity) || 1);
+
   if (!checkoutData) {
     return (
       <>
@@ -198,6 +254,14 @@ const CheckoutPage = () => {
       setError("Name, city, and address are required.");
       return;
     }
+    if (!EMAIL_REGEX.test(form.email.trim())) {
+      setError("Enter a valid email address so we can send your order receipt.");
+      return;
+    }
+    if (quoteState.error) {
+      setError(quoteState.error);
+      return;
+    }
 
     setError("");
     setShowConfirmModal(true);
@@ -222,8 +286,6 @@ const CheckoutPage = () => {
             brandName: item.brandName,
             selectedVariant: item.selectedVariant,
             quantity: item.quantity,
-            price: item.price,
-            shippingCost: item.shippingCost
           }))
         };
       } else {
@@ -236,13 +298,10 @@ const CheckoutPage = () => {
         };
       }
 
-      orderPayload.shippingCost = applicableShippingCost;
-      orderPayload.totalAmount = grandTotal;
-
       const orderResult = await createOrder({
         ...orderPayload,
         customerName: form.customerName,
-        email: form.email,
+        email: form.email.trim(),
         address: form.address,
         city: form.city,
         note: form.note,
@@ -254,13 +313,8 @@ const CheckoutPage = () => {
         clearCart();
       }
 
-      try {
-        localStorage.setItem('lastOrder', JSON.stringify(orderResult));
-      } catch {
-        // ignore
-      }
       setShowConfirmModal(false);
-      const orderId = orderResult._id || orderResult.id || 'confirmed';
+      const orderId = orderResult.id || 'confirmed';
       navigate(`/order-success/${orderId}`, {
         state: { orderDetails: orderResult }
       });
@@ -424,9 +478,14 @@ const CheckoutPage = () => {
             </div>
 
             <div className="md:col-span-2 mt-4 space-y-2">
+              {quoteState.error && (
+                <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                  {quoteState.error}
+                </p>
+              )}
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || Boolean(quoteState.error)}
                 className="w-full px-5 py-3.5 rounded-lg text-white font-bold bg-[#00AEEF] hover:bg-[#0095CC] flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all text-sm disabled:opacity-50 cursor-pointer"
               >
                 {submitting ? "Placing Order..." : "Place Order (Cash on Delivery)"}
@@ -507,12 +566,12 @@ const CheckoutPage = () => {
                     </div>
                     <div className="flex justify-between items-center mb-4 text-[#666666]">
                       <p className="text-sm">Shipping</p>
-                      <p className="font-semibold">Rs {applicableShippingCost}</p>
+                      <p className="font-semibold">Rs {Number(displayShipping).toLocaleString()}</p>
                     </div>
                     <div className="flex justify-between items-center border-t border-[#E0E0E0] pt-4">
                       <p className="text-base font-bold text-[#222222]">Estimated Total</p>
                       <p className="text-2xl font-black text-[#00AEEF]">
-                        Rs {grandTotal.toLocaleString()}
+                        Rs {Number(displayTotal).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -550,17 +609,17 @@ const CheckoutPage = () => {
                 <div className="flex justify-between text-[#666666] text-sm">
                   <span>Subtotal</span>
                   <span className="font-semibold">
-                    Rs {((Number(checkoutData.unitPrice) || 0) * (Number(form.quantity) > 0 ? Number(form.quantity) : checkoutData.quantity)).toLocaleString()}
+                    Rs {Number(displaySubtotal).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between text-[#666666] text-sm">
                   <span>Shipping</span>
-                  <span className="font-semibold">Rs {applicableShippingCost}</span>
+                  <span className="font-semibold">Rs {Number(displayShipping).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center pt-2 mt-2 border-t border-[#E0E0E0]">
                   <p className="text-sm font-semibold text-[#222222]">Estimated Total</p>
                   <p className="text-2xl font-bold text-[#00AEEF]">
-                    Rs {grandTotal.toLocaleString()}
+                    Rs {Number(displayTotal).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -594,11 +653,9 @@ const CheckoutPage = () => {
             address: form.address,
           }}
           totals={{
-            subtotal: isCartCheckout
-              ? checkoutData.total
-              : (checkoutData.unitPrice || 0) * (Number(form.quantity) || 1),
-            shipping: applicableShippingCost,
-            grand: grandTotal,
+            subtotal: displaySubtotal,
+            shipping: displayShipping,
+            grand: displayTotal,
           }}
           onConfirm={handleConfirmOrder}
           onCancel={() => setShowConfirmModal(false)}

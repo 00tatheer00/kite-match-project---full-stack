@@ -1,47 +1,25 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { findOrder, isUuid, toPublicOrder } from '@/lib/orders';
+import { getClientIp, rateLimit } from '@/lib/rate-limit';
+import { handleRouteError, jsonError, NO_STORE_HEADERS } from '@/lib/http';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
-// GET /api/orders/[id]
+// GET /api/orders/:id — public order confirmation lookup.
+// Only accepts the unguessable order UUID (not the sequential KT-xxx number)
+// and returns a reduced field set without email/address/full phone.
 export async function GET(request, context) {
-  const { params } = context;
-  const id = (await params)?.id;
-  if (!id) {
-    return NextResponse.json({ message: 'Order ID required' }, { status: 400 });
-  }
+  const limit = rateLimit(`order-lookup:${getClientIp(request)}`, { limit: 30, windowMs: 60 * 1000 });
+  if (!limit.ok) return jsonError('Too many requests', 429);
+
+  const id = (await context.params)?.id;
+  if (!isUuid(id)) return jsonError('Order not found', 404);
 
   try {
-    // Try Supabase
-    if (isSupabaseConfigured()) {
-      try {
-        const sb = getSupabaseAdmin();
-        let { data } = await sb.from('orders').select('*').eq('id', id).single();
-        if (!data) {
-          const res = await sb.from('orders').select('*').eq('orderNumber', id).single();
-          data = res.data;
-        }
-        if (data) return NextResponse.json(data);
-      } catch {}
-    }
-
-    // Fallback to store
-    try {
-      const { getOrderById } = await import('@/lib/store');
-      const storeOrder = getOrderById(id);
-      if (storeOrder) return NextResponse.json(storeOrder);
-    } catch {}
-
-    // Fallback to remote
-    try {
-      const { fetchRemoteFallback } = await import('@/lib/api-fallback');
-      const remoteOrder = await fetchRemoteFallback(`/orders/${id}`);
-      if (remoteOrder) return NextResponse.json(remoteOrder);
-    } catch {}
-
-    return NextResponse.json({ message: 'Order not found' }, { status: 404 });
+    const order = await findOrder(id);
+    if (!order) return jsonError('Order not found', 404);
+    return NextResponse.json(toPublicOrder(order), { headers: NO_STORE_HEADERS });
   } catch (err) {
-    return NextResponse.json({ message: 'Order not found' }, { status: 404 });
+    return handleRouteError(err, 'get order');
   }
 }

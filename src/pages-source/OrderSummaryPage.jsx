@@ -16,10 +16,11 @@ const OrderSummaryPage = () => {
       return;
     }
     try {
-      const saved = localStorage.getItem('lastOrder');
+      localStorage.removeItem('lastOrder'); // legacy: customer details used to persist here indefinitely
+      const saved = sessionStorage.getItem('lastOrder');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && (parsed._id === id || parsed.id === id || parsed.orderNumber === id || id === 'confirmed')) {
+        if (parsed && (parsed.id === id || parsed.orderNumber === id || id === 'confirmed')) {
           setOrderDetails(parsed);
           return;
         }
@@ -28,7 +29,7 @@ const OrderSummaryPage = () => {
       // ignore
     }
     if (id && id !== 'confirmed') {
-      fetch(`/api/orders/${id}`)
+      fetch(`/api/orders/${encodeURIComponent(id)}`)
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (data) setOrderDetails(data);
@@ -86,7 +87,7 @@ const OrderSummaryPage = () => {
                       </div>
                       <div className="col-span-2">
                         <p className="text-sm text-gray-500 mb-1">Address</p>
-                        <p className="font-semibold" style={{ color: colors.text.primary }}>{orderDetails.address}, {orderDetails.city}</p>
+                        <p className="font-semibold" style={{ color: colors.text.primary }}>{[orderDetails.address, orderDetails.city].filter(Boolean).join(', ')}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500 mb-1">Payment Method</p>
@@ -112,9 +113,11 @@ const OrderSummaryPage = () => {
                           {orderDetails.items.map((item, idx) => (
                             <tr key={idx} className="bg-white">
                               <td className="py-3 px-4" style={{ color: colors.text.primary }}>
-                                {item.itemType === 'promotion'
-                                  ? `Promotion: ${item.promotionId}`
-                                  : (item.brandName || `Product: ${item.productId}`)}
+                                {item.title
+                                  ? (item.brandName && item.brandName !== item.title ? `${item.title} — ${item.brandName}` : item.title)
+                                  : item.itemType === 'promotion'
+                                    ? `Promotion: ${item.promotionId}`
+                                    : (item.brandName || `Product: ${item.productId}`)}
                               </td>
                               <td className="py-3 px-4" style={{ color: colors.text.secondary }}>
                                 {item.selectedVariant || 'N/A'}
