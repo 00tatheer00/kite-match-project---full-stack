@@ -12,6 +12,7 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import ScrollToTop from '@/components/ScrollToTop';
 import VisitorTracker from '@/components/VisitorTracker';
 import NavigationProgress from '@/components/NavigationProgress';
+import MobileBottomNav from '@/components/MobileBottomNav';
 
 // Same look for every toast on the site and in the admin panel.
 const TOAST_OPTIONS = {
@@ -55,7 +56,8 @@ export default function ClientShell({ children }) {
       </Suspense>
       <ScrollToTop />
       <Toaster position="top-center" toastOptions={TOAST_OPTIONS} />
-      <div className="min-h-screen bg-white flex flex-col">
+      {/* pb on phones leaves room for the bottom tab bar */}
+      <div className="min-h-screen bg-white flex flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
         <Navbar />
         <div className="flex-1 app-page-compact">
           <main id="main-content">
@@ -66,6 +68,7 @@ export default function ClientShell({ children }) {
         <CartDrawer />
         <FloatingCartButton />
         <WhatsAppButton />
+        <MobileBottomNav />
       </div>
     </CartProvider>
   );

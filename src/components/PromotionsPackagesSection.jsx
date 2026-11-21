@@ -218,7 +218,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
           initial={{ opacity: 0, y: 25 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="text-center mb-10"
+          className="text-center mb-6 md:mb-10"
         >
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-4 shadow-xs">
@@ -233,12 +233,12 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
             </span>
           </h1>
 
-          <p className="text-[#666666] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-6">
+          <p className="hidden sm:block text-[#666666] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-6">
             Factory rates par hamara catalog browse karein, items ko direct Cart mein add karein aur online order place karein. Nationwide Cash on Delivery available hai!
           </p>
 
           {/* Customer Helpline & Support Banner */}
-          <div className="flex flex-wrap items-center justify-center gap-3 max-w-lg mx-auto mb-8">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-lg mx-auto mb-2 sm:mb-8">
             <div className="bg-white text-[#222222] border border-gray-200 px-5 py-2.5 rounded-full font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-xs">
               <FaPhoneAlt className="text-xs text-[#00AEEF]" />
               <span>Customer Helpline: 0301 8117666</span>
@@ -250,7 +250,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
           </div>
 
           {/* Trust Highlights */}
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
+          <div className="hidden sm:grid mt-8 grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
             <div className="bg-white p-3.5 rounded-xl border border-[#EBEBEB] shadow-sm flex items-center gap-3 text-left">
               <div className="w-9 h-9 rounded-lg bg-[#EAF8FE] text-[#00AEEF] flex items-center justify-center flex-shrink-0 text-base">
                 <FaTruck />
@@ -293,9 +293,9 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
           </div>
         </motion.div>
 
-        {/* Filter Tabs & Search Bar */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 pb-4 border-b border-[#E5E5E5]">
+        {/* Filter Tabs & Search Bar (sticky at the top on phones, like a shop app) */}
+        <div className="sticky top-0 z-30 -mx-4 px-4 pt-3 bg-[#FAFAFA]/95 backdrop-blur md:static md:mx-0 md:px-0 md:pt-0 md:bg-transparent md:backdrop-blur-none mb-5 md:mb-8">
+          <div className="flex flex-col-reverse md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 pb-3 md:pb-4 border-b border-[#E5E5E5]">
             {/* Filter Tabs */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
               {filterTabs.map((tab) => {
@@ -329,7 +329,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search SKU, weight or product..."
-                className="w-full pl-9 pr-4 py-2 rounded-lg bg-white border border-[#E0E0E0] text-xs sm:text-sm text-[#222222] placeholder-[#999999] focus:outline-none focus:border-[#00AEEF] transition-all"
+                className="w-full pl-9 pr-4 py-3 md:py-2 rounded-xl md:rounded-lg bg-white border border-[#E0E0E0] text-sm text-[#222222] placeholder-[#999999] focus:outline-none focus:border-[#00AEEF] transition-all"
               />
               {searchQuery && (
                 <button
@@ -382,7 +382,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className="bg-white rounded-2xl border border-[#E5E5E5] shadow-sm hover:shadow-md transition-all overflow-hidden p-6 sm:p-8"
+                    className="bg-white rounded-2xl border border-[#E5E5E5] shadow-sm hover:shadow-md transition-all overflow-hidden p-4 sm:p-8"
                   >
                     <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-start">
                       {/* Package Image */}
@@ -414,7 +414,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                       {/* Package Details */}
                       <div className="flex-1 flex flex-col justify-between w-full h-full">
                         <div>
-                          <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mb-2.5 leading-tight">
+                          <h3 className="text-xl sm:text-3xl md:text-4xl font-black text-slate-900 mb-2.5 leading-tight">
                             {pkg.title}
                           </h3>
                           {pkg.description && (
@@ -469,7 +469,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                             </div>
                             <div className="flex flex-wrap items-center gap-3">
                               <span className="text-sm sm:text-base font-black text-slate-800 uppercase tracking-wider">Final Price:</span>
-                              <p className="text-3xl sm:text-4xl md:text-5xl font-black text-[#00AEEF] tracking-tight">
+                              <p className="text-2xl sm:text-4xl md:text-5xl font-black text-[#00AEEF] tracking-tight">
                                 {formatPrice(totals.totalPrice)}
                               </p>
                               {pkg.shippingCost === 0 ? (
@@ -514,7 +514,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                             <button
                               type="button"
                               onClick={() => handleBuyPromotion(pkg)}
-                              className={`px-8 py-3 rounded-xl font-black text-sm sm:text-base text-white flex items-center gap-2.5 transition-all shadow-md cursor-pointer ${
+                              className={`flex-1 sm:flex-none justify-center px-6 sm:px-8 py-3 rounded-xl font-black text-sm sm:text-base text-white flex items-center gap-2.5 transition-all shadow-md cursor-pointer ${
                                 isJustAdded
                                   ? "bg-emerald-600 hover:bg-emerald-700"
                                   : "bg-[#00AEEF] hover:bg-[#0095CC] active:scale-95 shadow-sky-500/20"
@@ -555,7 +555,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
               {filteredSkus.map((sku, index) => {
                 const skuKey = `sku-${sku.product.id}-${sku.variant.name}`;
                 const isJustAdded = addedItemKey === skuKey;
@@ -567,11 +567,11 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.35, delay: (index % 12) * 0.03 }}
-                    className="bg-white rounded-xl border border-[#E5E5E5] hover:border-[#00AEEF]/50 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+                    className="bg-white rounded-2xl sm:rounded-xl border border-[#E5E5E5] hover:border-[#00AEEF]/50 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden group"
                   >
                     <div>
                       {/* Product Image Area */}
-                      <div className="relative aspect-square w-full bg-[#F7F7F7] flex items-center justify-center p-4 overflow-hidden border-b border-[#EFEFEF]">
+                      <div className="relative aspect-square w-full bg-[#F7F7F7] flex items-center justify-center p-3 sm:p-4 overflow-hidden border-b border-[#EFEFEF]">
                         {sku.image ? (
                           <img
                             src={sku.image?.src || sku.image}
@@ -589,7 +589,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                         {/* Top Category Badge */}
                         <div className="absolute top-2.5 left-2.5">
                           <span
-                            className="text-xs font-black px-2.5 py-1 rounded-lg text-white shadow-xs uppercase tracking-wider"
+                            className="text-[9px] sm:text-xs font-black px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-white shadow-xs uppercase tracking-wider"
                             style={{ backgroundColor: sku.color || "#00AEEF" }}
                           >
                             {sku.category}
@@ -598,7 +598,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
 
                         {/* Packing pill if available */}
                         {sku.variant.packing && (
-                          <div className="absolute bottom-2.5 left-2.5 right-2.5">
+                          <div className="hidden sm:block absolute bottom-2.5 left-2.5 right-2.5">
                             <span className="text-xs bg-white/95 backdrop-blur-xs text-slate-700 font-black px-2.5 py-1 rounded-lg border border-slate-200 shadow-xs inline-block truncate max-w-full">
                               📦 {sku.variant.packing}
                             </span>
@@ -607,24 +607,24 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                       </div>
 
                       {/* Content Details */}
-                      <div className="p-4">
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      <div className="p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 truncate">
                           {sku.brandName}
                         </p>
                         
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-2 mb-1 sm:mb-2">
+                          <h3 className="text-sm sm:text-lg font-black text-slate-900 leading-snug">
                             {sku.variant.name}
                           </h3>
                           {sku.variant.detail && (
-                            <span className="text-xs sm:text-sm font-bold px-2.5 py-0.5 bg-slate-100 text-slate-800 rounded-lg border border-slate-200">
+                            <span className="self-start text-[11px] sm:text-sm font-bold px-2 sm:px-2.5 py-0.5 bg-slate-100 text-slate-800 rounded-lg border border-slate-200">
                               {sku.variant.detail}
                             </span>
                           )}
                         </div>
 
                         {sku.tagline && (
-                          <p className="text-xs sm:text-sm text-slate-600 italic line-clamp-1 mb-2 font-medium">
+                          <p className="hidden sm:block text-xs sm:text-sm text-slate-600 italic line-clamp-1 mb-2 font-medium">
                             {sku.tagline}
                           </p>
                         )}
@@ -632,10 +632,10 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                     </div>
 
                     {/* Bottom Pricing & Actions */}
-                    <div className="p-4 pt-0">
-                      <div className="flex items-baseline justify-between mb-3 border-t border-slate-100 pt-3">
-                        <span className="text-sm font-black text-slate-700">Factory Price:</span>
-                        <span className="text-2xl sm:text-3xl font-black text-[#00AEEF] tracking-tight">
+                    <div className="p-3 pt-0 sm:p-4 sm:pt-0">
+                      <div className="flex items-baseline justify-between mb-2 sm:mb-3 border-t border-slate-100 pt-2 sm:pt-3">
+                        <span className="hidden sm:inline text-sm font-black text-slate-700">Factory Price:</span>
+                        <span className="text-lg sm:text-3xl font-black text-[#00AEEF] tracking-tight">
                           {formatPrice(sku.variant.price)}
                         </span>
                       </div>
@@ -645,7 +645,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                         <button
                           type="button"
                           onClick={() => handleBuySku(sku.product, sku.variant, sku.brandName)}
-                          className={`w-full py-3 px-4 rounded-xl font-black text-sm text-white flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg cursor-pointer ${
+                          className={`w-full py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-black text-xs sm:text-sm text-white flex items-center justify-center gap-1.5 sm:gap-2 transition-all shadow-md hover:shadow-lg cursor-pointer ${
                             isJustAdded
                               ? "bg-emerald-600 hover:bg-emerald-700"
                               : "bg-[#00AEEF] hover:bg-[#0095CC] active:scale-95 shadow-sky-500/20"
@@ -653,7 +653,8 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                           title="Add SKU to cart"
                         >
                           <FaShoppingCart className="text-sm" />
-                          <span>{isJustAdded ? "Added to Cart!" : "Add to Cart"}</span>
+                          <span className="sm:hidden">{isJustAdded ? "Added ✓" : "Add"}</span>
+                          <span className="hidden sm:inline">{isJustAdded ? "Added to Cart!" : "Add to Cart"}</span>
                         </button>
                       </div>
                     </div>

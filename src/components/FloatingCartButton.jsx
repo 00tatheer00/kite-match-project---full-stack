@@ -16,7 +16,7 @@ const FloatingCartButton = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: 50 }}
           transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 20 }}
-          className="fixed right-5 bottom-24 z-40 sm:bottom-28" // positioned above WhatsApp button
+          className="hidden md:block fixed right-5 bottom-24 z-40 sm:bottom-28" // positioned above WhatsApp button
         >
           <button
             onClick={openCart}

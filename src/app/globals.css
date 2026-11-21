@@ -307,6 +307,13 @@ body:not(.admin-route) textarea:hover {
   zoom: var(--home-scale);
 }
 
+/* Phones: full size, app-like (text and buttons big enough to read and tap). */
+@media (max-width: 767px) {
+  .app-page-compact {
+    --home-scale: 1;
+  }
+}
+
 @supports not (zoom: 1) {
   .app-page-compact {
     transform: scale(var(--home-scale));

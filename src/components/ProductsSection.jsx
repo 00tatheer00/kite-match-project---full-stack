@@ -131,7 +131,7 @@ const ProductsSection = ({ initialProducts = [] }) => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
               {allProducts.map((product) => {
                 const accent = product.color || "#00AEEF";
                 const prices = priceList(product);
@@ -143,7 +143,7 @@ const ProductsSection = ({ initialProducts = [] }) => {
                   <Link
                     key={product.id}
                     to={`/products/${product.id}`}
-                    className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300"
+                    className="group relative bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300"
                     aria-label={`${product.title}: view details and prices`}
                   >
                     {/* Image on a soft brand-coloured backdrop */}
@@ -159,30 +159,30 @@ const ProductsSection = ({ initialProducts = [] }) => {
                         className="max-h-[78%] max-w-[78%] object-contain drop-shadow-xl group-hover:scale-110 transition-transform duration-500"
                       />
                       <span
-                        className="absolute top-4 left-4 px-3 py-1 rounded-full text-white text-xs font-bold tracking-wide shadow-md"
+                        className="absolute top-2 left-2 sm:top-4 sm:left-4 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-white text-[10px] sm:text-xs font-bold tracking-wide shadow-md"
                         style={{ backgroundColor: accent }}
                       >
                         {product.category || product.productType || "Product"}
                       </span>
                       {fromPrice != null && (
-                        <span className="absolute bottom-4 right-4 rounded-2xl bg-white/95 backdrop-blur px-3.5 py-2 shadow-lg text-right leading-tight">
-                          <span className="block text-[11px] font-semibold text-slate-500">Starting from</span>
-                          <span className="block text-lg font-black text-slate-900">Rs {fromPrice.toLocaleString("en-PK")}</span>
+                        <span className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 rounded-xl sm:rounded-2xl bg-white/95 backdrop-blur px-2 sm:px-3.5 py-1 sm:py-2 shadow-lg text-right leading-tight">
+                          <span className="block text-[9px] sm:text-[11px] font-semibold text-slate-500">From</span>
+                          <span className="block text-sm sm:text-lg font-black text-slate-900">Rs {fromPrice.toLocaleString("en-PK")}</span>
                         </span>
                       )}
                     </div>
 
                     {/* Details */}
-                    <div className="p-6 flex-1 flex flex-col">
-                      <h3 className="text-slate-900 text-xl md:text-2xl font-extrabold leading-snug group-hover:text-[#00AEEF] transition-colors">
+                    <div className="p-3 sm:p-6 flex-1 flex flex-col">
+                      <h3 className="text-slate-900 text-sm sm:text-xl md:text-2xl font-extrabold leading-snug group-hover:text-[#00AEEF] transition-colors">
                         {product.title}
                       </h3>
                       {product.description && (
-                        <p className="mt-2 text-slate-600 text-sm leading-relaxed line-clamp-2">{product.description}</p>
+                        <p className="hidden sm:block mt-2 text-slate-600 text-sm leading-relaxed line-clamp-2">{product.description}</p>
                       )}
 
                       {sizes.length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-1.5">
+                        <div className="hidden sm:flex mt-4 flex-wrap gap-1.5">
                           {sizes.slice(0, 4).map((name) => (
                             <span key={name} className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">
                               {name}
@@ -196,12 +196,13 @@ const ProductsSection = ({ initialProducts = [] }) => {
                         </div>
                       )}
 
-                      <div className="mt-auto pt-6">
+                      <div className="mt-auto pt-3 sm:pt-6">
                         <span
-                          className="flex items-center justify-center gap-2 w-full rounded-2xl py-3 font-bold text-white shadow-md group-hover:shadow-lg transition-all"
+                          className="flex items-center justify-center gap-2 w-full rounded-xl sm:rounded-2xl py-2.5 sm:py-3 text-xs sm:text-base font-bold text-white shadow-md group-hover:shadow-lg transition-all"
                           style={{ backgroundColor: accent }}
                         >
-                          View details &amp; prices
+                          <span className="sm:hidden">View</span>
+                          <span className="hidden sm:inline">View details &amp; prices</span>
                           <FaArrowRight className="text-sm group-hover:translate-x-1 transition-transform" />
                         </span>
                       </div>

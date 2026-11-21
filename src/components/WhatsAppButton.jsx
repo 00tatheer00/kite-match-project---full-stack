@@ -16,7 +16,7 @@ const WhatsAppButton = () => {
   };
 
   return (
-    <div className="fixed bottom-8 right-8 z-50">
+    <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 md:bottom-8 md:right-8 z-50">
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
