@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
 import { adminGetAnalytics, adminResetAnalytics } from "../services/api";
 import { useAdminTheme } from "../context/AdminThemeContext";
+import { notify } from "@/components/admin/AdminToast";
 import { 
   FaChartLine, 
   FaUsers, 
@@ -23,6 +24,8 @@ import {
   FaCheckCircle 
 } from "react-icons/fa";
 
+const ACTIVE_WINDOW_MS = 5 * 60 * 1000;
+
 const AdminAnalyticsPage = () => {
   const { isDark } = useAdminTheme();
   const [analytics, setAnalytics] = useState(null);
@@ -30,11 +33,14 @@ const AdminAnalyticsPage = () => {
   // Clock for relative timestamps (kept in state so rendering stays pure).
   const [nowTs, setNowTs] = useState(() => Date.now());
   useEffect(() => {
-    const t = setInterval(() => setNowTs(Date.now()), 30000);
+    const t = setInterval(() => setNowTs(Date.now()), 15000);
     return () => clearInterval(t);
   }, []);
   const [refreshing, setRefreshing] = useState(false);
-  const [timeRange, setTimeRange] = useState("30d");
+  const activeNow = (analytics?.recentVisits || []).filter((v) => {
+    const t = new Date(v?.timestamp).getTime();
+    return Number.isFinite(t) && nowTs - t <= ACTIVE_WINDOW_MS;
+  }).length;
 
   const loadData = async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
@@ -50,13 +56,14 @@ const AdminAnalyticsPage = () => {
   };
 
   const handleReset = async () => {
-    if (!window.confirm("Are you sure you want to reset all visitor analytics to 0?")) return;
+    if (!window.confirm("Reset all visitor numbers to 0?\n\nCounting starts again from now. This cannot be undone.")) return;
     setRefreshing(true);
     try {
       await adminResetAnalytics();
       await loadData(true);
+      notify.success("Analytics reset to 0. New visits will be counted from now.");
     } catch (e) {
-      console.error(e);
+      notify.error(e?.message || "Could not reset analytics. Please try again.");
     } finally {
       setRefreshing(false);
     }
@@ -64,8 +71,8 @@ const AdminAnalyticsPage = () => {
 
   useEffect(() => {
     loadData();
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(() => loadData(), 30000);
+    // Auto-refresh every 15 seconds so the numbers stay live.
+    const interval = setInterval(() => loadData(), 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -179,40 +186,12 @@ const AdminAnalyticsPage = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Time range toggle */}
-            <div className={`inline-flex rounded-xl border p-1 text-xs font-semibold ${
-              isDark ? "border-[#1E293B] bg-[#111726]" : "border-slate-200 bg-white shadow-xs"
-            }`}>
-              <button
-                onClick={() => setTimeRange("7d")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  timeRange === "7d"
-                    ? "bg-[#00AEEF] text-white shadow-sm"
-                    : isDark ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                7 Days
-              </button>
-              <button
-                onClick={() => setTimeRange("30d")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  timeRange === "30d"
-                    ? "bg-[#00AEEF] text-white shadow-sm"
-                    : isDark ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                30 Days
-              </button>
-              <button
-                onClick={() => setTimeRange("all")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  timeRange === "all"
-                    ? "bg-[#00AEEF] text-white shadow-sm"
-                    : isDark ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                All Time
-              </button>
+            {/* Visitors active in the last 5 minutes (from the live visit stream) */}
+            <div className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold ${
+              isDark ? "border-[#1E293B] bg-[#111726] text-slate-200" : "border-slate-200 bg-white text-slate-800 shadow-xs"
+            }`} title="Visits in the last 5 minutes">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>{activeNow} online now</span>
             </div>
 
             {/* Reset to 0 Button */}

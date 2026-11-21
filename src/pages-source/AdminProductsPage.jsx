@@ -12,7 +12,6 @@ import {
   FaTrashAlt,
   FaPlus,
   FaTag,
-  FaFileDownload,
   FaFileUpload,
   FaFileExcel
 } from "react-icons/fa";
@@ -29,6 +28,7 @@ import {
   downloadCSV,
 } from "@/utils/csvHelper";
 import { colors } from "../theme";
+import { notify } from "@/components/admin/AdminToast";
 
 const emptyForm = {
   id: "",
@@ -229,14 +229,93 @@ const AdminProductsPage = () => {
       : "bg-sky-50 text-sky-800 border border-sky-200/90 font-semibold";
   };
 
-  const handleEditSku = (sku) => {
-    const parentProd = products.find((p) => p.id === sku.productId) || sku.product;
-    if (parentProd) {
-      handleEdit(parentProd);
-      setTimeout(() => {
-        const el = document.getElementById("variants-section");
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 150);
+  // ---------------- Quick SKU editor (one size/price at a time) ----------------
+  // quickSku: null | { mode: 'edit'|'add', productId, brandIndex (number|null), variantIndex, name, detail, packing, price }
+  const [quickSku, setQuickSku] = useState(null);
+  const [quickError, setQuickError] = useState("");
+
+  const openQuickEdit = (sku) => {
+    setQuickError("");
+    setQuickSku({
+      mode: "edit",
+      productId: sku.productId,
+      brandIndex: Number.isInteger(sku.brandIndex) ? sku.brandIndex : null,
+      variantIndex: sku.variantIndex,
+      originalName: sku.variant.name || "",
+      name: sku.variant.name || "",
+      detail: sku.variant.detail || "",
+      packing: sku.variant.packing || "",
+      price: sku.variant.price ?? "",
+    });
+  };
+
+  const openQuickAdd = () => {
+    setQuickError("");
+    const first = products[0];
+    setQuickSku({
+      mode: "add",
+      productId: first?.id || "",
+      brandIndex: first?.brands?.length ? 0 : null,
+      variantIndex: null,
+      originalName: "",
+      name: "",
+      detail: "",
+      packing: "",
+      price: "",
+    });
+  };
+
+  // Builds the minimal update (only the list that changed) for a product.
+  const buildSkuUpdate = (prod, brandIndex, transform) => {
+    if (Number.isInteger(brandIndex)) {
+      const brands = (prod.brands || []).map((b, i) =>
+        i === brandIndex ? { ...b, variants: transform([...(b.variants || [])]) } : b
+      );
+      return { brands };
+    }
+    return { variants: transform([...(prod.variants || [])]) };
+  };
+
+  const saveQuickSku = async () => {
+    const q = quickSku;
+    if (!q) return;
+    const prod = products.find((p) => p.id === q.productId);
+    if (!prod) return setQuickError("Please choose a product.");
+    if (prod.brands?.length && !Number.isInteger(q.brandIndex)) return setQuickError("Please choose a brand.");
+    const name = q.name.trim();
+    if (!name) return setQuickError("Please enter the size name (for example: 1 KG, LARGE, SUPER BAR).");
+    const price = Number(q.price);
+    if (q.price === "" || !Number.isFinite(price) || price <= 0) {
+      return setQuickError("Please enter a price greater than 0 (numbers only, e.g. 350).");
+    }
+    const list = Number.isInteger(q.brandIndex) ? prod.brands[q.brandIndex]?.variants || [] : prod.variants || [];
+    const duplicate = list.some(
+      (v, i) => (v.name || "").trim().toLowerCase() === name.toLowerCase() && (q.mode === "add" || i !== q.variantIndex)
+    );
+    if (duplicate) return setQuickError(`"${name}" already exists for this product. Use a different name.`);
+
+    const variant = { name, detail: q.detail.trim(), packing: q.packing.trim(), price };
+    const update = buildSkuUpdate(prod, q.brandIndex, (vs) => {
+      if (q.mode === "add") return [...vs, variant];
+      return vs.map((v, i) => (i === q.variantIndex ? { ...v, ...variant } : v));
+    });
+    // Keep a product-level size picture attached when the size is renamed.
+    if (q.mode === "edit" && !Number.isInteger(q.brandIndex) && q.originalName && q.originalName !== name) {
+      update.variantImages = (prod.variantImages || []).map((vi) =>
+        (vi?.name || "").trim().toLowerCase() === q.originalName.trim().toLowerCase() ? { ...vi, name } : vi
+      );
+    }
+
+    try {
+      setSaving(true);
+      await adminUpdateProduct(prod.id, update);
+      await load();
+      setQuickSku(null);
+      notify.success(q.mode === "add" ? `"${name}" added to ${prod.title}.` : `"${name}" saved. The website is updated.`);
+    } catch (err) {
+      setQuickError(err.message || "Could not save. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -245,42 +324,33 @@ const AdminProductsPage = () => {
   const handleDeleteSku = async (sku) => {
     const parentProd = products.find((p) => p.id === sku.productId) || sku.product;
     if (!parentProd) return;
+    const where = Number.isInteger(sku.brandIndex) ? sku.brandName : sku.productTitle;
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete SKU "${sku.variant.name}" (${sku.variant.detail || ""}) from ${sku.productTitle}?`
+      `Delete "${sku.variant.name}"${sku.variant.detail ? ` (${sku.variant.detail})` : ""} from ${where}?\n\nCustomers will no longer be able to order this size.`
     );
     if (!confirmDelete) return;
 
     try {
       setSaving(true);
-      const nextVariants = (parentProd.variants || []).filter(
-        (_, idx) => idx !== sku.variantIndex
+      // Brand sizes live inside the brand; product sizes live on the product.
+      const update = buildSkuUpdate(parentProd, Number.isInteger(sku.brandIndex) ? sku.brandIndex : null, (vs) =>
+        vs.filter((_, idx) => idx !== sku.variantIndex)
       );
-      const updatedProduct = {
-        ...parentProd,
-        variants: nextVariants,
-      };
-      await adminUpdateProduct(parentProd.id, updatedProduct);
-      setProducts((prev) =>
-        prev.map((p) => (p.id === parentProd.id ? updatedProduct : p))
-      );
+      await adminUpdateProduct(parentProd.id, update);
+      await load();
+      notify.success(`"${sku.variant.name}" deleted from ${where}.`);
     } catch (err) {
-      setError(err.message || "Failed to delete SKU");
+      notify.error(err.message || "Could not delete. Please try again.");
     } finally {
       setSaving(false);
     }
   };
 
+  // The download is the live price list: edit it in Excel, then "Upload Excel".
   const handleDownloadSampleTemplate = () => {
-    const csvContent = generateProductsSampleCSV();
-    downloadCSV("kite-products-sample-template.csv", csvContent);
-  };
-
-  const handleExportProducts = () => {
-    const csvContent = exportProductsToCSV(products);
-    downloadCSV(
-      `kite-products-export-${new Date().toISOString().slice(0, 10)}.csv`,
-      csvContent
-    );
+    const csvContent = products.length ? exportProductsToCSV(products) : generateProductsSampleCSV(products);
+    downloadCSV(`kite-price-list-${new Date().toISOString().slice(0, 10)}.csv`, csvContent);
+    notify.success("Price list downloaded. Change prices in Excel, save as CSV, then click \"Upload Excel\".");
   };
 
   const handleImportCsvFile = (e) => {
@@ -291,24 +361,28 @@ const AdminProductsPage = () => {
       try {
         const text = evt.target?.result;
         if (!text) return;
-        const merged = parseProductsCSV(text, products);
-        if (!merged || !merged.length) {
-          alert("No valid products detected in file. Please check format.");
+        const { changed, summary, problems } = parseProductsCSV(text, products);
+        if (problems.length) {
+          notify.error(`Please fix the file first: ${problems.slice(0, 3).join(" | ")}`);
+          return;
+        }
+        if (!changed.length) {
+          notify.success("Nothing to change: the file matches the prices already on the website.");
           return;
         }
         const confirmImport = window.confirm(
-          `Found ${merged.length} products with variants in CSV.\n\nDo you want to import and save these into the system now?`
+          `This file will update:\n\n${summary.join("\n")}\n\nSave these changes to the website now?`
         );
         if (!confirmImport) return;
 
         setSaving(true);
-        for (const prod of merged) {
+        for (const prod of changed) {
           await adminUpdateProduct(prod.id, prod);
         }
-        setProducts(merged);
-        alert(`Successfully imported ${merged.length} products!`);
+        await load();
+        notify.success(`Import finished: ${changed.length} product(s) updated. The website is updated.`);
       } catch (err) {
-        alert("Error importing CSV: " + (err.message || "Invalid file format"));
+        notify.error("Import failed: " + (err.message || "Invalid file format"));
       } finally {
         setSaving(false);
         e.target.value = "";
@@ -656,8 +730,10 @@ const AdminProductsPage = () => {
       setProductImages([]);
       setVariantImageFiles({});
       setBrandImageFiles({});
+      notify.success(`"${payload.title}" saved. The website is updated.`);
     } catch (err) {
       setError(err.message || "Failed to save product");
+      notify.error(err.message || "Could not save the product. Please check the form.");
     } finally {
       setSaving(false);
     }
@@ -708,7 +784,10 @@ const AdminProductsPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    const name = products.find((p) => p.id === id)?.title || id;
+    if (!window.confirm(`Delete the whole product "${name}" and all its sizes?
+
+This cannot be undone.`)) return;
     try {
       setSaving(true);
       await adminDeleteProduct(id);
@@ -717,8 +796,10 @@ const AdminProductsPage = () => {
         setShowForm(false);
         setEditingId(null);
       }
+      notify.success(`"${name}" deleted.`);
     } catch (err) {
       setError(err.message || "Failed to delete product");
+      notify.error(err.message || "Could not delete the product.");
     } finally {
       setSaving(false);
     }
@@ -764,7 +845,7 @@ const AdminProductsPage = () => {
                 title="Download standard Excel/CSV template to fill out with products data"
               >
                 <FaFileExcel className="text-emerald-500 text-sm" />
-                <span>Sample Excel Doc</span>
+                <span>Download Excel (to edit)</span>
               </button>
 
               <button
@@ -779,21 +860,18 @@ const AdminProductsPage = () => {
                 title="Import products from Excel/CSV file"
               >
                 <FaFileUpload className="text-sky-500 text-sm" />
-                <span>Import Excel/CSV</span>
+                <span>Upload Excel</span>
               </button>
 
               <button
                 type="button"
-                onClick={handleExportProducts}
-                className={`px-3.5 py-2.5 rounded-xl font-semibold text-xs border flex items-center gap-1.5 transition-all cursor-pointer ${
-                  isDark
-                    ? "bg-slate-800/90 border-slate-700 text-slate-200 hover:bg-slate-700"
-                    : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs"
-                }`}
-                title="Export all products to CSV file"
+                onClick={openQuickAdd}
+                disabled={saving || products.length === 0}
+                className="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-md flex items-center gap-1.5 cursor-pointer transition-all disabled:opacity-50"
+                title="Add a new size and price to an existing product"
               >
-                <FaFileDownload className="text-slate-400 text-sm" />
-                <span>Export CSV</span>
+                <FaTag className="text-xs" />
+                <span>+ Add Size / Price</span>
               </button>
 
               <button
@@ -977,7 +1055,7 @@ const AdminProductsPage = () => {
                               <div className="flex items-center justify-end gap-1.5">
                                 <button
                                   type="button"
-                                  onClick={() => handleEditSku(sku)}
+                                  onClick={() => openQuickEdit(sku)}
                                   className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
                                     isDark
                                       ? "bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
@@ -1056,7 +1134,7 @@ const AdminProductsPage = () => {
                           <div className="flex items-center gap-1.5 mt-1.5">
                             <button
                               type="button"
-                              onClick={() => handleEditSku(sku)}
+                              onClick={() => openQuickEdit(sku)}
                               className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
                                 isDark
                                   ? "bg-slate-800 border-slate-700 text-slate-200"
@@ -2036,6 +2114,135 @@ const AdminProductsPage = () => {
             </div>
           )}
         </div>
+
+        {quickSku && (() => {
+          const qProd = products.find((p) => p.id === quickSku.productId);
+          const qBrands = qProd?.brands || [];
+          const set = (patch) => setQuickSku((prev) => ({ ...prev, ...patch }));
+          const fieldCls = `w-full px-3.5 py-3 rounded-xl border text-base outline-none transition-colors ${
+            isDark
+              ? "bg-[#0B0F19] border-slate-700 text-white placeholder:text-slate-500 focus:border-sky-500"
+              : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-sky-500"
+          }`;
+          const lbl = `block mb-1.5 text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`;
+          const hint = "mt-1 text-xs text-slate-500";
+          return (
+            <div
+              className="fixed inset-0 z-[90] bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+              onClick={(e) => { if (e.target === e.currentTarget && !saving) setQuickSku(null); }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="quick-sku-title"
+            >
+              <form
+                onSubmit={(e) => { e.preventDefault(); saveQuickSku(); }}
+                className={`w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 max-h-[92vh] overflow-y-auto ${
+                  isDark ? "bg-[#111726] text-slate-100" : "bg-white text-slate-900"
+                }`}
+              >
+                <h2 id="quick-sku-title" className="text-xl font-black mb-1">
+                  {quickSku.mode === "add" ? "Add a new size / price" : "Edit size & price"}
+                </h2>
+                <p className={`text-sm mb-5 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                  {quickSku.mode === "add"
+                    ? "Choose the product, fill in the details and press Save. It appears on the website immediately."
+                    : `${qProd?.title || ""}${Number.isInteger(quickSku.brandIndex) ? ` → ${qBrands[quickSku.brandIndex]?.name || ""}` : ""}`}
+                </p>
+
+                <div className="flex flex-col gap-4">
+                  {quickSku.mode === "add" && (
+                    <>
+                      <div>
+                        <label className={lbl} htmlFor="q-product">Product</label>
+                        <select
+                          id="q-product"
+                          className={fieldCls}
+                          value={quickSku.productId}
+                          onChange={(e) => {
+                            const p = products.find((x) => x.id === e.target.value);
+                            set({ productId: e.target.value, brandIndex: p?.brands?.length ? 0 : null });
+                          }}
+                        >
+                          {products.map((p) => (
+                            <option key={p.id} value={p.id}>{p.title}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {qBrands.length > 0 && (
+                        <div>
+                          <label className={lbl} htmlFor="q-brand">Brand</label>
+                          <select
+                            id="q-brand"
+                            className={fieldCls}
+                            value={quickSku.brandIndex ?? 0}
+                            onChange={(e) => set({ brandIndex: Number(e.target.value) })}
+                          >
+                            {qBrands.map((b, i) => (
+                              <option key={`${b.name}-${i}`} value={i}>{b.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  <div>
+                    <label className={lbl} htmlFor="q-name">Size name *</label>
+                    <input id="q-name" className={fieldCls} value={quickSku.name} autoFocus
+                      onChange={(e) => set({ name: e.target.value })} placeholder="e.g. 1 KG, LARGE, SUPER BAR" />
+                    <p className={hint}>This is what customers see on the button.</p>
+                  </div>
+
+                  <div>
+                    <label className={lbl} htmlFor="q-price">Price (Rs) *</label>
+                    <input id="q-price" className={fieldCls} value={quickSku.price} inputMode="decimal"
+                      onChange={(e) => set({ price: e.target.value.replace(/[^0-9.]/g, "") })} placeholder="e.g. 350" />
+                    <p className={hint}>Numbers only. Delivery charge is added separately at checkout.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className={lbl} htmlFor="q-detail">Weight / detail</label>
+                      <input id="q-detail" className={fieldCls} value={quickSku.detail}
+                        onChange={(e) => set({ detail: e.target.value })} placeholder="e.g. 1000 g, 58 Sticks" />
+                    </div>
+                    <div>
+                      <label className={lbl} htmlFor="q-packing">Carton packing</label>
+                      <input id="q-packing" className={fieldCls} value={quickSku.packing}
+                        onChange={(e) => set({ packing: e.target.value })} placeholder="e.g. 12 pcs/ctn" />
+                    </div>
+                  </div>
+
+                  {quickError && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm font-semibold" role="alert">
+                      {quickError}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-6 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={() => setQuickSku(null)}
+                    className={`px-5 py-3 rounded-xl font-bold border cursor-pointer ${
+                      isDark ? "border-slate-700 text-slate-200 hover:bg-slate-800" : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="px-6 py-3 rounded-xl font-bold bg-sky-600 hover:bg-sky-700 text-white cursor-pointer disabled:opacity-60"
+                  >
+                    {saving ? "Saving..." : "Save"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          );
+        })()}
       </AdminLayout>
     </RequireAdminAuth>
   );

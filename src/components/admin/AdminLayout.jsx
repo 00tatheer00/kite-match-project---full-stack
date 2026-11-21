@@ -9,6 +9,7 @@ import InstallAppBtn from "./InstallAppBtn";
 import { AdminThemeContext, AdminThemeProvider, useAdminTheme } from "@/context/AdminThemeContext";
 import { Menu, X } from "lucide-react";
 import { adminLogout } from "@/services/api";
+import { AdminToaster } from "./AdminToast";
 
 const AdminLayoutContent = ({ children, darkOverride }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -311,6 +312,7 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
         <div className="flex-1 p-4 sm:p-5 lg:p-6 min-w-0">
           <div className="w-full max-w-[1720px] mx-auto min-w-0">{children}</div>
         </div>
+        <AdminToaster />
       </main>
     </div>
   );

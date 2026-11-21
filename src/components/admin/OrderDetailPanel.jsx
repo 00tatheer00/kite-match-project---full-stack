@@ -22,7 +22,7 @@ const formatDateTime = (value) => {
   });
 };
 
-const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
+const OrderDetailPanel = ({ order, onClose, onStatusChange, onDelete, updatingId }) => {
   const { isDark } = useAdminTheme();
 
   if (!order) return null;
@@ -116,6 +116,16 @@ const OrderDetailPanel = ({ order, onClose, onStatusChange, updatingId }) => {
                   </button>
                 ))}
               </div>
+              {onDelete && (
+                <button
+                  type="button"
+                  disabled={updatingId === orderKey}
+                  onClick={() => onDelete(order)}
+                  className="mt-3 px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50 bg-white dark:bg-red-950/40 dark:border-red-900/60 dark:text-red-400 cursor-pointer disabled:opacity-50"
+                >
+                  Delete order (test / duplicate only)
+                </button>
+              )}
             </div>
           </div>
 

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import AdminLayout from "../components/admin/AdminLayout";
 import RequireAdminAuth from "../components/admin/RequireAdminAuth";
 import OrderDetailPanel from "../components/admin/OrderDetailPanel";
-import { adminGetOrders, adminGetOrder, adminUpdateOrderStatus } from "../services/api";
+import { adminGetOrders, adminGetOrder, adminUpdateOrderStatus, adminDeleteOrder } from "../services/api";
 
 const orderKeyOf = (o) => o?.id || o?._id || o?.orderNumber;
 import { colors } from "../theme";
@@ -134,6 +134,25 @@ const AdminOrdersPage = () => {
     } catch (err) {
       toast.error(err.message || "Failed to update status");
       setError(err.message || "Failed to update status");
+    } finally {
+      setUpdatingId("");
+    }
+  };
+
+  const handleDelete = async (order) => {
+    const key = orderKeyOf(order);
+    const label = order.orderNumber || key;
+    if (!window.confirm(`Permanently delete order ${label}${order.customerName ? ` (${order.customerName})` : ""}?
+
+Use this only for test or duplicate orders. For real orders, set the status to "cancelled" instead.`)) return;
+    setUpdatingId(key);
+    try {
+      await adminDeleteOrder(key);
+      setOrders((prev) => prev.filter((o) => orderKeyOf(o) !== key));
+      setSelectedOrder(null);
+      toast.success(`Order ${label} deleted.`);
+    } catch (err) {
+      toast.error(err.message || "Could not delete the order.");
     } finally {
       setUpdatingId("");
     }
@@ -410,6 +429,7 @@ const AdminOrdersPage = () => {
             order={selectedOrder}
             onClose={() => setSelectedOrder(null)}
             onStatusChange={handleStatusChange}
+            onDelete={handleDelete}
             updatingId={updatingId}
           />
         )}

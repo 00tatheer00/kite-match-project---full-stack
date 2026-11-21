@@ -293,6 +293,8 @@ export async function adminGetOrders() {
 
 export const adminGetOrder = (id) => adminFetch(`/admin/orders/${encodeURIComponent(id)}`);
 
+export const adminDeleteOrder = (id) => adminFetch(`/admin/orders/${encodeURIComponent(id)}`, { method: 'DELETE' });
+
 export const adminUpdateOrderStatus = (id, status) =>
   adminFetch(`/admin/orders/${encodeURIComponent(id)}/status`, jsonBody('PATCH', { status }));
 

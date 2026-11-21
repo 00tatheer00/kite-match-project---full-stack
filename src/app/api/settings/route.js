@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { getSettings } from '@/lib/data';
 import { uploadImageBuffer } from '@/lib/storage';
-import { DEFAULT_SETTINGS, DEFAULT_SHIPPING_COST } from '@/lib/constants';
+import { DEFAULT_SETTINGS } from '@/lib/constants';
 import { handleRouteError, jsonError, requireAdmin, revalidateCatalog } from '@/lib/http';
 
 export const dynamic = 'force-dynamic';
@@ -26,9 +26,15 @@ function linkOrPath(value) {
   return null; // invalid
 }
 
+// A blank or invalid value must never be saved: Number('') is 0, which would make every
+// order ship free. Reject it instead so the admin sees an error.
 function shippingCost(value) {
-  const n = Number(value);
-  return Number.isFinite(n) && n >= 0 ? n : DEFAULT_SHIPPING_COST;
+  const raw = typeof value === 'string' ? value.trim() : value;
+  const n = raw === '' || raw === null ? NaN : Number(raw);
+  if (!Number.isFinite(n) || n < 0) {
+    throw Object.assign(new Error('Delivery charge must be a number (0 or more).'), { status: 400 });
+  }
+  return n;
 }
 
 // Only these keys can be written by the admin settings page.

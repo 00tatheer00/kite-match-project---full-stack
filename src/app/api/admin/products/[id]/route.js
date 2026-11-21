@@ -19,6 +19,7 @@ export async function PUT(request, context) {
     const existing = await getOne('products', id);
 
     if (!existing) {
+      if (!payload.title || !payload.category) return jsonError('Title and category are required for a new product.', 400);
       const created = await createOne('products', { ...payload, id });
       revalidateCatalog();
       return NextResponse.json(created, { status: 201 });

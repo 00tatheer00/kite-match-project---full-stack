@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 
 const SOURCES = new Set(['direct', 'whatsapp', 'facebook', 'instagram', 'google', 'tiktok', 'referral']);
 const DEVICES = new Set(['mobile', 'desktop', 'tablet']);
+const BOT_UA = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp\/|headless|lighthouse|pingdom|uptime|monitor|curl|wget|python|axios|node-fetch|vercel/i;
 
 function cleanPath(value) {
   const p = String(value || '/').split('?')[0].split('#')[0].slice(0, 120);
@@ -52,6 +53,10 @@ export async function POST(req) {
 
   const sb = getSupabaseAdmin();
   if (!sb) return NextResponse.json({ ok: true });
+
+  // Count people, not search-engine crawlers, link previewers or uptime monitors.
+  const ua = req.headers.get('user-agent') || '';
+  if (!ua || BOT_UA.test(ua)) return NextResponse.json({ ok: true });
 
   const path = cleanPath(payload.path);
   if (path.startsWith('/admin') || path.startsWith('/api')) return NextResponse.json({ ok: true });

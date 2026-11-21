@@ -98,14 +98,17 @@ async function readRequest(request) {
   return { body: body || {}, files };
 }
 
-function validateIdentity(payload, { requireId }) {
+// On create (requireId) title and category are mandatory. On update they are only
+// checked when sent, so a quick edit (e.g. just a price) does not need the whole record.
+function validateIdentity(payload, { requireId, sentKeys }) {
   if (requireId) {
     if (!payload.id || !ID_REGEX.test(payload.id)) {
       throw new PayloadError('ID is required and may only contain letters, numbers, "-" and "_".');
     }
   }
-  if (!payload.title) throw new PayloadError('Title is required.');
-  if (!payload.category) throw new PayloadError('Category is required.');
+  const mustHave = (key) => requireId || !sentKeys || sentKeys.has(key);
+  if (mustHave('title') && !payload.title) throw new PayloadError('Title is required.');
+  if (mustHave('category') && !payload.category) throw new PayloadError('Category is required.');
 }
 
 export async function parseProductRequest(request, { requireId = true } = {}) {
@@ -151,7 +154,7 @@ export async function parseProductRequest(request, { requireId = true } = {}) {
   // Only overwrite shippingCost when the client actually sent it.
   if (!Object.prototype.hasOwnProperty.call(body, 'shippingCost')) delete payload.shippingCost;
 
-  validateIdentity(payload, { requireId });
+  validateIdentity(payload, { requireId, sentKeys });
 
   if (files.length > 0) {
     const productImages = files.filter((f) => f.fieldname === 'productImages');
@@ -233,7 +236,7 @@ export async function parsePromotionRequest(request, { requireId = true } = {}) 
     isActive: toBoolean(body.isActive, true),
   };
 
-  validateIdentity(payload, { requireId });
+  validateIdentity(payload, { requireId, sentKeys });
 
   let hasPrimaryUpload = false;
   let hasGalleryUpload = false;

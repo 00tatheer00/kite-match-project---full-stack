@@ -1,10 +1,21 @@
 /**
- * CSV Import / Export / Sample Generator utility for Kite Admin
- * Supports standard CSV parsing with quotes, commas, multiline values, and header mapping.
+ * CSV (Excel) import / export for the Kite admin.
+ *
+ * Products file: one row per size. Columns:
+ *   product_id, product_name, category, brand, size_name, weight, packing, price
+ * - "brand" is only used for products sold per brand (Safety Matches: Kite, Bird, ...).
+ * - Existing sizes are matched by name and updated; new names are added.
+ * - Import never deletes anything (delete sizes in the admin panel).
+ * - The downloaded file is always the CURRENT catalogue, so importing it unchanged changes nothing.
+ *
+ * Packages file: one row per package. "items" = "Product name:quantity:price | ..."
+ * Empty cells keep the current value (they never turn into 0).
  */
 
 export function parseCSV(text) {
   if (!text || typeof text !== 'string') return [];
+  // Excel adds a BOM to UTF-8 files.
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
   const lines = [];
   let row = [];
   let inQuotes = false;
@@ -27,9 +38,7 @@ export function parseCSV(text) {
     } else if ((char === '\r' || char === '\n') && !inQuotes) {
       if (char === '\r' && nextChar === '\n') i++;
       row.push(currentVal.trim());
-      if (row.some((val) => val.length > 0)) {
-        lines.push(row);
-      }
+      if (row.some((val) => val.length > 0)) lines.push(row);
       row = [];
       currentVal = '';
     } else {
@@ -39,33 +48,34 @@ export function parseCSV(text) {
 
   if (currentVal || row.length > 0) {
     row.push(currentVal.trim());
-    if (row.some((val) => val.length > 0)) {
-      lines.push(row);
-    }
+    if (row.some((val) => val.length > 0)) lines.push(row);
   }
 
   if (lines.length < 2) return [];
 
-  const headers = lines[0].map((h) =>
-    h.toLowerCase().replace(/[^a-z0-9_]/g, '')
-  );
+  const headers = lines[0].map((h) => h.toLowerCase().replace(/[^a-z0-9_]/g, ''));
   const records = [];
-
   for (let r = 1; r < lines.length; r++) {
     const values = lines[r];
-    const record = {};
+    const record = { __row: r + 1 };
     headers.forEach((h, idx) => {
-      record[h] = values[idx] !== undefined ? values[idx] : '';
+      record[h] = unguard(values[idx] !== undefined ? values[idx] : '');
     });
     records.push(record);
   }
-
   return records;
+}
+
+// Export prefixes risky cells with ' (spreadsheet formula guard); remove it on import.
+function unguard(value) {
+  const v = String(value ?? '');
+  return /^'[=+\-@]/.test(v) ? v.slice(1) : v;
 }
 
 export function downloadCSV(filename, csvContent) {
   if (typeof window === 'undefined') return;
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  // BOM so Excel opens Urdu text and "Rs" values correctly.
+  const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.setAttribute('href', url);
@@ -85,462 +95,273 @@ function escapeCSV(val) {
   if (/^[=+\-@\t\r]/.test(str) && !/^-?\d+(\.\d+)?$/.test(str)) {
     str = `'${str}`;
   }
-  if (
-    str.includes(',') ||
-    str.includes('"') ||
-    str.includes('\n') ||
-    str.includes('\r')
-  ) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return `"${str}"`;
+  return `"${str.replace(/"/g, '""')}"`;
 }
 
-// ---------------- PRODUCTS CSV ----------------
-export function generateProductsSampleCSV() {
-  const headers = [
-    'id',
-    'title',
-    'category',
-    'productType',
-    'variantName',
-    'weight',
-    'packing',
-    'price',
-    'tagline',
-    'description',
-  ];
-  const sampleRows = [
-    [
-      'dish-wash-bar',
-      'Kite Dish Wash Bar',
-      'Dish Wash',
-      'dish-wash',
-      'SUPER BAR',
-      '200 g',
-      '36 pcs/ctn',
-      '60',
-      'Kaifiyat aur taazgi ka behtareen bar',
-      'High grade lemon dish wash bar that cuts grease effortlessly',
-    ],
-    [
-      'dish-wash-bar',
-      'Kite Dish Wash Bar',
-      'Dish Wash',
-      'dish-wash',
-      'LONG BAR',
-      '190 g',
-      '36 pcs/ctn',
-      '60',
-      'Lamba chalay ziyada safai karay',
-      'Long-lasting dish wash bar for everyday household use',
-    ],
-    [
-      'dish-wash-bar',
-      'Kite Dish Wash Bar',
-      'Dish Wash',
-      'dish-wash',
-      'CLASSIC BAR',
-      '80 g',
-      '36 pcs/ctn',
-      '30',
-      'Classic Kite hygiene formula',
-      'Compact dish wash bar for small families',
-    ],
-    [
-      'kite-glow',
-      'Kite Glow Detergent',
-      'Detergents',
-      'detergents',
-      '1 KG',
-      '1000 g',
-      '12 pcs/ctn',
-      '350',
-      'Zabardast safai aur chamak',
-      'Detergent powder with active color lock formula',
-    ],
-    [
-      'kite-glow',
-      'Kite Glow Detergent',
-      'Detergents',
-      'detergents',
-      '2 KG',
-      '2000 g',
-      '6 pcs/ctn',
-      '650',
-      'Zabardast safai aur chamak',
-      'Family size detergent pack for heavy washing',
-    ],
-    [
-      'safety-matches',
-      'Safety Matches Collection',
-      'Safety Matches',
-      'matches',
-      'LARGE BOX',
-      'Standard',
-      '10 boxes/outer',
-      '2000',
-      'Har ghar ki zaroorat',
-      'Premium carbonized splinter matches with steady flame',
-    ],
-  ];
+const toRows = (headers, rows) => [headers.join(','), ...rows.map((row) => row.map(escapeCSV).join(','))].join('\r\n');
+const norm = (v) => String(v || '').trim().toLowerCase();
+const pick = (row, ...keys) => {
+  for (const k of keys) if (row[k] !== undefined && String(row[k]).trim() !== '') return String(row[k]).trim();
+  return '';
+};
 
-  return [
-    headers.join(','),
-    ...sampleRows.map((row) => row.map(escapeCSV).join(',')),
-  ].join('\r\n');
-}
+// ---------------- PRODUCTS ----------------
+const PRODUCT_HEADERS = ['product_id', 'product_name', 'category', 'brand', 'size_name', 'weight', 'packing', 'price'];
 
 export function exportProductsToCSV(products = []) {
-  const headers = [
-    'id',
-    'title',
-    'category',
-    'productType',
-    'variantName',
-    'weight',
-    'packing',
-    'price',
-    'tagline',
-    'description',
-  ];
   const rows = [];
-
   products.forEach((p) => {
-    if (Array.isArray(p.variants) && p.variants.length > 0) {
+    const base = [p.id || '', p.title || '', p.category || ''];
+    const brands = Array.isArray(p.brands) ? p.brands : [];
+    if (brands.length > 0) {
+      brands.forEach((b) => {
+        (b.variants || []).forEach((v) => {
+          rows.push([...base, b.name || '', v.name || '', v.detail || '', v.packing || '', v.price ?? '']);
+        });
+      });
+    } else if (Array.isArray(p.variants) && p.variants.length > 0) {
       p.variants.forEach((v) => {
-        rows.push([
-          p.id || '',
-          p.title || '',
-          p.category || '',
-          p.productType || 'general',
-          v.name || '',
-          v.detail || '',
-          v.packing || '',
-          v.price != null ? String(v.price) : '',
-          p.tagline || '',
-          p.description || '',
-        ]);
+        rows.push([...base, '', v.name || '', v.detail || '', v.packing || '', v.price ?? '']);
       });
     } else {
-      rows.push([
-        p.id || '',
-        p.title || '',
-        p.category || '',
-        p.productType || 'general',
-        'Standard',
-        '',
-        '',
-        '',
-        p.tagline || '',
-        p.description || '',
-      ]);
+      rows.push([...base, '', '', '', '', '']);
     }
   });
-
-  return [
-    headers.join(','),
-    ...rows.map((row) => row.map(escapeCSV).join(',')),
-  ].join('\r\n');
+  return toRows(PRODUCT_HEADERS, rows);
 }
 
+// The sample is the current catalogue: edit a price in Excel and upload it again.
+export function generateProductsSampleCSV(products = []) {
+  if (products.length > 0) return exportProductsToCSV(products);
+  return toRows(PRODUCT_HEADERS, [
+    ['kite-glow', 'Kite Glow Detergent', 'Detergents', '', '1 KG', '1000 g', '12 pcs/ctn', '350'],
+    ['safety-matches', 'Safety Matches Collection', 'Safety Matches', 'Kite Safety Matches', 'LARGE', '58 Sticks', '500 pcs/ctn', '2000'],
+  ]);
+}
+
+/**
+ * @returns {{ changed: object[], summary: string[], problems: string[] }}
+ *   changed  — only products that actually change (minimal fields to send)
+ *   summary  — human readable lines for the confirmation dialog
+ *   problems — row-level errors; nothing should be saved when this is not empty
+ */
 export function parseProductsCSV(csvText, existingProducts = []) {
   const records = parseCSV(csvText);
-  if (!records.length) return [];
-
-  const productMap = new Map();
-
-  // First seed with existing products
-  existingProducts.forEach((p) => {
-    productMap.set(p.id, JSON.parse(JSON.stringify(p)));
-  });
+  const problems = [];
+  const working = new Map(existingProducts.map((p) => [p.id, JSON.parse(JSON.stringify(p))]));
+  const stats = new Map(); // id -> { updated, added, created }
 
   records.forEach((row) => {
-    const rawId = (row.id || row.productid || row.slug || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]/g, '-');
-    const title = (row.title || row.producttitle || row.name || '').trim();
-    if (!rawId && !title) return;
-
-    const id = rawId || title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const category = (row.category || 'Detergents').trim();
-    const productType = (row.producttype || 'general').trim();
-    const tagline = (row.tagline || '').trim();
-    const description = (row.description || '').trim();
-
-    const variantName = (
-      row.variantname ||
-      row.variant ||
-      row.size ||
-      row.sku ||
-      title
-    ).trim();
-    const weight = (row.weight || row.detail || '').trim();
-    const packing = (row.packing || row.cartonpacking || '').trim();
-    const price =
-      row.price !== '' && !isNaN(Number(row.price)) ? Number(row.price) : 0;
-
-    let prod = productMap.get(id);
-    if (!prod) {
-      prod = {
-        id,
-        title: title || id,
-        category,
-        productType,
-        tagline,
-        description,
-        isActive: true,
-        showOnLanding: true,
-        showInProductsPage: true,
-        showInNavbar: true,
-        variants: [],
-        features: [],
-        facilities: [],
-        images: [],
-        variantImages: [],
-        brands: [],
-        displayOrder: productMap.size + 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      productMap.set(id, prod);
-    } else {
-      if (title) prod.title = title;
-      if (category) prod.category = category;
-      if (productType) prod.productType = productType;
-      if (tagline) prod.tagline = tagline;
-      if (description) prod.description = description;
-      prod.updatedAt = new Date().toISOString();
+    const line = `Row ${row.__row}`;
+    const rawId = pick(row, 'product_id', 'id', 'productid', 'slug');
+    const name = pick(row, 'product_name', 'title', 'producttitle', 'name');
+    if (!rawId && !name) return;
+    const id = (rawId || name).toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
+    const brandName = pick(row, 'brand', 'brandname');
+    const sizeName = pick(row, 'size_name', 'variantname', 'variant', 'size', 'sku');
+    const weight = pick(row, 'weight', 'detail');
+    const packing = pick(row, 'packing', 'cartonpacking');
+    const priceText = pick(row, 'price').replace(/^rs\.?\s*/i, '').replace(/,/g, '');
+    const price = priceText === '' ? null : Number(priceText);
+    if (priceText !== '' && (!Number.isFinite(price) || price < 0)) {
+      problems.push(`${line}: price "${priceText}" is not a number`);
+      return;
     }
 
-    if (variantName) {
-      prod.variants = prod.variants || [];
-      const existingVIdx = prod.variants.findIndex(
-        (v) => (v.name || '').trim().toLowerCase() === variantName.toLowerCase()
-      );
-      if (existingVIdx >= 0) {
-        prod.variants[existingVIdx] = {
-          ...prod.variants[existingVIdx],
-          name: variantName,
-          detail: weight || prod.variants[existingVIdx].detail || '',
-          packing: packing || prod.variants[existingVIdx].packing || '',
-          price: price || prod.variants[existingVIdx].price || 0,
-        };
-      } else {
-        prod.variants.push({
-          name: variantName,
-          detail: weight,
-          packing,
-          price,
-        });
+    let prod = working.get(id);
+    const st = stats.get(id) || { updated: 0, added: 0, created: false };
+    if (!prod) {
+      const category = pick(row, 'category');
+      if (!name || !category) {
+        problems.push(`${line}: new product "${id}" needs product_name and category`);
+        return;
       }
+      prod = {
+        id, title: name, category, productType: 'general', isActive: true,
+        showOnLanding: true, showInProductsPage: true, showInNavbar: true,
+        variants: [], brands: [], features: [], images: [], variantImages: [], facilities: [],
+      };
+      working.set(id, prod);
+      st.created = true;
+    }
+    stats.set(id, st);
+    if (!sizeName) return;
+
+    let list;
+    if (brandName) {
+      prod.brands = Array.isArray(prod.brands) ? prod.brands : [];
+      let brand = prod.brands.find((b) => norm(b.name) === norm(brandName));
+      if (!brand) {
+        brand = { name: brandName, variants: [] };
+        prod.brands.push(brand);
+      }
+      brand.variants = Array.isArray(brand.variants) ? brand.variants : [];
+      list = brand.variants;
+    } else {
+      if (Array.isArray(prod.brands) && prod.brands.length > 0) {
+        problems.push(`${line}: "${prod.title}" is sold per brand — fill in the brand column`);
+        return;
+      }
+      prod.variants = Array.isArray(prod.variants) ? prod.variants : [];
+      list = prod.variants;
+    }
+
+    const existing = list.find((v) => norm(v.name) === norm(sizeName));
+    if (existing) {
+      const before = JSON.stringify(existing);
+      if (weight) existing.detail = weight;
+      if (packing) existing.packing = packing;
+      if (price != null) existing.price = price;
+      if (JSON.stringify(existing) !== before) st.updated++;
+    } else {
+      if (price == null || price <= 0) {
+        problems.push(`${line}: new size "${sizeName}" needs a price`);
+        return;
+      }
+      list.push({ name: sizeName, detail: weight, packing, price });
+      st.added++;
     }
   });
 
-  return Array.from(productMap.values());
+  const changed = [];
+  const summary = [];
+  for (const [id, st] of stats) {
+    if (!st.created && !st.updated && !st.added) continue;
+    const p = working.get(id);
+    const payload = st.created
+      ? p
+      : { title: p.title, category: p.category, variants: p.variants || [], brands: p.brands || [] };
+    changed.push({ id, ...payload });
+    const parts = [];
+    if (st.created) parts.push('NEW product');
+    if (st.updated) parts.push(`${st.updated} size(s) changed`);
+    if (st.added) parts.push(`${st.added} new size(s)`);
+    summary.push(`• ${p.title}: ${parts.join(', ')}`);
+  }
+  return { changed, summary, problems };
 }
 
-// ---------------- PROMOTIONS CSV ----------------
-export function generatePromotionsSampleCSV() {
-  const headers = [
-    'id',
-    'title',
-    'category',
-    'originalPrice',
-    'discount',
-    'shippingCost',
-    'displayOrder',
-    'items',
-    'description',
-  ];
-  const sampleRows = [
-    [
-      'kite-affordable-all',
-      'Kite Affordable for All',
-      'Value Pack',
-      '470',
-      '70',
-      '200',
-      '1',
-      'Kite Glow Detergent 1kg:1:250|Kite Long Bar 190g:2:75',
-      'Affordable bundle pack featuring 1kg Kite Glow Detergent and 2 Kite Long Bars (190g).',
-    ],
-    [
-      'kite-family-super-saver',
-      'Kite Family Super Saver Pack',
-      'Family Bundle',
-      '1100',
-      '150',
-      '0',
-      '2',
-      'Kite Glow Detergent 2kg:1:650|Kite Dish Wash Super Bar:3:100',
-      'Mega saver grocery pack for the entire month with FREE nationwide delivery.',
-    ],
-    [
-      'kite-match-wholesaler-box',
-      'Safety Matches Master Carton',
-      'Wholesale Pack',
-      '2400',
-      '200',
-      '300',
-      '3',
-      'Large Matches Outer:10:220',
-      'Special discounted wholesale package for regional shopkeepers and distributors.',
-    ],
-  ];
+// ---------------- PACKAGES (promotions) ----------------
+const PROMO_HEADERS = ['package_id', 'package_name', 'category', 'items', 'original_price', 'discount', 'delivery_charge', 'display_order', 'description', 'final_price_auto'];
 
-  return [
-    headers.join(','),
-    ...sampleRows.map((row) => row.map(escapeCSV).join(',')),
-  ].join('\r\n');
-}
+const formatItems = (items) =>
+  Array.isArray(items) ? items.map((it) => `${it.product || ''}:${it.quantity || 1}:${it.price ?? 0}`).join(' | ') : '';
 
 export function exportPromotionsToCSV(promotions = []) {
-  const headers = [
-    'id',
-    'title',
-    'category',
-    'originalPrice',
-    'discount',
-    'finalPrice',
-    'shippingCost',
-    'displayOrder',
-    'items',
-    'description',
-  ];
-  const rows = [];
-
-  promotions.forEach((p) => {
-    const itemsFormatted = Array.isArray(p.items)
-      ? p.items
-          .map(
-            (it) =>
-              `${it.product || ''}:${it.quantity || 1}:${it.price || 0}`
-          )
-          .join('|')
-      : '';
-
-    rows.push([
-      p.id || '',
-      p.title || '',
-      p.category || '',
-      p.originalPrice != null ? String(p.originalPrice) : '',
-      p.discount != null ? String(p.discount) : '',
-      p.totalPrice != null ? String(p.totalPrice) : '',
-      p.shippingCost != null ? String(p.shippingCost) : '',
-      p.displayOrder != null ? String(p.displayOrder) : '0',
-      itemsFormatted,
-      p.description || '',
-    ]);
-  });
-
-  return [
-    headers.join(','),
-    ...rows.map((row) => row.map(escapeCSV).join(',')),
-  ].join('\r\n');
+  const rows = promotions.map((p) => [
+    p.id || '',
+    p.title || '',
+    p.category || '',
+    formatItems(p.items),
+    p.originalPrice ?? '',
+    p.discount ?? '',
+    p.shippingCost ?? '',
+    p.displayOrder ?? '',
+    p.description || '',
+    p.totalPrice ?? '',
+  ]);
+  return toRows(PROMO_HEADERS, rows);
 }
 
+export function generatePromotionsSampleCSV(promotions = []) {
+  if (promotions.length > 0) return exportPromotionsToCSV(promotions);
+  return toRows(PROMO_HEADERS, [
+    ['kite-value-pack', 'Kite Value Pack', 'Value Pack', 'Kite Glow Detergent 1kg:1:250 | Kite Long Bar 190g:2:75', '470', '70', '', '1', 'Example package', ''],
+  ]);
+}
+
+/** @returns {{ changed: object[], summary: string[], problems: string[] }} */
 export function parsePromotionsCSV(csvText, existingPromotions = []) {
   const records = parseCSV(csvText);
-  if (!records.length) return [];
+  const problems = [];
+  const changed = [];
+  const summary = [];
+  const byId = new Map(existingPromotions.map((p) => [p.id, p]));
 
-  const promoMap = new Map();
-  existingPromotions.forEach((p) => {
-    promoMap.set(p.id, JSON.parse(JSON.stringify(p)));
-  });
+  const num = (row, line, label, ...keys) => {
+    const t = pick(row, ...keys).replace(/^rs\.?\s*/i, '').replace(/,/g, '');
+    if (t === '') return undefined; // empty cell = keep current value
+    const n = Number(t);
+    if (!Number.isFinite(n) || n < 0) {
+      problems.push(`${line}: ${label} "${t}" is not a number`);
+      return undefined;
+    }
+    return n;
+  };
 
   records.forEach((row) => {
-    const rawId = (row.id || row.slug || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]/g, '-');
-    const title = (row.title || row.name || '').trim();
+    const line = `Row ${row.__row}`;
+    const rawId = pick(row, 'package_id', 'id', 'slug');
+    const title = pick(row, 'package_name', 'title', 'name');
     if (!rawId && !title) return;
+    const id = (rawId || title).toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
+    const existing = byId.get(id);
 
-    const id = rawId || title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const category = (row.category || 'Special Packages').trim();
-    const description = (row.description || '').trim();
-    const originalPrice = !isNaN(Number(row.originalprice))
-      ? Number(row.originalprice)
-      : 0;
-    const discount = !isNaN(Number(row.discount)) ? Number(row.discount) : 0;
-    const shippingCost = !isNaN(Number(row.shippingcost))
-      ? Number(row.shippingcost)
-      : 150;
-    const displayOrder = !isNaN(Number(row.displayorder))
-      ? Number(row.displayorder)
-      : promoMap.size + 1;
-
-    const rawItemsStr = (row.items || row.products || '').trim();
     const items = [];
-    if (rawItemsStr) {
-      const parts = rawItemsStr.split('|');
-      parts.forEach((part) => {
+    const itemsText = pick(row, 'items', 'products');
+    if (itemsText) {
+      itemsText.split('|').forEach((part) => {
         const segs = part.split(':').map((s) => s.trim());
-        if (segs[0]) {
-          items.push({
-            product: segs[0],
-            quantity: segs[1] && !isNaN(Number(segs[1])) ? Number(segs[1]) : 1,
-            price: segs[2] && !isNaN(Number(segs[2])) ? Number(segs[2]) : 0,
-          });
+        if (!segs[0]) return;
+        const quantity = segs[1] === undefined || segs[1] === '' ? 1 : Number(segs[1]);
+        const price = segs[2] === undefined || segs[2] === '' ? 0 : Number(segs[2]);
+        if (!Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(price) || price < 0) {
+          problems.push(`${line}: item "${part.trim()}" must look like Name:quantity:price`);
+          return;
         }
+        items.push({ product: segs[0], quantity, price });
       });
     }
 
-    const totalQuantity = items.reduce(
-      (sum, it) => sum + (Number(it.quantity) || 0),
-      0
-    );
-    const calculatedPrice = items.reduce(
-      (sum, it) => sum + (Number(it.quantity) || 0) * (Number(it.price) || 0),
-      0
-    );
-    const finalPrice =
-      calculatedPrice > 0
-        ? calculatedPrice
-        : originalPrice - discount > 0
-          ? originalPrice - discount
-          : originalPrice;
-
-    let promo = promoMap.get(id);
-    if (!promo) {
-      promo = {
-        id,
-        title: title || id,
-        category,
-        description,
-        originalPrice,
-        discount,
-        totalPrice: finalPrice,
-        totalQuantity: totalQuantity || 1,
-        shippingCost,
-        displayOrder,
-        items: items.length
-          ? items
-          : [{ product: title, quantity: 1, price: finalPrice }],
-        isActive: true,
-        imageUrls: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      promoMap.set(id, promo);
-    } else {
-      if (title) promo.title = title;
-      if (category) promo.category = category;
-      if (description) promo.description = description;
-      if (originalPrice) promo.originalPrice = originalPrice;
-      if (discount) promo.discount = discount;
-      if (finalPrice) promo.totalPrice = finalPrice;
-      if (shippingCost !== undefined) promo.shippingCost = shippingCost;
-      if (displayOrder !== undefined) promo.displayOrder = displayOrder;
-      if (items.length) {
-        promo.items = items;
-        promo.totalQuantity = totalQuantity;
-      }
-      promo.updatedAt = new Date().toISOString();
+    const update = {};
+    if (title) update.title = title;
+    const category = pick(row, 'category');
+    if (category) update.category = category;
+    const description = pick(row, 'description');
+    if (description) update.description = description;
+    const originalPrice = num(row, line, 'original price', 'original_price', 'originalprice');
+    if (originalPrice !== undefined) update.originalPrice = originalPrice;
+    const discount = num(row, line, 'discount', 'discount');
+    if (discount !== undefined) update.discount = discount;
+    const shipping = num(row, line, 'delivery charge', 'delivery_charge', 'shippingcost');
+    if (shipping !== undefined) update.shippingCost = shipping;
+    const displayOrder = num(row, line, 'display order', 'display_order', 'displayorder');
+    if (displayOrder !== undefined) update.displayOrder = displayOrder;
+    if (items.length) {
+      update.items = items;
+      update.totalQuantity = items.reduce((s, it) => s + it.quantity, 0);
+      update.totalPrice = items.reduce((s, it) => s + it.quantity * it.price, 0);
     }
+
+    if (!existing) {
+      if (!title || !category || !items.length) {
+        problems.push(`${line}: new package "${id}" needs package_name, category and items`);
+        return;
+      }
+      changed.push({ id, isActive: true, ...update });
+      summary.push(`• ${title}: NEW package`);
+      return;
+    }
+
+    // Items in the database can carry extra fields (images, notes): compare only what the file has.
+    const comparable = (k, v) =>
+      k === 'items' && Array.isArray(v)
+        ? v.map((it) => ({ product: String(it?.product || '').trim(), quantity: Number(it?.quantity) || 1, price: Number(it?.price) || 0 }))
+        : k === 'totalPrice' || k === 'totalQuantity' ? Number(v) || 0 : v ?? null;
+    const diff = {};
+    for (const [k, v] of Object.entries(update)) {
+      if (JSON.stringify(comparable(k, v)) !== JSON.stringify(comparable(k, existing[k]))) diff[k] = v;
+    }
+    // Keep the items' extra fields when only quantities/prices are re-sent unchanged.
+    if (diff.items === undefined) {
+      delete diff.totalPrice;
+      delete diff.totalQuantity;
+    }
+    if (diff.totalQuantity !== undefined && diff.items === undefined) delete diff.totalQuantity;
+    if (Object.keys(diff).length === 0) return;
+    changed.push({ id, ...diff });
+    summary.push(`• ${existing.title}: ${Object.keys(diff).filter((k) => k !== 'totalQuantity').join(', ')} changed`);
   });
 
-  return Array.from(promoMap.values());
+  return { changed, summary, problems };
 }

@@ -28,6 +28,7 @@ import {
   downloadCSV,
 } from "@/utils/csvHelper";
 import { colors } from "../theme";
+import { notify } from "@/components/admin/AdminToast";
 
 const emptyForm = {
   id: "",
@@ -236,8 +237,10 @@ const AdminPromotionsPage = () => {
       setEditingId(null);
       setShowForm(false);
       setPromotionImages([]);
+      notify.success(`"${payload.title}" saved. The website is updated.`);
     } catch (err) {
       setError(err.message || "Failed to save promotion");
+      notify.error(err.message || "Could not save the package. Please check the form.");
     } finally {
       setSaving(false);
     }
@@ -273,14 +276,19 @@ const AdminPromotionsPage = () => {
       prev.map((item) => (item.id === p.id ? updated : item))
     );
     try {
-      await adminUpdatePromotion(p.id, updated);
+      await adminUpdatePromotion(p.id, { isActive: updated.isActive });
+      notify.success(updated.isActive ? `"${p.title}" is now visible on the website.` : `"${p.title}" is now hidden from the website.`);
     } catch (err) {
-      setError(err.message || "Failed to update status");
+      setPromos((prev) => prev.map((item) => (item.id === p.id ? p : item))); // undo
+      notify.error(err.message || "Could not change visibility.");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this promotion?")) return;
+    const name = promos.find((p) => p.id === id)?.title || id;
+    if (!window.confirm(`Delete the package "${name}"?
+
+This cannot be undone.`)) return;
     try {
       setSaving(true);
       await adminDeletePromotion(id);
@@ -289,8 +297,10 @@ const AdminPromotionsPage = () => {
         setShowForm(false);
         setEditingId(null);
       }
+      notify.success(`"${name}" deleted.`);
     } catch (err) {
       setError(err.message || "Failed to delete promotion");
+      notify.error(err.message || "Could not delete the package.");
     } finally {
       setSaving(false);
     }
@@ -299,7 +309,7 @@ const AdminPromotionsPage = () => {
   const fileInputRef = useRef(null);
 
   const handleDownloadSampleTemplate = () => {
-    const csvContent = generatePromotionsSampleCSV();
+    const csvContent = generatePromotionsSampleCSV(promos);
     downloadCSV("kite-promotions-sample-template.csv", csvContent);
   };
 
@@ -319,24 +329,28 @@ const AdminPromotionsPage = () => {
       try {
         const text = evt.target?.result;
         if (!text) return;
-        const merged = parsePromotionsCSV(text, promos);
-        if (!merged || !merged.length) {
-          alert("No valid promotions detected in file. Please check format.");
+        const { changed, summary, problems } = parsePromotionsCSV(text, promos);
+        if (problems.length) {
+          notify.error(`Please fix the file first: ${problems.slice(0, 3).join(" | ")}`);
+          return;
+        }
+        if (!changed.length) {
+          notify.success("Nothing to change: the file matches the packages already on the website.");
           return;
         }
         const confirmImport = window.confirm(
-          `Found ${merged.length} promotions in CSV.\n\nDo you want to import and save these into the system now?`
+          `This file will update:\n\n${summary.join("\n")}\n\nSave these changes to the website now?`
         );
         if (!confirmImport) return;
 
         setSaving(true);
-        for (const promo of merged) {
+        for (const promo of changed) {
           await adminUpdatePromotion(promo.id, promo);
         }
-        setPromos(merged);
-        alert(`Successfully imported ${merged.length} promotions!`);
+        await load();
+        notify.success(`Import finished: ${changed.length} package(s) updated. The website is updated.`);
       } catch (err) {
-        alert("Error importing CSV: " + (err.message || "Invalid file format"));
+        notify.error("Import failed: " + (err.message || "Invalid file format"));
       } finally {
         setSaving(false);
         e.target.value = "";
