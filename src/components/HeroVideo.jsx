@@ -93,15 +93,16 @@ const HeroVideo = () => {
           loop
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           poster="/videos/kite-motion-poster.jpg"
           aria-label="Kite Motion Banner"
           className="absolute inset-0 w-full h-full object-cover object-center block"
           style={{ objectFit: 'cover', width: '100%', height: '100%' }}
         >
-          {/* Pristine original high-bitrate master video */}
-          <source src="/videos/Kite Motion Banner.mp4" type="video/mp4" />
-          <source src="/videos/kite-motion-banner.mp4" type="video/mp4" />
+          {/* Phones/tablets get the 6.7 MB encode; large screens get the 21.8 MB master.
+              Browsers without <source media> support use the first (lighter) source. */}
+          <source src="/videos/kite-motion-banner.mp4" type="video/mp4" media="(max-width: 1024px)" />
+          <source src="/videos/Kite%20Motion%20Banner.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       </div>

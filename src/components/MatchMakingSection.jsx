@@ -2,13 +2,29 @@
 
 import { FaPlay, FaTimes, FaExpand } from "react-icons/fa";
 import { Link } from '@/components/RouterCompat';
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 const match_making = "/videos/match_making.mp4";
 
 const MatchMakingSection = () => {
   const videoRef = useRef(null);
   const expandedVideoRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // The source video is large (~50 MB): only start streaming it when the section is on screen,
+  // and pause it again when scrolled away, instead of downloading it on every home-page visit.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      },
+      { threshold: 0.25 }
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
 
   const handleVideoClick = () => {
     setIsExpanded(true);
@@ -90,11 +106,10 @@ const MatchMakingSection = () => {
                 <video
                   ref={videoRef}
                   className="w-full aspect-video object-cover rounded-2xl cursor-pointer"
-                  autoPlay
                   loop
                   muted
                   playsInline
-                  preload="metadata"
+                  preload="none"
                   onClick={handleVideoClick}
                 >
                   <source src={match_making} type="video/mp4" />

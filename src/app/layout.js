@@ -2,6 +2,7 @@ import "./globals.css";
 import ClientShell from "@/components/ClientShell";
 import PwaRegister from "@/components/PwaRegister";
 import Script from "next/script";
+import { toJsonLd } from "@/lib/json-ld";
 
 export const metadata = {
   metadataBase: new URL("https://www.kitepk.com"),
@@ -198,7 +199,7 @@ export default function RootLayout({ children }) {
         {/* Structured Data (JSON-LD) for #1 Google Rank for "best match factory in pakistan" & "mohsin match factory" */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdStructuredData) }}
+          dangerouslySetInnerHTML={{ __html: toJsonLd(jsonLdStructuredData) }}
         />
       </head>
       <body>

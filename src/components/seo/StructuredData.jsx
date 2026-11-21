@@ -1,4 +1,5 @@
 'use client';
+import { toJsonLd } from '@/lib/json-ld';
 
 const StructuredData = ({ data }) => {
   if (!data) return null;
@@ -6,7 +7,7 @@ const StructuredData = ({ data }) => {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: toJsonLd(data) }}
     />
   );
 };

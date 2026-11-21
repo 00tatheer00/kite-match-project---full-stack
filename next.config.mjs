@@ -9,10 +9,6 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'res.cloudinary.com',
-      },
-      {
-        protocol: 'https',
         hostname: 'images.unsplash.com',
       },
       {
@@ -23,6 +19,8 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Duplicate page consolidated (SEO: one canonical URL)
+      { source: '/products/tanga', destination: '/products/tanga-matches', permanent: true },
       {
         source: '/:path*',
         has: [
@@ -75,6 +73,18 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains',
+          },
+        ],
+      },
+      {
+        // Admin panel & APIs must never be cached by browsers/CDNs or indexed.
+        source: '/admin/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store' },
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
         ],
       },
     ];

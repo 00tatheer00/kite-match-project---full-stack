@@ -10,9 +10,15 @@
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-    # 2. Redirect www to non-www (Consistent Canonical URL)
-    RewriteCond %{HTTP_HOST} ^www\.kitepk\.com$ [NC]
-    RewriteRule ^(.*)$ https://kitepk.com/$1 [L,R=301]
+    # 2. Redirect non-www to www (canonical host = www.kitepk.com, same as next.config.mjs
+    #    and metadataBase — the opposite rule caused an infinite redirect loop)
+    RewriteCond %{HTTP_HOST} ^kitepk\.com$ [NC]
+    RewriteRule ^(.*)$ https://www.kitepk.com/$1 [L,R=301]
+
+    # 2b. Never serve secrets, server code or data files directly
+    RewriteCond %{REQUEST_URI} !^/\.well-known/
+    RewriteRule (^|/)\. - [F,L]
+    RewriteRule ^(data|\.next/server|node_modules)(/|$) - [F,L]
 
     # 3. Allow direct access to real static files and folders (public, .next/static)
     RewriteCond %{REQUEST_FILENAME} -f [OR]

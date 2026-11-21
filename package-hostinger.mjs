@@ -59,6 +59,10 @@ if (fs.existsSync(dataDir)) {
 }
 
 // 6. Copy .env.production (or .env.local) as .env in dist
+// SECURITY: this bundles live secrets (Supabase service role key, Resend key, admin password).
+//  - Never share dist-hostinger.zip.
+//  - The web server document root must NOT expose this folder's dotfiles; .htaccess blocks
+//    dotfiles/data, but prefer setting env vars in the Hostinger panel and deleting dist/.env.
 const prodEnvFile = path.join(projectRoot, '.env.production');
 const targetEnv = path.join(distDir, '.env');
 if (fs.existsSync(prodEnvFile)) {
