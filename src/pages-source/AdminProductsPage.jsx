@@ -2145,7 +2145,7 @@ This cannot be undone.`)) return;
                 </h2>
                 <p className={`text-sm mb-5 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
                   {quickSku.mode === "add"
-                    ? "Choose the product, fill in the details and press Save. It appears on the website immediately."
+                    ? "A size belongs to a product, so first choose the product (and brand). After saving, the new size shows in the Factory SKUs list and on the website."
                     : `${qProd?.title || ""}${Number.isInteger(quickSku.brandIndex) ? ` → ${qBrands[quickSku.brandIndex]?.name || ""}` : ""}`}
                 </p>
 
@@ -2153,7 +2153,7 @@ This cannot be undone.`)) return;
                   {quickSku.mode === "add" && (
                     <>
                       <div>
-                        <label className={lbl} htmlFor="q-product">Product</label>
+                        <label className={lbl} htmlFor="q-product">Add the new size to which product?</label>
                         <select
                           id="q-product"
                           className={fieldCls}
@@ -2170,7 +2170,7 @@ This cannot be undone.`)) return;
                       </div>
                       {qBrands.length > 0 && (
                         <div>
-                          <label className={lbl} htmlFor="q-brand">Brand</label>
+                          <label className={lbl} htmlFor="q-brand">Which brand?</label>
                           <select
                             id="q-brand"
                             className={fieldCls}
@@ -2183,11 +2183,42 @@ This cannot be undone.`)) return;
                           </select>
                         </div>
                       )}
+
+                      {/* Sizes this product/brand already has (the Factory SKUs rows), for reference */}
+                      {(() => {
+                        const existing = Number.isInteger(quickSku.brandIndex)
+                          ? qBrands[quickSku.brandIndex]?.variants || []
+                          : qProd?.variants || [];
+                        return (
+                          <div className={`rounded-xl border px-3.5 py-3 ${isDark ? "border-slate-700 bg-slate-900/40" : "border-slate-200 bg-slate-50"}`}>
+                            <p className={`text-xs font-bold mb-2 ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                              {existing.length
+                                ? `Sizes this already has (${existing.length}) — tap one to copy its details:`
+                                : "This has no sizes yet. Your new size will be the first one."}
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {existing.map((v, i) => (
+                                <button
+                                  key={`${v.name}-${i}`}
+                                  type="button"
+                                  onClick={() => set({ detail: v.detail || "", packing: v.packing || "", price: v.price ?? "" })}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold border cursor-pointer ${
+                                    isDark ? "border-slate-600 text-slate-200 hover:bg-slate-800" : "border-slate-300 text-slate-700 bg-white hover:bg-sky-50"
+                                  }`}
+                                  title="Copy weight, packing and price from this size"
+                                >
+                                  {v.name}{v.detail ? ` · ${v.detail}` : ""} · Rs {v.price ?? "—"}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </>
                   )}
 
                   <div>
-                    <label className={lbl} htmlFor="q-name">Size name *</label>
+                    <label className={lbl} htmlFor="q-name">New size name *</label>
                     <input id="q-name" className={fieldCls} value={quickSku.name} autoFocus
                       onChange={(e) => set({ name: e.target.value })} placeholder="e.g. 1 KG, LARGE, SUPER BAR" />
                     <p className={hint}>This is what customers see on the button.</p>
