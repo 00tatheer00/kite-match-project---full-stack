@@ -2,32 +2,29 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { adminCheckSession } from '@/services/api';
 
+/**
+ * Client-side guard for admin pages. The real protection is server-side:
+ * every /api/admin/* route verifies the httpOnly session cookie.
+ */
 const RequireAdminAuth = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const [status, setStatus] = useState('checking'); // checking | ok
   const router = useRouter();
 
   useEffect(() => {
-    let token = typeof window !== 'undefined' ? localStorage.getItem("adminToken") : null;
-    if (!token && typeof document !== 'undefined') {
-      const match = document.cookie.match(/(?:^|;\s*)adminToken=([^;]+)/);
-      if (match) {
-        try {
-          token = decodeURIComponent(match[1]);
-          localStorage.setItem("adminToken", token);
-        } catch {}
-      }
-    }
-    if (!token) {
-      router.replace("/admin/login");
-    } else {
-      setIsAuthenticated(true);
-    }
-    setChecking(false);
+    let cancelled = false;
+    adminCheckSession().then((ok) => {
+      if (cancelled) return;
+      if (ok) setStatus('ok');
+      else router.replace('/admin/login');
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
-  if (checking || !isAuthenticated) {
+  if (status !== 'ok') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 text-slate-500 text-sm">
         Verifying admin session...

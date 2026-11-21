@@ -8,6 +8,7 @@ import ThemeToggleBtn from "./ThemeToggleBtn";
 import InstallAppBtn from "./InstallAppBtn";
 import { AdminThemeContext, AdminThemeProvider, useAdminTheme } from "@/context/AdminThemeContext";
 import { Menu, X } from "lucide-react";
+import { adminLogout } from "@/services/api";
 
 const AdminLayoutContent = ({ children, darkOverride }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,8 +28,8 @@ const AdminLayoutContent = ({ children, darkOverride }) => {
     { to: "/admin/settings", label: "Settings" },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminToken");
+  const handleLogout = async () => {
+    await adminLogout();
     navigate("/admin/login");
   };
 

@@ -1,78 +1,74 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import { ADMIN_COOKIE, adminCookieOptions, getJwtSecret, signAdminToken, isSameOriginRequest } from '@/lib/auth';
+import { getClientIp, rateLimit } from '@/lib/rate-limit';
+import { jsonError } from '@/lib/http';
 
-const JWT_SECRET = process.env.ADMIN_JWT_SECRET || 'kite-production-secret-jwt-key-2026-secure';
+export const dynamic = 'force-dynamic';
 
-export async function POST(request) {
-  try {
-    const body = await request.json().catch(() => ({}));
-    const rawEmail = String(body.email || '').trim().toLowerCase();
-    const rawPassword = String(body.password || '');
+function safeEqual(a, b) {
+  const ab = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  if (ab.length !== bb.length) {
+    crypto.timingSafeEqual(ab, ab); // keep timing roughly constant
+    return false;
+  }
+  return crypto.timingSafeEqual(ab, bb);
+}
 
-    const configuredEmail = String(process.env.ADMIN_EMAIL || 'admin@kitepk.com').trim().toLowerCase();
-    const configuredPassword = process.env.ADMIN_PASSWORD || 'Impossible@890';
-    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
-
-    let authenticated = false;
-
-    // Allowed admin emails
-    const validEmails = [configuredEmail, 'admin@kitepk.com', 'info@kitepk.com'];
-    if (validEmails.includes(rawEmail)) {
-      // Check passwords (Impossible@890, configuredPassword, or admin123)
-      if (
-        rawPassword === 'Impossible@890' ||
-        rawPassword === configuredPassword ||
-        rawPassword === 'admin123'
-      ) {
-        authenticated = true;
-      } else if (adminPasswordHash) {
-        try {
-          if (await bcrypt.compare(rawPassword, adminPasswordHash)) {
-            authenticated = true;
-          }
-        } catch {
-          // ignore bcrypt comparison error
-        }
-      }
-    }
-
-    if (authenticated) {
-      const token = jwt.sign(
-        { email: rawEmail, role: 'admin' },
-        JWT_SECRET,
-        { expiresIn: '365d' }
-      );
-      const res = NextResponse.json({ token, success: true, email: rawEmail });
-      res.cookies.set('adminToken', token, {
-        path: '/',
-        maxAge: 365 * 24 * 60 * 60,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-      });
-      return res;
-    }
-
-    // Try remote fallback to live backend
+async function checkPassword(password) {
+  const hash = (process.env.ADMIN_PASSWORD_HASH || '').trim();
+  if (hash) {
     try {
-      const { postRemoteFallback } = await import('@/lib/api-fallback');
-      const remoteRes = await postRemoteFallback('/admin/login', { email: rawEmail, password: rawPassword });
-      if (remoteRes?.token) {
-        return NextResponse.json(remoteRes);
-      }
+      return await bcrypt.compare(password, hash);
     } catch {
-      // remote fallback failed
+      return false;
     }
+  }
+  const plain = process.env.ADMIN_PASSWORD || '';
+  if (!plain) return false;
+  return safeEqual(password, plain);
+}
 
+// POST /api/admin/login
+export async function POST(request) {
+  if (!isSameOriginRequest(request)) return jsonError('Forbidden', 403);
+
+  const ip = getClientIp(request);
+  const limit = rateLimit(`login:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+  if (!limit.ok) {
     return NextResponse.json(
-      { message: 'Invalid email or password' },
-      { status: 401 }
-    );
-  } catch (err) {
-    console.error('Login error:', err);
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
+      { message: `Too many login attempts. Try again in ${Math.ceil(limit.retryAfter / 60)} minutes.` },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } }
     );
   }
+
+  const configuredEmail = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+  if (!configuredEmail || !getJwtSecret() || (!process.env.ADMIN_PASSWORD_HASH && !process.env.ADMIN_PASSWORD)) {
+    console.error('[login] Admin login is not configured. Set ADMIN_EMAIL, ADMIN_JWT_SECRET and ADMIN_PASSWORD_HASH (or ADMIN_PASSWORD).');
+    return jsonError('Admin login is not configured on the server.', 503);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonError('Invalid request body', 400);
+  }
+  const email = String(body?.email || '').trim().toLowerCase().slice(0, 254);
+  const password = String(body?.password || '').slice(0, 200);
+
+  const emailOk = safeEqual(email, configuredEmail);
+  const passwordOk = await checkPassword(password);
+  if (!emailOk || !passwordOk) {
+    return jsonError('Invalid email or password', 401);
+  }
+
+  const token = signAdminToken(configuredEmail);
+  if (!token) return jsonError('Admin login is not configured on the server.', 503);
+
+  const res = NextResponse.json({ success: true, email: configuredEmail });
+  res.cookies.set(ADMIN_COOKIE, token, adminCookieOptions());
+  return res;
 }

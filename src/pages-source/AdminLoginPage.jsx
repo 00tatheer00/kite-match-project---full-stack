@@ -19,8 +19,7 @@ const AdminLoginPage = () => {
     setLoading(true);
     setError("");
     try {
-      const data = await adminLogin(email.trim(), password);
-      localStorage.setItem("adminToken", data.token);
+      await adminLogin(email.trim(), password);
       navigate("/admin/products");
     } catch (err) {
       setError(err.message || "Failed to login");

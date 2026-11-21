@@ -148,14 +148,14 @@ async function run() {
     await client.query(`
       GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
       GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, service_role;
-      GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon, authenticated;
-      GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO anon, authenticated;
-
-      ALTER TABLE public.products DISABLE ROW LEVEL SECURITY;
-      ALTER TABLE public.promotions DISABLE ROW LEVEL SECURITY;
-      ALTER TABLE public.orders DISABLE ROW LEVEL SECURITY;
-      ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;
-      ALTER TABLE public.analytics DISABLE ROW LEVEL SECURITY;
+      -- SECURITY: public roles get NO write access and RLS stays ON.
+      -- The app uses the service role key (bypasses RLS). See supabase/migrations/.
+      REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON ALL TABLES IN SCHEMA public FROM anon, authenticated;
+      ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+      ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
+      ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+      ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+      ALTER TABLE public.analytics ENABLE ROW LEVEL SECURITY;
 
       -- Notify PostgREST to reload schema cache
       NOTIFY pgrst, 'reload schema';
