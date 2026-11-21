@@ -38,7 +38,6 @@ function DashboardContent() {
     return () => clearInterval(t);
   }, []);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeFilter, setActiveFilter] = useState("all");
   const [promotionsList, setPromotionsList] = useState([]);
 
   const loadDashboard = async (showRefresh = false) => {
@@ -138,6 +137,50 @@ function DashboardContent() {
 
   const getRelativeTime = (isoString) => formatRelativeTime(isoString, nowTs);
 
+  // ---- Header + KPI cards (real numbers only) ----
+  const rs = (n) => `Rs ${new Intl.NumberFormat("en-PK").format(Math.round(Number(n) || 0))}`;
+  const hour = Number(new Date(nowTs).toLocaleString("en-US", { hour: "numeric", hour12: false, timeZone: "Asia/Karachi" }));
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const todayLabel = new Date(nowTs).toLocaleDateString("en-PK", { weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Karachi" });
+  const lastUpdatedLabel = data?.lastUpdated ? getRelativeTime(data.lastUpdated) : "just now";
+  const todayKey = new Date(nowTs).toLocaleDateString("en-CA", { timeZone: "Asia/Karachi" });
+  const ordersToday = recentOrders.filter(
+    (o) => o.createdAt && new Date(o.createdAt).toLocaleDateString("en-CA", { timeZone: "Asia/Karachi" }) === todayKey
+  ).length;
+  const kpis = [
+    {
+      label: "Sales (confirmed)",
+      value: rs(overview.totalRevenue),
+      sub: `${approvedOrders} confirmed / shipped ${approvedOrders === 1 ? "order" : "orders"}`,
+      icon: <FaChartBar />, iconBg: "bg-emerald-500/15 text-emerald-500", bar: "bg-emerald-500",
+    },
+    {
+      label: "Total orders",
+      value: formatNumber(totalOrders),
+      sub: `${ordersToday} today · ${totalOrders > 0 ? Math.round((approvedOrders / totalOrders) * 100) : 0}% confirmed`,
+      icon: <FaClipboardList />, iconBg: "bg-sky-500/15 text-sky-500", bar: "bg-sky-500",
+    },
+    {
+      label: "Waiting for confirmation",
+      value: formatNumber(pendingOrders),
+      sub: pendingOrders > 0 ? `${rs(overview.pipelineValue)} in pending orders` : "Nothing waiting - all caught up",
+      icon: <FaClock />, iconBg: "bg-amber-500/15 text-amber-500", bar: "bg-amber-500",
+    },
+    {
+      label: "Website visitors today",
+      value: formatNumber(todayVisitors),
+      sub: `${formatNumber(totalVisitors)} visitors in total`,
+      icon: <FaUsers />, iconBg: "bg-purple-500/15 text-purple-500", bar: "bg-purple-500",
+    },
+  ];
+  const quickActions = [
+    { to: "/admin/products", label: "Change prices", hint: "Edit sizes & prices", icon: <FaTag />, iconBg: "bg-sky-500/15 text-sky-500" },
+    { to: "/admin/orders", label: "Orders", hint: `${pendingOrders} waiting`, icon: <FaClipboardList />, iconBg: "bg-amber-500/15 text-amber-500" },
+    { to: "/admin/promotions", label: "Packages & deals", hint: `${activePromotions} active`, icon: <FaBoxes />, iconBg: "bg-pink-500/15 text-pink-500" },
+    { to: "/admin/settings", label: "Delivery & banner", hint: "Store settings", icon: <FaShieldAlt />, iconBg: "bg-emerald-500/15 text-emerald-500" },
+  ];
+
+
   // First load: show the page layout in grey instead of misleading zeros.
   if (loading && !data) return <SkeletonDashboard />;
 
@@ -145,223 +188,113 @@ function DashboardContent() {
     <div className="space-y-5 sm:space-y-6 font-sans selection:bg-[#8B5CF6] selection:text-white">
         
         {/* ========================================================================= */}
-        {/* 1. TOP HEADER & FILTER PILLS */}
+        {/* HEADER */}
         {/* ========================================================================= */}
-        <div
-          className={`flex flex-col xl:flex-row xl:items-end justify-between gap-4 pb-4 border-b transition-colors ${
-            isDark ? "border-[#1E293B]" : "border-slate-200"
-          }`}
-        >
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[11px] font-black tracking-widest uppercase text-sky-500">
-                OVERVIEW &bull; OPERATIONS
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-              <span className="text-[11px] font-semibold text-emerald-500 flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                LIVE CONNECTED
-              </span>
-            </div>
-            <h1
-              className={`text-2xl sm:text-3xl font-black tracking-tight ${
-                isDark ? "text-white" : "text-slate-900"
-              }`}
-            >
-              Executive Dashboard
+            <p className={`text-sm font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+              {greeting} 👋 · {todayLabel}
+            </p>
+            <h1 className={`mt-1 text-2xl sm:text-3xl font-black tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}>
+              Business Overview
             </h1>
-            <p
-              className={`text-xs sm:text-sm font-medium mt-1 max-w-3xl ${
-                isDark ? "text-slate-400" : "text-slate-600"
-              }`}
-            >
-              {totalOrders} Consumer Orders &bull; {totalPromotions} Value Packages &bull; 4 Industrial Divisions &bull; Edge Location Tracking
+            <p className={`mt-1 text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+              Orders, sales and website visitors at a glance. Updates automatically every 25 seconds.
             </p>
           </div>
-
-          {/* Filter Pills & Actions */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border ${
+              isDark ? "border-[#1E293B] bg-[#111726] text-slate-300" : "border-slate-200 bg-white text-slate-600"
+            }`}>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Updated {lastUpdatedLabel}
+            </span>
             <button
-              onClick={() => setActiveFilter("all")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                activeFilter === "all"
-                  ? isDark
-                    ? "bg-[#1E293B] text-white border border-slate-500 shadow-sm"
-                    : "bg-slate-900 text-white shadow-sm shadow-slate-900/10"
-                  : isDark
-                  ? "bg-[#131823] text-slate-400 hover:text-white border border-[#1E293B]"
-                  : "bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-100"
-              }`}
-            >
-              All Divisions ({totalOrders + totalVisitors})
-            </button>
-
-            <button
-              onClick={() => setActiveFilter("matches")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                activeFilter === "matches"
-                  ? isDark
-                    ? "bg-[#1E293B] text-white border border-blue-500 shadow-sm shadow-blue-500/10"
-                    : "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
-                  : isDark
-                  ? "bg-[#131823] text-slate-400 hover:text-white border border-[#1E293B]"
-                  : "bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-100"
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-              Matches (Kite &bull; Olympia)
-            </button>
-
-            <button
-              onClick={() => setActiveFilter("detergents")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                activeFilter === "detergents"
-                  ? isDark
-                    ? "bg-[#1E293B] text-white border border-emerald-500 shadow-sm shadow-emerald-500/10"
-                    : "bg-emerald-600 text-white shadow-sm shadow-emerald-600/20"
-                  : isDark
-                  ? "bg-[#131823] text-slate-400 hover:text-white border border-[#1E293B]"
-                  : "bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-100"
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              Detergents (Burq &bull; Vero)
-            </button>
-
-            <Link
-              to="/admin/promotions"
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                isDark
-                  ? "bg-pink-500/15 text-pink-300 border border-pink-500/30 hover:bg-pink-500/25"
-                  : "bg-pink-50 text-pink-700 border border-pink-200 hover:bg-pink-100"
-              }`}
-            >
-              <FaTag className="text-[10px]" />
-              <span>Promotions ({totalPromotions})</span>
-            </Link>
-
-            <Link
-              to="/admin/orders"
-              className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-600 to-orange-500 text-white shadow-md shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-102 transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>{pendingOrders} Pending Orders</span>
-              <FaArrowRight className="text-[10px]" />
-            </Link>
-
-            <button
+              type="button"
               onClick={() => loadDashboard(true)}
               disabled={refreshing}
-              className={`p-2 rounded-full border transition-all cursor-pointer ${
-                isDark
-                  ? "bg-[#131823] border-[#1E293B] text-slate-300 hover:text-white hover:border-slate-500"
-                  : "bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer disabled:opacity-60 ${
+                isDark ? "border-[#1E293B] bg-[#111726] text-slate-200 hover:bg-[#161D2E]" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
               }`}
-              title="Refresh Live Data"
             >
-              <FaSyncAlt className={`text-xs ${refreshing ? "animate-spin text-purple-500" : ""}`} />
+              <FaSyncAlt className={refreshing ? "animate-spin" : ""} />
+              Refresh
             </button>
+            <Link
+              to="/admin/orders"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#00AEEF] hover:bg-[#0095CC] text-white shadow-sm transition-colors"
+            >
+              Manage orders <FaArrowRight className="text-[10px]" />
+            </Link>
           </div>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 3. FOUR KPI METRIC STAT CARDS (Compact Executive Proportions) */}
-        {/* ========================================================================= */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          
-          {/* Card 1: Total Orders */}
-          <div
-            className={`rounded-2xl p-4 sm:p-5 border transition-all ${
-              isDark
-                ? "bg-[#111726] border-[#1E293B] hover:border-slate-600 shadow-md"
-                : "bg-white border-slate-200 hover:border-slate-400 shadow-xs hover:shadow-md"
+        {/* Pending orders call-to-action (only when something needs attention) */}
+        {pendingOrders > 0 && (
+          <Link
+            to="/admin/orders"
+            className={`flex items-center justify-between gap-4 rounded-2xl border px-5 py-4 transition-colors ${
+              isDark ? "border-amber-900/60 bg-amber-950/30 hover:bg-amber-950/50" : "border-amber-200 bg-amber-50 hover:bg-amber-100/70"
             }`}
           >
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center"><FaClock /></span>
+              <div>
+                <p className={`font-bold ${isDark ? "text-amber-200" : "text-amber-900"}`}>
+                  {pendingOrders} {pendingOrders === 1 ? "order is" : "orders are"} waiting for confirmation
+                </p>
+                <p className={`text-xs ${isDark ? "text-amber-300/80" : "text-amber-800/80"}`}>
+                  Call the customer, then mark the order as confirmed.
+                </p>
+              </div>
+            </div>
+            <span className={`hidden sm:inline-flex items-center gap-1.5 text-sm font-bold ${isDark ? "text-amber-200" : "text-amber-900"}`}>
+              Review now <FaArrowRight className="text-xs" />
+            </span>
+          </Link>
+        )}
+
+        {/* ========================================================================= */}
+        {/* KPI CARDS */}
+        {/* ========================================================================= */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          {kpis.map((k) => (
             <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm mb-3 ${
-                isDark ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-700"
+              key={k.label}
+              className={`relative overflow-hidden rounded-2xl border p-5 transition-shadow hover:shadow-md ${
+                isDark ? "bg-[#111726] border-[#1E293B]" : "bg-white border-slate-200 shadow-sm"
               }`}
             >
-              <FaClipboardList />
+              <div className={`absolute inset-x-0 top-0 h-1 ${k.bar}`} />
+              <div className="flex items-start justify-between gap-3">
+                <p className={`text-xs font-bold uppercase tracking-wider ${isDark ? "text-slate-400" : "text-slate-500"}`}>{k.label}</p>
+                <span className={`w-10 h-10 rounded-xl flex items-center justify-center text-base ${k.iconBg}`}>{k.icon}</span>
+              </div>
+              <p className={`mt-3 text-3xl font-black tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}>{k.value}</p>
+              <p className={`mt-1.5 text-xs font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>{k.sub}</p>
             </div>
-            <div className={`text-2xl sm:text-3xl font-black tracking-tight mb-1 ${isDark ? "text-white" : "text-slate-900"}`}>
-              {totalOrders > 0 ? formatNumber(totalOrders) : "0"}
-            </div>
-            <div className={`text-xs sm:text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
-              Total Orders &amp; Inquiries
-            </div>
-            <div className={`text-[11px] sm:text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-              Customer submissions via Web &amp; WhatsApp
-            </div>
-          </div>
+          ))}
+        </div>
 
-          {/* Card 2: Dispatched / Approved */}
-          <div
-            className={`rounded-2xl p-4 sm:p-5 border transition-all ${
-              isDark
-                ? "bg-[#111726] border-[#1E293B] hover:border-emerald-500/40 shadow-md"
-                : "bg-white border-slate-200 hover:border-emerald-400 shadow-xs hover:shadow-md"
-            }`}
-          >
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center text-sm mb-3">
-              <FaChartBar />
-            </div>
-            <div className="text-2xl sm:text-3xl font-black tracking-tight mb-1 text-emerald-500">
-              {approvedOrders > 0 ? formatNumber(approvedOrders) : "0"}
-            </div>
-            <div className={`text-xs sm:text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
-              Dispatched / Processed
-            </div>
-            <div className="text-[11px] sm:text-xs text-emerald-500 font-bold mt-0.5">
-              {totalOrders > 0 ? `${Math.round((approvedOrders / totalOrders) * 100)}% of orders confirmed or shipped` : "No orders yet"}
-            </div>
-          </div>
-
-          {/* Card 3: Pending Review (Alert) */}
-          <div
-            className={`rounded-2xl p-4 sm:p-5 border transition-all relative ${
-              isDark
-                ? "bg-[#111726] border-[#1E293B] hover:border-amber-500/40 shadow-md"
-                : "bg-white border-slate-200 hover:border-amber-400 shadow-xs hover:shadow-md"
-            }`}
-          >
-            <span className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
-            <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center text-sm mb-3">
-              <FaClock />
-            </div>
-            <div className="text-2xl sm:text-3xl font-black tracking-tight mb-1 text-amber-500">
-              {pendingOrders}
-            </div>
-            <div className={`text-xs sm:text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
-              Pending Review
-            </div>
-            <div className={`text-[11px] sm:text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-              Awaiting dispatch &amp; payment confirmation
-            </div>
-          </div>
-
-          {/* Card 4: Live Active Visitors */}
-          <div
-            className={`rounded-2xl p-4 sm:p-5 border transition-all relative ${
-              isDark
-                ? "bg-[#111726] border-[#1E293B] hover:border-purple-500/40 shadow-md"
-                : "bg-white border-slate-200 hover:border-purple-400 shadow-xs hover:shadow-md"
-            }`}
-          >
-            <span className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <div className="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-500 flex items-center justify-center text-sm mb-3">
-              <FaUsers />
-            </div>
-            <div className={`text-2xl sm:text-3xl font-black tracking-tight mb-1 ${isDark ? "text-white" : "text-slate-900"}`}>
-              {formatNumber(totalVisitors)}
-            </div>
-            <div className={`text-xs sm:text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
-              Live Active Visitors
-            </div>
-            <div className="text-[11px] sm:text-xs text-purple-500 font-bold mt-0.5">
-              {todayVisitors} active sessions captured today
-            </div>
-          </div>
-
+        {/* ========================================================================= */}
+        {/* QUICK ACTIONS */}
+        {/* ========================================================================= */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {quickActions.map((q) => (
+            <Link
+              key={q.to}
+              to={q.to}
+              className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all hover:-translate-y-0.5 ${
+                isDark ? "bg-[#111726] border-[#1E293B] hover:border-slate-600" : "bg-white border-slate-200 hover:border-sky-300 hover:shadow-sm"
+              }`}
+            >
+              <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${q.iconBg}`}>{q.icon}</span>
+              <span className="min-w-0">
+                <span className={`block text-sm font-bold truncate ${isDark ? "text-slate-100" : "text-slate-800"}`}>{q.label}</span>
+                <span className="block text-[11px] truncate text-slate-500">{q.hint}</span>
+              </span>
+            </Link>
+          ))}
         </div>
 
         {/* ========================================================================= */}
@@ -746,7 +679,7 @@ function DashboardContent() {
                 </span>
               </div>
               <h3 className={`font-black text-lg sm:text-xl flex items-center gap-2.5 ${isDark ? "text-white" : "text-slate-900"}`}>
-                Active Promotional Bundles ({promotionsList.length || 9} Packages)
+                Active Packages ({promotionsList.length})
               </h3>
               <p className={`text-xs sm:text-sm font-medium mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                 Verified against client rate-sheet: Packages 1-6 standard delivery, bottom 3 premium bundles free shipping
