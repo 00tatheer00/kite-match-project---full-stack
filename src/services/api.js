@@ -1,3 +1,4 @@
+import { compressFilesIn, compressFormData, totalFileBytes, MAX_REQUEST_FILE_BYTES } from '@/utils/imageCompress';
 /**
  * Frontend API client.
  *
@@ -54,7 +55,13 @@ async function handleResponse(res) {
     data = null;
   }
   if (!res.ok) {
-    throw new ApiError(data?.message || `Request failed (${res.status})`, res.status, data);
+    const friendly =
+      res.status === 413
+        ? 'The picture is too large to upload. Please choose a smaller picture (under 4 MB).'
+        : res.status >= 500 && !data?.message
+          ? 'The server could not complete this. Please try again in a moment.'
+          : null;
+    throw new ApiError(data?.message || friendly || `Request failed (${res.status})`, res.status, data);
   }
   return sanitizePayloadUrls(data);
 }
@@ -252,14 +259,25 @@ export async function createOrder(payload) {
 
 export const adminGetProducts = () => adminFetch('/admin/products');
 
+// Pictures are shrunk in the browser first: Vercel rejects requests over ~4.5 MB (HTTP 413).
+async function withCompressedFiles(data, options) {
+  const prepared = await compressFilesIn(data || {}, options);
+  if (totalFileBytes(prepared) > MAX_REQUEST_FILE_BYTES) {
+    throw new ApiError('These pictures are too large together. Please upload fewer or smaller pictures at a time.', 413);
+  }
+  return prepared;
+}
+
 export async function adminCreateProduct(data) {
   invalidateProductsCache();
-  return adminFetch('/admin/products', { method: 'POST', body: buildProductFormData(data) });
+  const prepared = await withCompressedFiles(data);
+  return adminFetch('/admin/products', { method: 'POST', body: buildProductFormData(prepared) });
 }
 
 export async function adminUpdateProduct(id, data) {
   invalidateProductsCache();
-  return adminFetch(`/admin/products/${encodeURIComponent(id)}`, { method: 'PUT', body: buildProductFormData(data) });
+  const prepared = await withCompressedFiles(data);
+  return adminFetch(`/admin/products/${encodeURIComponent(id)}`, { method: 'PUT', body: buildProductFormData(prepared) });
 }
 
 export async function adminDeleteProduct(id) {
@@ -270,11 +288,13 @@ export async function adminDeleteProduct(id) {
 export const adminGetPromotions = () => adminFetch('/admin/promotions');
 
 export async function adminCreatePromotion(data) {
-  return adminFetch('/admin/promotions', { method: 'POST', body: buildPromotionFormData(data) });
+  const prepared = await withCompressedFiles(data);
+  return adminFetch('/admin/promotions', { method: 'POST', body: buildPromotionFormData(prepared) });
 }
 
 export async function adminUpdatePromotion(id, data) {
-  return adminFetch(`/admin/promotions/${encodeURIComponent(id)}`, { method: 'PUT', body: buildPromotionFormData(data) });
+  const prepared = await withCompressedFiles(data);
+  return adminFetch(`/admin/promotions/${encodeURIComponent(id)}`, { method: 'PUT', body: buildPromotionFormData(prepared) });
 }
 
 export async function adminDeletePromotion(id) {
@@ -283,7 +303,12 @@ export async function adminDeletePromotion(id) {
 
 export async function adminUpdateSettings(data) {
   const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
-  return adminFetch('/settings', isFormData ? { method: 'PUT', body: data } : jsonBody('PUT', data));
+  if (!isFormData) return adminFetch('/settings', jsonBody('PUT', data));
+  const prepared = await compressFormData(data, { maxSide: 2400 }); // banners stay sharp on big screens
+  if (totalFileBytes(prepared) > MAX_REQUEST_FILE_BYTES) {
+    throw new ApiError('The banner picture is too large. Please choose a smaller picture (under 4 MB).', 413);
+  }
+  return adminFetch('/settings', { method: 'PUT', body: prepared });
 }
 
 export async function adminGetOrders() {

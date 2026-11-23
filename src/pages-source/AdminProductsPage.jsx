@@ -2283,7 +2283,7 @@ This cannot be undone.`)) return;
                               e.target.value = "";
                               if (!file) return;
                               if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) return setQuickError("Please choose a JPG, PNG or WEBP picture.");
-                              if (file.size > 8 * 1024 * 1024) return setQuickError("Picture is too large (max 8 MB).");
+                              if (file.size > 30 * 1024 * 1024) return setQuickError("Picture is too large (max 30 MB).");
                               setQuickError("");
                               set({ imageFile: file, imagePreview: URL.createObjectURL(file) });
                             }}
@@ -2292,7 +2292,7 @@ This cannot be undone.`)) return;
                         <p className={hint}>
                           {Number.isInteger(quickSku.brandIndex)
                             ? `This picture is used for all ${qBrands[quickSku.brandIndex]?.name || "brand"} sizes.`
-                            : "JPG, PNG or WEBP, up to 8 MB."}
+                            : "JPG, PNG or WEBP. Large phone photos are reduced automatically."}
                         </p>
                       </div>
                     </div>
