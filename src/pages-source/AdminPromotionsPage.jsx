@@ -878,6 +878,25 @@ This cannot be undone.`)) return;
                         <p className={`text-xs mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                           Upload one or many. First image is used as primary.
                         </p>
+                        {/* Current vs. newly chosen picture, so it is clear what Save will do */}
+                        {(form.image || promotionImages.length > 0) && (
+                          <div className="mt-2 flex items-center gap-3">
+                            {form.image && (
+                              <figure className="text-center">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={form.image} alt="" className={`w-20 h-20 rounded-xl border object-contain p-1 ${promotionImages.length ? "opacity-40" : ""}`} />
+                                <figcaption className="mt-1 text-[11px] text-slate-500">Current</figcaption>
+                              </figure>
+                            )}
+                            {promotionImages.length > 0 && (
+                              <figure className="text-center">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={URL.createObjectURL(promotionImages[0])} alt="" className="w-20 h-20 rounded-xl border-2 border-emerald-500 object-contain p-1" />
+                                <figcaption className="mt-1 text-[11px] font-semibold text-emerald-600">New - replaces on save</figcaption>
+                              </figure>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <label className={labelCls}>Original / MRP Price (Rs)</label>

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { ADMIN_COOKIE, adminCookieOptions, getJwtSecret, signAdminToken, isSameOriginRequest } from '@/lib/auth';
-import { getClientIp, rateLimit } from '@/lib/rate-limit';
+import { getClientIp, rateLimit, resetRateLimit } from '@/lib/rate-limit';
 import { jsonError } from '@/lib/http';
 
 export const dynamic = 'force-dynamic';
@@ -36,7 +36,8 @@ export async function POST(request) {
   if (!isSameOriginRequest(request)) return jsonError('Forbidden', 403);
 
   const ip = getClientIp(request);
-  const limit = rateLimit(`login:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+  // 10 wrong attempts per 15 min per connection; a successful login clears the counter.
+  const limit = rateLimit(`login:${ip}`, { limit: 10, windowMs: 15 * 60 * 1000 });
   if (!limit.ok) {
     return NextResponse.json(
       { message: `Too many login attempts. Try again in ${Math.ceil(limit.retryAfter / 60)} minutes.` },
@@ -65,6 +66,7 @@ export async function POST(request) {
     return jsonError('Invalid email or password', 401);
   }
 
+  resetRateLimit(`login:${ip}`);
   const token = signAdminToken(configuredEmail);
   if (!token) return jsonError('Admin login is not configured on the server.', 503);
 

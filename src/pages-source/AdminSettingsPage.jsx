@@ -512,7 +512,7 @@ const AdminSettingsPage = () => {
                       <input
                         type="number"
                         value={defaultShippingCost}
-                        onChange={(e) => setDefaultShippingCost(Number(e.target.value))}
+                        onChange={(e) => setDefaultShippingCost(e.target.value)}
                         required
                         min="0"
                         className={`w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF] transition-colors ${
@@ -535,7 +535,7 @@ const AdminSettingsPage = () => {
                       <input
                         type="number"
                         value={smallPackageShippingCost}
-                        onChange={(e) => setSmallPackageShippingCost(Number(e.target.value))}
+                        onChange={(e) => setSmallPackageShippingCost(e.target.value)}
                         required
                         min="0"
                         className={`w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF] transition-colors ${

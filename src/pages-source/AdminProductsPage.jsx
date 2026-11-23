@@ -35,9 +35,11 @@ const emptyForm = {
   id: "",
   title: "",
   category: "",
-  productType: "matches",
-  navGroup: "Safety Matches",
-  iconType: "fire",
+  // Neutral defaults: "matches" hides the Sizes section (sizes live under brands),
+  // which made new detergent products impossible to price.
+  productType: "general",
+  navGroup: "",
+  iconType: "",
   description: "",
   image: "",
   color: colors.primary.main,
@@ -1495,6 +1497,25 @@ This cannot be undone.`)) return;
                 <p className="text-xs text-slate-500 mt-1">
                   Upload one or many. First image is used as primary.
                 </p>
+                {/* Current vs. newly chosen picture, so it is clear what Save will do */}
+                {(form.image || productImages.length > 0) && (
+                  <div className="mt-2 flex items-center gap-3">
+                    {form.image && (
+                      <figure className="text-center">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={form.image} alt="" className={`w-20 h-20 rounded-xl border object-contain p-1 ${productImages.length ? "opacity-40" : ""}`} />
+                        <figcaption className="mt-1 text-[11px] text-slate-500">Current</figcaption>
+                      </figure>
+                    )}
+                    {productImages.length > 0 && (
+                      <figure className="text-center">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={URL.createObjectURL(productImages[0])} alt="" className="w-20 h-20 rounded-xl border-2 border-emerald-500 object-contain p-1" />
+                        <figcaption className="mt-1 text-[11px] font-semibold text-emerald-600">New - replaces on save</figcaption>
+                      </figure>
+                    )}
+                  </div>
+                )}
               </div>
               <div>
                 <label className={labelCls}>Color (hex)</label>

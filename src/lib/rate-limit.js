@@ -38,3 +38,8 @@ export function rateLimit(key, { limit, windowMs }) {
   }
   return { ok: true, retryAfter: 0 };
 }
+
+/** Forget a key's attempts (e.g. after a successful login, so only failed attempts count). */
+export function resetRateLimit(key) {
+  buckets.delete(key);
+}
