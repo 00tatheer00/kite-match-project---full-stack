@@ -163,7 +163,7 @@ export async function adminCheckSession() {
 let productsCache = null;
 let productsCacheTime = 0;
 let productsInFlightPromise = null;
-const PRODUCTS_CACHE_TTL = 15 * 1000;
+const PRODUCTS_CACHE_TTL = 5 * 1000; // short: admin edits must show quickly
 
 export function invalidateProductsCache() {
   productsCache = null;
@@ -212,7 +212,7 @@ export async function getProduct(id) {
   } catch {
     // fall back to direct lookup
   }
-  const res = await fetch(`${API_BASE_URL}/products/${encodeURIComponent(id)}`);
+  const res = await fetch(`${API_BASE_URL}/products/${encodeURIComponent(id)}`, { cache: 'no-store' });
   return handleResponse(res);
 }
 
@@ -223,7 +223,7 @@ export async function getPromotions() {
 }
 
 export async function getSettings() {
-  const res = await fetch(`${API_BASE_URL}/settings`);
+  const res = await fetch(`${API_BASE_URL}/settings`, { cache: 'no-store' });
   return handleResponse(res);
 }
 

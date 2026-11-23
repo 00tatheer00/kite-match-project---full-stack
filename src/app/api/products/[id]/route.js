@@ -13,7 +13,7 @@ export async function GET(request, context) {
     const product = await resolveProduct(requested);
     if (!product || product.isActive === false) return jsonError('Product not found', 404);
     return NextResponse.json(product, {
-      headers: { 'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=60' },
+      headers: { 'Cache-Control': 'no-store, max-age=0' },
     });
   } catch (err) {
     return handleRouteError(err, 'get product');

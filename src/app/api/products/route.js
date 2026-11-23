@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const products = await listProducts({ activeOnly: true });
     return NextResponse.json(products, {
-      headers: { 'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=60' },
+      headers: { 'Cache-Control': 'no-store, max-age=0' },
     });
   } catch (err) {
     return handleRouteError(err, 'list products');

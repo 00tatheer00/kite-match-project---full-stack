@@ -5,8 +5,11 @@ import { useInView } from "react-intersection-observer";
 import { Link } from '@/components/RouterCompat';
 import { FaFire, FaArrowLeft, FaCheckCircle } from "react-icons/fa";
 import kite_img from "../assets/products/kite.jpeg";
+import useBrandImage from "@/hooks/useBrandImage";
 
 const PartyMatchesPage = () => {
+  // Picture managed in the admin panel (falls back to the built-in one).
+  const brandImage = useBrandImage("Party");
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -65,7 +68,7 @@ const PartyMatchesPage = () => {
           >
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-[#E0E0E0]">
               <img
-                src={product.image?.src || product.image}
+                src={brandImage || product.image?.src || product.image}
                 alt={product.title}
                 className="w-full h-auto object-cover"
               />
