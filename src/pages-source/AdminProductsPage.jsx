@@ -243,6 +243,9 @@ const AdminProductsPage = () => {
       brandIndex: Number.isInteger(sku.brandIndex) ? sku.brandIndex : null,
       variantIndex: sku.variantIndex,
       originalName: sku.variant.name || "",
+      currentImage: sku.image?.src || sku.image || "",
+      imageFile: null,
+      imagePreview: "",
       name: sku.variant.name || "",
       detail: sku.variant.detail || "",
       packing: sku.variant.packing || "",
@@ -259,6 +262,9 @@ const AdminProductsPage = () => {
       brandIndex: first?.brands?.length ? 0 : null,
       variantIndex: null,
       originalName: "",
+      currentImage: "",
+      imageFile: null,
+      imagePreview: "",
       name: "",
       detail: "",
       packing: "",
@@ -305,6 +311,22 @@ const AdminProductsPage = () => {
       update.variantImages = (prod.variantImages || []).map((vi) =>
         (vi?.name || "").trim().toLowerCase() === q.originalName.trim().toLowerCase() ? { ...vi, name } : vi
       );
+    }
+
+    // New picture: brand sizes share the brand's picture; product sizes have their own.
+    if (q.imageFile) {
+      if (Number.isInteger(q.brandIndex)) {
+        update.brandImageFiles = (update.brands || []).map((_, i) => (i === q.brandIndex ? q.imageFile : null));
+      } else {
+        const list = (update.variantImages || prod.variantImages || []).map((vi) => ({ name: vi?.name || "", image: vi?.image || "" }));
+        let idx = list.findIndex((vi) => vi.name.trim().toLowerCase() === name.toLowerCase());
+        if (idx < 0) {
+          list.push({ name, image: "" });
+          idx = list.length - 1;
+        }
+        update.variantImages = list;
+        update.variantImageFiles = list.map((_, i) => (i === idx ? q.imageFile : null));
+      }
     }
 
     try {
@@ -2217,7 +2239,46 @@ This cannot be undone.`)) return;
                   )}
 
                   <div>
-                    <label className={lbl} htmlFor="q-name">New size name *</label>
+                    <span className={lbl}>Picture</span>
+                    <div className="flex items-center gap-3">
+                      <span className={`w-20 h-20 rounded-xl border flex items-center justify-center overflow-hidden shrink-0 ${isDark ? "border-slate-700 bg-slate-900" : "border-slate-200 bg-slate-50"}`}>
+                        {quickSku.imagePreview || quickSku.currentImage ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={quickSku.imagePreview || quickSku.currentImage} alt="" className="w-full h-full object-contain p-1" />
+                        ) : (
+                          <FaBoxOpen className="text-slate-400 text-2xl" />
+                        )}
+                      </span>
+                      <div className="min-w-0">
+                        <label className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-bold cursor-pointer ${isDark ? "border-slate-600 text-slate-200 hover:bg-slate-800" : "border-slate-300 text-slate-700 bg-white hover:bg-slate-50"}`}>
+                          <FaFileUpload className="text-sky-500" />
+                          {quickSku.imagePreview || quickSku.currentImage ? "Change picture" : "Add picture"}
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              e.target.value = "";
+                              if (!file) return;
+                              if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) return setQuickError("Please choose a JPG, PNG or WEBP picture.");
+                              if (file.size > 8 * 1024 * 1024) return setQuickError("Picture is too large (max 8 MB).");
+                              setQuickError("");
+                              set({ imageFile: file, imagePreview: URL.createObjectURL(file) });
+                            }}
+                          />
+                        </label>
+                        <p className={hint}>
+                          {Number.isInteger(quickSku.brandIndex)
+                            ? `This picture is used for all ${qBrands[quickSku.brandIndex]?.name || "brand"} sizes.`
+                            : "JPG, PNG or WEBP, up to 8 MB."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={lbl} htmlFor="q-name">{quickSku.mode === "add" ? "New size name *" : "Size name *"}</label>
                     <input id="q-name" className={fieldCls} value={quickSku.name} autoFocus
                       onChange={(e) => set({ name: e.target.value })} placeholder="e.g. 1 KG, LARGE, SUPER BAR" />
                     <p className={hint}>This is what customers see on the button.</p>

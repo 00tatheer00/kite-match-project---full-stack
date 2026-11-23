@@ -444,7 +444,7 @@ This cannot be undone.`)) return;
                 title="Restore and synchronize the 9 official rate-sheet packages"
               >
                 <span className={syncing ? "animate-spin" : ""}>↻</span>
-                <span>{syncing ? "Syncing..." : "Re-Sync Official Packages"}</span>
+                <span>{syncing ? "Refreshing..." : "Refresh list"}</span>
               </button>
 
               <button
@@ -549,7 +549,7 @@ This cannot be undone.`)) return;
                           <td className="py-3 pr-3">
                             <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-slate-200 flex-shrink-0 flex items-center justify-center">
                               {p.image ? (
-                                <img src={p.id === 'pkg-kite-smart-starter' ? '/packages-image/kite-smart-starter-v3.jpeg' : p.image?.src || p.image} alt={p.title} className="w-full h-full object-cover" />
+                                <img src={p.image?.src || p.image} alt={p.title} className="w-full h-full object-cover" />
                               ) : (
                                 <span className="text-[10px] text-gray-400">No Img</span>
                               )}
@@ -649,7 +649,7 @@ This cannot be undone.`)) return;
                       <div className="flex items-start gap-3">
                         <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 border border-slate-200 flex-shrink-0">
                           {p.image ? (
-                            <img src={p.id === 'pkg-kite-smart-starter' ? '/packages-image/kite-smart-starter-v3.jpeg' : p.image?.src || p.image} alt={p.title} className="w-full h-full object-cover" />
+                            <img src={p.image?.src || p.image} alt={p.title} className="w-full h-full object-cover" />
                           ) : (
                             <span className="text-[10px] text-gray-400 p-2 block">No Img</span>
                           )}

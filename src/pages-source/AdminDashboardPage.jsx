@@ -713,7 +713,7 @@ function DashboardContent() {
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-14 h-14 rounded-lg overflow-hidden bg-white border border-slate-200 flex-shrink-0 flex items-center justify-center p-1">
                       {p.image ? (
-                        <img src={p.id === 'pkg-kite-smart-starter' ? '/packages-image/kite-smart-starter-v3.jpeg' : p.image?.src || p.image} alt={p.title} className="w-full h-full object-contain" />
+                        <img src={p.image?.src || p.image} alt={p.title} className="w-full h-full object-contain" />
                       ) : (
                         <span className="text-[10px] text-gray-400">Pack {idx + 1}</span>
                       )}
