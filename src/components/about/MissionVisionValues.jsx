@@ -33,7 +33,7 @@ const MissionVisionValues = () => {
         "Our foundation is built upon the pillars of Commitment, Integrity, and Honesty, which guide every decision we make. We believe in the power of Nurture and Care to foster a supportive environment, while Respect forms the basis of our interactions. By choosing to Innovate and Excel, we ensure that our collective efforts deliver exceptional results and lasting impact.",
       gradient: "from-[#FF8ACE] to-[#FFEFF9]",
       border: "border-[#FF8ACE]",
-      textColor: "text-[#ED028C]",
+      textColor: "text-[#C70275]",
     },
   ];
 

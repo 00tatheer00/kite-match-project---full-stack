@@ -20,6 +20,7 @@ import OrderTrustStrip from "../components/OrderTrustStrip";
 import { trackEvent } from "../lib/gtag";
 import { FaWhatsapp } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
+import { readable } from "../utils/contrast";
 
 const firstVariantOf = (p) =>
   p?.variants?.[0]?.name || p?.variantImages?.[0]?.name || p?.sizes?.[0]?.size || p?.skus?.[0]?.size || "";
@@ -146,7 +147,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
             </h2>
             <Link
               to="/products"
-              className="text-[#00AEEF] hover:text-[#ED028C] font-semibold"
+              className="text-[#006DA8] hover:text-[#ED028C] font-semibold"
             >
               Back to Products
             </Link>
@@ -342,10 +343,10 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
         <div className="px-6 py-5 pb-4">
           <h4 className="text-lg font-bold text-[#333]">{title}</h4>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Sizes and pricing table">
           <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
-              <tr style={{ backgroundColor: color }}>
+              <tr style={{ backgroundColor: readable(color) }}>
                 <th className="py-3 px-6 font-bold text-white uppercase tracking-wider text-xs">Variant</th>
                 <th className="py-3 px-6 font-bold text-white uppercase tracking-wider text-xs">Detail</th>
                 <th className="py-3 px-6 font-bold text-white text-xs tracking-wider">Packing</th>
@@ -358,7 +359,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                   <td className="py-4 px-6 text-[#222222] font-extrabold text-xs tracking-wide uppercase">{v.name || "-"}</td>
                   <td className="py-4 px-6 text-[#666666] text-sm">{v.detail || "-"}</td>
                   <td className="py-4 px-6 text-[#666666] text-sm">{v.packing || "-"}</td>
-                  <td className="py-4 px-6 text-sm font-semibold" style={{ color: color }}>
+                  <td className="py-4 px-6 text-sm font-semibold" style={{ color: readable(color) }}>
                     {v.price != null ? `Rs ${v.price}` : "Contact for pricing"}
                   </td>
                 </tr>
@@ -411,7 +412,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
               >
                 <div
                   className="inline-block px-4 py-1.5 rounded-full text-white text-sm font-bold tracking-wider uppercase mb-4"
-                  style={{ backgroundColor: product.color }}
+                  style={{ backgroundColor: readable(product.color) }}
                 >
                   {product.category}
                 </div>
@@ -421,7 +422,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                 {product.tagline && (
                   <p
                     className="font-amiri text-2xl sm:text-3xl font-bold mb-6"
-                    style={{ color: product.color }}
+                    style={{ color: readable(product.color) }}
                   >
                     {product.tagline}
                   </p>
@@ -478,7 +479,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                     </>
                   )}
                   {selectedVariant && (
-                    <span className="absolute top-4 left-4 px-3 py-1 rounded-full text-white text-sm font-semibold bg-[#00AEEF]/95 shadow-lg">
+                    <span className="absolute top-4 left-4 px-3 py-1 rounded-full text-white text-sm font-semibold bg-[#006DA8] shadow-lg">
                       {selectedVariant}
                     </span>
                   )}
@@ -518,13 +519,13 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
                 <div className="flex items-center mb-4 sm:mb-6">
-                  <div className="mr-4" style={{ color: product.color }}>
+                  <div className="mr-4" style={{ color: readable(product.color) }}>
                     {icon}
                   </div>
                   <div>
                     <div
                       className="inline-block px-3 py-1 rounded-full text-white text-sm font-semibold mb-2"
-                      style={{ backgroundColor: product.color }}
+                      style={{ backgroundColor: readable(product.color) }}
                     >
                       {product.category}
                     </div>
@@ -537,7 +538,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                 {product.tagline && (
                   <p
                     className="font-amiri text-xl sm:text-2xl font-bold mb-5 sm:mb-6"
-                    style={{ color: product.color }}
+                    style={{ color: readable(product.color) }}
                   >
                     {product.tagline}
                   </p>
@@ -549,15 +550,15 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
 
                 {/* Features */}
                 <div className="mb-6 sm:mb-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#222222] mb-4">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#222222] mb-4">
                     Key Features
-                  </h3>
+                  </h2>
                   <ul className="space-y-3">
                     {(product.features || []).map((feature, idx) => (
                       <li key={idx} className="flex items-start">
                         <FaCheckCircle
                           className="mr-3 mt-1 flex-shrink-0"
-                          style={{ color: product.color }}
+                          style={{ color: readable(product.color) }}
                         />
                         <span className="text-[#666666]">{feature}</span>
                       </li>
@@ -579,7 +580,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                           onClick={() => handleVariantSelect(opt)}
                           className={`px-3 sm:px-4 py-2 rounded-full border text-xs sm:text-sm font-semibold ${
                             selectedVariant === opt
-                              ? "bg-[#00AEEF] text-white border-[#00AEEF]"
+                              ? "bg-[#006DA8] text-white border-[#00AEEF]"
                               : "bg-white text-[#222222] border-[#E0E0E0] hover:border-[#00AEEF]"
                           }`}
                         >
@@ -594,7 +595,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                 {!(product.brands?.length > 0) && (
                   <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-8 border-t border-[#E0E0E0]">
                     {getSelectedPrice() > 0 ? (
-                      <p className="text-xl sm:text-2xl font-bold text-[#00AEEF]">
+                      <p className="text-xl sm:text-2xl font-bold text-[#006DA8]">
                         Rs {(getSelectedPrice() * quantity).toLocaleString()}
                       </p>
                     ) : (
@@ -641,7 +642,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                         type="button"
                         onClick={handleMainAddToCart}
                         disabled={addingToCart || getSelectedPrice() <= 0}
-                        className="px-8 py-3 rounded-full text-white font-semibold bg-[#00AEEF] hover:bg-[#0095CC] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                        className="px-8 py-3 rounded-full text-white font-semibold bg-[#006DA8] hover:bg-[#005F92] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
                         title="Add to shopping cart"
                       >
                         <FaShoppingCart className="text-base" />
@@ -652,7 +653,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => trackEvent("whatsapp_click", { location: "product_buy_box", item_id: String(product.id) })}
-                        className="px-6 py-3 rounded-full font-semibold border-2 border-[#25D366] text-[#128C7E] hover:bg-[#25D366] hover:text-white transition-all flex items-center justify-center gap-2 active:scale-95"
+                        className="px-6 py-3 rounded-full font-semibold border-2 border-[#25D366] text-[#075E54] hover:bg-[#25D366] hover:text-white transition-all flex items-center justify-center gap-2 active:scale-95"
                       >
                         <FaWhatsapp aria-hidden="true" className="text-base" />
                         <span>Order on WhatsApp</span>
@@ -687,7 +688,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                         {/* Left: Image Box */}
                         <div className="w-full md:w-5/12 relative">
                           <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-[#F0F0F0] p-8 sm:p-12 flex items-center justify-center">
-                            <div className="absolute top-4 left-4 bg-[#ED028C] px-3 py-1 rounded-full shadow-md text-xs font-bold text-white z-10">
+                            <div className="absolute top-4 left-4 bg-[#C70275] px-3 py-1 rounded-full shadow-md text-xs font-bold text-white z-10">
                               {brandSelectedVariants[bIdx] || brand.variants?.[0]?.name || "Select Variant"}
                             </div>
                             {brand.image ? (
@@ -701,12 +702,12 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                         {/* Right: Details Box */}
                         <div className="w-full md:w-7/12 flex flex-col justify-center">
                           <div>
-                            <span className="inline-block mb-3 px-3 py-1 bg-[#ED028C] text-white rounded-full text-xs font-bold tracking-wider uppercase shadow-sm">
+                            <span className="inline-block mb-3 px-3 py-1 bg-[#C70275] text-white rounded-full text-xs font-bold tracking-wider uppercase shadow-sm">
                               {brand.category || "Safety Matches"}
                             </span>
                             <h4 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#222222] mb-3 tracking-tight">{brand.name}</h4>
                             {brand.tagline && (
-                              <p className="text-[#ED028C] text-xl sm:text-2xl font-medium mb-4 font-amiri leading-normal" dir="auto">
+                              <p className="text-[#C70275] text-xl sm:text-2xl font-medium mb-4 font-amiri leading-normal" dir="auto">
                                 {brand.tagline}
                               </p>
                             )}
@@ -722,7 +723,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                                 <ul className="space-y-2">
                                   {brand.features.filter(Boolean).map((feature, fIdx) => (
                                     <li key={fIdx} className="flex items-start text-base text-[#444]">
-                                      <FaCheckCircle className="text-[#ED028C] mt-1.5 mr-3 flex-shrink-0" />
+                                      <FaCheckCircle className="text-[#C70275] mt-1.5 mr-3 flex-shrink-0" />
                                       <span>{feature}</span>
                                     </li>
                                   ))}
@@ -744,7 +745,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                                       onClick={() => setBrandSelectedVariants(prev => ({ ...prev, [bIdx]: variant.name }))}
                                       className={`px-5 py-2.5 rounded-full border-2 text-sm font-bold transition-all duration-300 ${
                                         isSelected 
-                                          ? "bg-[#00AEEF] text-white border-[#00AEEF] shadow-lg shadow-[#00AEEF]/30" 
+                                          ? "bg-[#006DA8] text-white border-[#00AEEF] shadow-lg shadow-[#00AEEF]/30" 
                                           : "bg-white text-[#555] border-[#E0E0E0] hover:border-[#00AEEF] hover:text-[#00AEEF]"
                                       }`}
                                     >
@@ -757,7 +758,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
                                   {brand.variants.find(v => v.name === (brandSelectedVariants[bIdx] || brand.variants[0]?.name))?.price != null ? (
-                                    <p className="text-2xl font-bold text-[#00AEEF]">
+                                    <p className="text-2xl font-bold text-[#006DA8]">
                                       Rs {brand.variants.find(v => v.name === (brandSelectedVariants[bIdx] || brand.variants[0]?.name)).price}
                                     </p>
                                   ) : (
@@ -790,7 +791,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                                       type="button"
                                       onClick={() => handleBrandVariantAddToCart(brand, bIdx)}
                                       disabled={addingToCart}
-                                      className="px-5 py-2.5 bg-[#00AEEF] hover:bg-[#0095CC] text-white rounded-lg font-bold flex items-center gap-1.5 shadow-sm text-xs transition-colors active:scale-95 cursor-pointer"
+                                      className="px-5 py-2.5 bg-[#006DA8] hover:bg-[#005F92] text-white rounded-lg font-bold flex items-center gap-1.5 shadow-sm text-xs transition-colors active:scale-95 cursor-pointer"
                                       title="Add to shopping cart"
                                     >
                                       <FaShoppingCart className="text-xs" />
@@ -834,7 +835,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                         {facility.name}
                       </p>
                       <p className="text-[#666666] mb-1">{facility.location}</p>
-                      <p className="text-[#00AEEF] text-sm italic">
+                      <p className="text-[#006DA8] text-sm italic">
                         {facility.note}
                       </p>
                     </div>
@@ -848,7 +849,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
               <div
                 className="rounded-2xl p-8 text-white shadow-lg"
                 style={{
-                  background: `linear-gradient(135deg, ${product.color} 0%, ${product.color}dd 100%)`,
+                  background: `linear-gradient(135deg, ${readable(product.color)} 0%, ${readable(product.color)}dd 100%)`,
                 }}
               >
                 <h3 className="text-2xl font-bold mb-4">Additional Services</h3>
@@ -876,7 +877,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Link
                   to="/contact"
-                  className="bg-white text-[#00AEEF] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
+                  className="bg-white text-[#006DA8] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
                 >
                   Request Quote
                 </Link>

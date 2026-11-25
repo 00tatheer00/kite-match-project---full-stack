@@ -165,7 +165,7 @@ const Navbar = () => {
                   to={item.href}
                   className={`text-base lg:text-[17px] font-semibold transition-colors duration-200 flex items-center gap-1.5 py-2 px-1 focus:outline-none ${
                     isActive(item.href)
-                      ? "text-primary"
+                      ? "text-[#006DA8]"
                       : "text-text-primary hover:text-primary"
                   }`}
                 >
@@ -193,7 +193,7 @@ const Navbar = () => {
                     >
                       {item.megaMenu.map((category) => (
                         <div key={category.title}>
-                          <h3 className="text-sm font-bold text-primary mb-3 uppercase tracking-wide">
+                          <h3 className="text-sm font-bold text-[#006DA8] mb-3 uppercase tracking-wide">
                             {category.title}
                           </h3>
 
@@ -205,7 +205,7 @@ const Navbar = () => {
                                   to={menuItem.href}
                                   className={`block text-sm px-3 py-1 rounded transition-all duration-200 focus:outline-none ${
                                     isActive(menuItem.href)
-                                      ? "text-primary bg-accent-tint font-semibold"
+                                      ? "text-[#006DA8] bg-accent-tint font-semibold"
                                       : "text-text-secondary hover:text-primary hover:bg-accent-tint"
                                   }`}
                                 >
@@ -229,7 +229,7 @@ const Navbar = () => {
                         to={dropdownItem.href}
                         className={`block px-4 py-2 transition-all duration-200 focus:outline-none ${
                           isActive(dropdownItem.href)
-                            ? "text-primary bg-accent-tint font-semibold"
+                            ? "text-[#006DA8] bg-accent-tint font-semibold"
                             : "text-text-primary hover:bg-accent-tint hover:text-primary"
                         }`}
                       >
@@ -253,7 +253,7 @@ const Navbar = () => {
             >
               <FaShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-primary transition-colors" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#ED028C] text-white text-[11px] font-bold min-w-5 h-5 px-1 flex items-center justify-center rounded-full shadow-sm animate-scale-in">
+                <span className="absolute -top-1 -right-1 bg-[#C70275] text-white text-[11px] font-bold min-w-5 h-5 px-1 flex items-center justify-center rounded-full shadow-sm animate-scale-in">
                   {cartCount}
                 </span>
               )}
@@ -263,8 +263,8 @@ const Navbar = () => {
               to="/contact"
               className={`inline-flex items-center justify-center px-6 py-2.5 lg:px-7 lg:py-2.5 rounded-full text-base font-semibold transition-all duration-300 shadow-md hover:shadow-lg focus:outline-none ${
                 isActive("/contact")
-                  ? "bg-primary-600 text-text-white shadow-lg scale-95"
-                  : "bg-primary text-text-white hover:bg-primary-600 hover:scale-105 active:scale-95"
+                  ? "bg-[#005F92] text-text-white shadow-lg scale-95"
+                  : "bg-[#006DA8] text-text-white hover:bg-[#005F92] hover:scale-105 active:scale-95"
               }`}
             >
               Contact Us
@@ -281,7 +281,7 @@ const Navbar = () => {
             >
               <FaShoppingCart className="h-6 w-6 text-gray-700" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#ED028C] text-white text-[10px] font-bold min-w-4 h-4 px-1 flex items-center justify-center rounded-full shadow-xs">
+                <span className="absolute -top-1 -right-1 bg-[#C70275] text-white text-[10px] font-bold min-w-4 h-4 px-1 flex items-center justify-center rounded-full shadow-xs">
                   {cartCount}
                 </span>
               )}
@@ -317,7 +317,7 @@ const Navbar = () => {
                   to={item.href}
                   className={`flex items-center justify-between px-3 py-1.5 rounded-lg font-medium transition-all duration-200 focus:outline-none ${
                     isActive(item.href)
-                      ? "text-primary bg-gray-100"
+                      ? "text-[#006DA8] bg-gray-100"
                       : "text-text-primary hover:text-primary hover:bg-gray-100"
                   }`}
                   onClick={() =>
@@ -339,7 +339,7 @@ const Navbar = () => {
                         {/* Category Header - Clickable to expand/collapse */}
                         <button
                           onClick={() => toggleMobileCategory(category.title)}
-                          className="w-full flex items-center justify-between text-xs font-bold text-primary py-1.5 uppercase focus:outline-none"
+                          className="w-full flex items-center justify-between text-xs font-bold text-[#006DA8] py-1.5 uppercase focus:outline-none"
                         >
                           <span>{category.title}</span>
                           <FaChevronDown
@@ -391,8 +391,8 @@ const Navbar = () => {
               to="/contact"
               className={`block w-full text-center px-6 py-1.5 rounded-full font-medium transition-all duration-300 mt-4 focus:outline-none ${
                 isActive("/contact")
-                  ? "bg-primary-600 text-text-white shadow-lg"
-                  : "bg-primary text-text-white hover:bg-primary-600 active:scale-95"
+                  ? "bg-[#005F92] text-text-white shadow-lg"
+                  : "bg-[#006DA8] text-text-white hover:bg-[#005F92] active:scale-95"
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >

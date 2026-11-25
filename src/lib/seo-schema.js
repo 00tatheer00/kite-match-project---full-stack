@@ -41,6 +41,7 @@ export const returnPolicy = {
   merchantReturnDays: RETURN_DAYS,
   returnMethod: "https://schema.org/ReturnByMail",
   returnFees: "https://schema.org/FreeReturn",
+  refundType: "https://schema.org/FullRefund", // Terms: damaged/wrong items are replaced or refunded
   merchantReturnLink: `${SITE}/terms`,
 };
 

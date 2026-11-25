@@ -6,6 +6,7 @@ import { Link } from '@/components/RouterCompat';
 import { FaFire, FaArrowLeft, FaCheckCircle } from "react-icons/fa";
 import kite_img from "../assets/products/kite.jpeg";
 import useBrandImage from "@/hooks/useBrandImage";
+import { readable } from "../utils/contrast";
 
 const TangaMatchesPage = () => {
   // Picture managed in the admin panel (falls back to the built-in one).
@@ -18,7 +19,7 @@ const TangaMatchesPage = () => {
     id: "tanga",
     category: "Safety Matches",
     title: "Tanga Safety Matches",
-    icon: <FaFire className="text-6xl text-[#ED028C]" />,
+    icon: <FaFire className="text-6xl text-[#C70275]" />,
     description:
       "Tanga is a trusted local brand of safety matches, manufactured with premium quality standards. Known for reliable performance and consistent quality across all sizes.",
     image: kite_img,
@@ -81,13 +82,13 @@ const TangaMatchesPage = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <div className="flex items-center mb-6">
-              <div className="mr-4" style={{ color: product.color }}>
+              <div className="mr-4" style={{ color: readable(product.color) }}>
                 {product.icon}
               </div>
               <div>
                 <div
                   className="inline-block px-3 py-1 rounded-full text-white text-sm font-semibold mb-2"
-                  style={{ backgroundColor: product.color }}
+                  style={{ backgroundColor: readable(product.color) }}
                 >
                   {product.category}
                 </div>
@@ -102,15 +103,15 @@ const TangaMatchesPage = () => {
             </p>
 
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-[#222222] mb-4">
+              <h2 className="text-2xl font-bold text-[#222222] mb-4">
                 Key Features
-              </h3>
+              </h2>
               <ul className="space-y-3">
                 {product.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start">
                     <FaCheckCircle
                       className="mr-3 mt-1 flex-shrink-0"
-                      style={{ color: product.color }}
+                      style={{ color: readable(product.color) }}
                     />
                     <span className="text-[#666666]">{feature}</span>
                   </li>
@@ -127,10 +128,10 @@ const TangaMatchesPage = () => {
           className="space-y-12"
         >
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-[#E0E0E0]">
-            <h3 className="text-2xl font-bold text-[#222222] mb-6">
+            <h2 className="text-2xl font-bold text-[#222222] mb-6">
               Available Sizes
-            </h3>
-            <div className="overflow-x-auto">
+            </h2>
+            <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Sizes and pricing table">
               <table className="w-full">
                 <thead>
                   <tr
@@ -177,9 +178,9 @@ const TangaMatchesPage = () => {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-16 bg-gradient-to-r from-[#00AEEF] to-[#0095CC] rounded-3xl p-8 md:p-12 text-center shadow-2xl"
         >
-          <h3 className="text-white text-3xl md:text-4xl font-bold mb-6 drop-shadow-lg">
+          <h2 className="text-white text-3xl md:text-4xl font-bold mb-6 drop-shadow-lg">
             Interested in {product.title}?
-          </h3>
+          </h2>
           <p className="text-white/90 text-lg mb-8 max-w-3xl mx-auto drop-shadow-md">
             Contact us for product inquiries, bulk orders, private labeling
             services, or export opportunities.
@@ -187,7 +188,7 @@ const TangaMatchesPage = () => {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               to="/contact"
-              className="bg-white text-[#00AEEF] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
+              className="bg-white text-[#006DA8] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
             >
               Request Quote
             </Link>

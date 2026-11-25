@@ -82,7 +82,7 @@ const RealEstatePage = () => {
             </div>
 
             <div className="card-hover bg-white rounded-xl shadow-lg p-8 text-center">
-              <div className="bg-[#0095CC] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-[#006DA8] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FaMapMarkerAlt className="text-white text-2xl" />
               </div>
               <h3 className="text-xl font-bold text-[#222222] mb-3">
@@ -94,7 +94,7 @@ const RealEstatePage = () => {
             </div>
 
             <div className="card-hover bg-white rounded-xl shadow-lg p-8 text-center">
-              <div className="bg-[#00AEEF] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-[#006DA8] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FaAward className="text-white text-2xl" />
               </div>
               <h3 className="text-xl font-bold text-[#222222] mb-3">
@@ -252,7 +252,7 @@ const RealEstatePage = () => {
               </div>
 
               <div className="bg-white rounded-xl shadow-lg p-8">
-                <div className="bg-[#0095CC] w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <div className="bg-[#006DA8] w-12 h-12 rounded-full flex items-center justify-center mb-4">
                   <FaAward className="text-white text-xl" />
                 </div>
                 <h3 className="text-xl font-bold text-[#222222] mb-3">
@@ -340,7 +340,7 @@ const RealEstatePage = () => {
           </p>
           <a
             href="/contact"
-            className="inline-block bg-white text-[#00AEEF] px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
+            className="inline-block bg-white text-[#006DA8] px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
           >
             Contact Us
           </a>

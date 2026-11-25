@@ -317,12 +317,13 @@ const WoodenSplintsExport = () => {
         {/* Section Header & Contact */}
         <div className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-[#00AEEF] text-lg font-semibold mb-2 uppercase tracking-wide">
+            <p className="text-[#006DA8] text-lg font-semibold mb-2 uppercase tracking-wide">
               Wooden Splints Export
-            </h2>
-            <h3 className="text-[#222222] text-4xl md:text-5xl font-bold mb-6">
+            </p>
+            {/* The page's only H1 (SEO: one main heading per page). */}
+            <h1 className="text-[#222222] text-4xl md:text-5xl font-bold mb-6">
               Premium Quality Wooden Splints
-            </h3>
+            </h1>
             <div className="w-24 h-1 bg-[#ED028C] mx-auto"></div>
           </div>
           <div className="grid md:grid-cols-2 gap-8 items-center bg-white rounded-2xl shadow-lg p-8 border-2 border-[#E0E0E0]">
@@ -334,7 +335,7 @@ const WoodenSplintsExport = () => {
               </p>
             </div>
             <div className="md:border-l-2 md:border-[#E0E0E0] md:pl-8">
-              <h4 className="text-[#222222] text-xl font-bold mb-4">Export Department Contact</h4>
+              <h2 className="text-[#222222] text-xl font-bold mb-4">Export Department Contact</h2>
               <div className="space-y-2">
                 <p className="text-[#666666]">
                   <strong className="text-[#222222]">Email:</strong> match.export@azizgrp.com
@@ -365,9 +366,9 @@ const WoodenSplintsExport = () => {
 
         {/* Splints Images Showcase */}
         <div className="mb-20">
-          <h3 className="text-[#222222] text-3xl font-bold text-center mb-12">
+          <h2 className="text-[#222222] text-3xl font-bold text-center mb-12">
             Our Wooden Splints
-          </h3>
+          </h2>
 
           <div className="grid md:grid-cols-2 gap-8">
             <div className="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-[#E0E0E0]">
@@ -383,9 +384,9 @@ const WoodenSplintsExport = () => {
                 />
               </div>
               <div className="p-6 text-center">
-                <h4 className="text-[#222222] font-bold text-xl mb-2">
+                <h3 className="text-[#222222] font-bold text-xl mb-2">
                   Premium Quality Splints
-                </h4>
+                </h3>
                 <p className="text-[#666666]">
                   Carefully selected wood for optimal match production
                 </p>
@@ -405,9 +406,9 @@ const WoodenSplintsExport = () => {
                 />
               </div>
               <div className="p-6 text-center">
-                <h4 className="text-[#222222] font-bold text-xl mb-2">
+                <h3 className="text-[#222222] font-bold text-xl mb-2">
                   Precision Manufacturing
-                </h4>
+                </h3>
                 <p className="text-[#666666]">
                   State-of-the-art processing for consistent quality
                 </p>
@@ -418,9 +419,9 @@ const WoodenSplintsExport = () => {
 
         {/* Export Countries */}
         <div className="mb-20">
-          <h3 className="text-[#222222] text-3xl font-bold text-center mb-4">
+          <h2 className="text-[#222222] text-3xl font-bold text-center mb-4">
             Global Splint Desitinations
-          </h3>
+          </h2>
           <p className="text-[#666666] text-center mb-12 max-w-2xl mx-auto">
             We export to 6+ countries across multiple continents
           </p>
@@ -444,9 +445,9 @@ const WoodenSplintsExport = () => {
 
         {/* Custom Order Options */}
         <div className="mb-20">
-          <h3 className="text-[#222222] text-3xl font-bold text-center mb-4">
+          <h2 className="text-[#222222] text-3xl font-bold text-center mb-4">
             Available Sizes & Custom Options
-          </h3>
+          </h2>
           <p className="text-[#666666] text-center mb-12 max-w-2xl mx-auto">
             We provide standard sizes and can accommodate custom specifications
           </p>
@@ -458,11 +459,11 @@ const WoodenSplintsExport = () => {
                 className="card-hover bg-white rounded-2xl shadow-lg p-8 border-2 border-[#E0E0E0]"
               >
                 <div className="flex items-start gap-4 mb-6">
-                  <FaCog className="text-4xl text-[#00AEEF] flex-shrink-0" />
+                  <FaCog className="text-4xl text-[#006DA8] flex-shrink-0" />
                   <div>
-                    <h4 className="text-[#222222] text-xl font-bold mb-3">
+                    <h3 className="text-[#222222] text-xl font-bold mb-3">
                       {option.title}
-                    </h4>
+                    </h3>
                     <p className="text-[#666666] mb-4">{option.description}</p>
                     <ul className="space-y-3">
                       {option.options.map((opt, idx) => (
@@ -470,7 +471,7 @@ const WoodenSplintsExport = () => {
                           key={idx}
                           className="flex items-center text-[#666666]"
                         >
-                          <FaCheckCircle className="text-[#ED028C] mr-3 flex-shrink-0" />
+                          <FaCheckCircle className="text-[#C70275] mr-3 flex-shrink-0" />
                           {opt}
                         </li>
                       ))}
@@ -484,9 +485,9 @@ const WoodenSplintsExport = () => {
 
         {/* Export Services */}
         <div className="mb-20">
-          <h3 className="text-[#222222] text-3xl font-bold text-center mb-12">
+          <h2 className="text-[#222222] text-3xl font-bold text-center mb-12">
             Comprehensive Export Services
-          </h3>
+          </h2>
 
           <div className="grid md:grid-cols-2 gap-8">
             {exportServices.map((service, index) => (
@@ -499,9 +500,9 @@ const WoodenSplintsExport = () => {
                     {service.icon}
                   </div>
                   <div>
-                    <h4 className="text-2xl font-bold mb-3 drop-shadow-md">
+                    <h3 className="text-2xl font-bold mb-3 drop-shadow-md">
                       {service.title}
-                    </h4>
+                    </h3>
                     <p className="text-white/90 leading-relaxed mb-4">
                       {service.description}
                     </p>
@@ -522,15 +523,15 @@ const WoodenSplintsExport = () => {
 
         {/* Trust Cards */}
         <div className="mb-16">
-          <h3 className="text-[#222222] text-3xl font-bold text-center mb-12">
+          <h2 className="text-[#222222] text-3xl font-bold text-center mb-12">
             Why Choose Our Wooden Splints?
-          </h3>
+          </h2>
 
           <div className="bg-white rounded-2xl border-2 border-[#E0E0E0] p-8 md:p-12">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {trustCards.map((card, index) => (
                 <div key={index} className="flex items-start">
-                  <FaAward className="text-2xl text-[#ED028C] mr-4 flex-shrink-0 mt-1" />
+                  <FaAward className="text-2xl text-[#C70275] mr-4 flex-shrink-0 mt-1" />
                   <p className="text-[#666666] font-medium">{card}</p>
                 </div>
               ))}
@@ -542,25 +543,25 @@ const WoodenSplintsExport = () => {
         <div className="mb-20 bg-gradient-to-br from-[#00AEEF]/10 via-white to-pink-50 rounded-3xl p-8 md:p-12 border-2 border-[#00AEEF]/20 shadow-lg">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 bg-[#00AEEF] text-white text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-4 shadow-sm">
+              <div className="inline-flex items-center gap-2 bg-[#006DA8] text-white text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-4 shadow-sm">
                 <span>Consumer Goods Division</span>
               </div>
-              <h3 className="text-[#222222] text-3xl sm:text-4xl font-black mb-4">
-                Explore Our <span className="text-[#00AEEF]">Detergents</span> &amp; Cleaning Range
-              </h3>
+              <h2 className="text-[#222222] text-3xl sm:text-4xl font-black mb-4">
+                Explore Our <span className="text-[#006DA8]">Detergents</span> &amp; Cleaning Range
+              </h2>
               <p className="text-[#666666] text-base sm:text-lg leading-relaxed mb-6">
                 In addition to industrial wooden splints and export safety matches, Kite Group manufactures Pakistan's leading laundry &amp; hygiene brands — including <strong>Kite Glow</strong>, <strong>BURQ Action</strong>, <strong>Vero Detergent</strong>, and <strong>Kite Dish Wash Bar</strong>.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
                   to="/online-order"
-                  className="bg-[#ED028C] hover:bg-[#D4027D] text-white px-6 py-3 rounded-full text-sm font-bold shadow-md shadow-[#ED028C]/25 transition-all duration-300 hover:scale-105 active:scale-95"
+                  className="bg-[#C70275] hover:bg-[#D4027D] text-white px-6 py-3 rounded-full text-sm font-bold shadow-md shadow-[#ED028C]/25 transition-all duration-300 hover:scale-105 active:scale-95"
                 >
                   Order Detergents Online
                 </Link>
                 <Link
                   to="/fmcg-division"
-                  className="bg-white hover:bg-[#F5F5F5] text-[#00AEEF] border-2 border-[#00AEEF] px-6 py-3 rounded-full text-sm font-bold transition-all duration-300 hover:scale-105 active:scale-95"
+                  className="bg-white hover:bg-[#F5F5F5] text-[#006DA8] border-2 border-[#00AEEF] px-6 py-3 rounded-full text-sm font-bold transition-all duration-300 hover:scale-105 active:scale-95"
                 >
                   View FMCG Division
                 </Link>
@@ -575,20 +576,20 @@ const WoodenSplintsExport = () => {
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full lg:w-auto">
               <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs text-center min-w-[140px]">
-                <div className="text-xl sm:text-2xl font-black text-[#00AEEF]">Kite Glow</div>
-                <div className="text-xs text-[#777777] mt-1">Five Enzyme</div>
+                <div className="text-xl sm:text-2xl font-black text-[#006DA8]">Kite Glow</div>
+                <div className="text-xs text-[#666666] mt-1">Five Enzyme</div>
               </div>
               <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs text-center min-w-[140px]">
-                <div className="text-xl sm:text-2xl font-black text-[#ED028C]">BURQ Action</div>
-                <div className="text-xs text-[#777777] mt-1">Colour Guard</div>
+                <div className="text-xl sm:text-2xl font-black text-[#C70275]">BURQ Action</div>
+                <div className="text-xs text-[#666666] mt-1">Colour Guard</div>
               </div>
               <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs text-center min-w-[140px]">
                 <div className="text-xl sm:text-2xl font-black text-[#059669]">Dish Wash</div>
-                <div className="text-xs text-[#777777] mt-1">Lemon Super Bar</div>
+                <div className="text-xs text-[#666666] mt-1">Lemon Super Bar</div>
               </div>
               <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs text-center min-w-[140px]">
                 <div className="text-xl sm:text-2xl font-black text-[#6366F1]">Vero Care</div>
-                <div className="text-xs text-[#777777] mt-1">Bulk &amp; Wholesale</div>
+                <div className="text-xs text-[#666666] mt-1">Bulk &amp; Wholesale</div>
               </div>
             </div>
           </div>
@@ -598,9 +599,9 @@ const WoodenSplintsExport = () => {
         <div className="bg-gradient-to-r from-[#ED028C] to-[#d4027a] rounded-3xl p-8 md:p-12">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
-              <h3 className="text-white text-3xl md:text-4xl font-bold mb-6 drop-shadow-lg">
+              <h2 className="text-white text-3xl md:text-4xl font-bold mb-6 drop-shadow-lg">
                 Need Premium Wooden Splints?
-              </h3>
+              </h2>
               <p className="text-white/90 text-lg leading-relaxed mb-8 drop-shadow-md">
                 Contact us for competitive pricing, reliable supply, and
                 exceptional quality. We handle everything from custom
@@ -611,7 +612,7 @@ const WoodenSplintsExport = () => {
                   href="mailto:match.export@azizgrp.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white text-[#ED028C] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg active:scale-95"
+                  className="bg-white text-[#C70275] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg active:scale-95"
                 >
                   Email Us
                 </a>

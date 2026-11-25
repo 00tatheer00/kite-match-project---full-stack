@@ -75,7 +75,7 @@ const BoardDivisionPage = () => {
             </div>
 
             <div className="card-hover bg-white rounded-xl shadow-lg p-8 text-center">
-              <div className="bg-[#0095CC] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-[#006DA8] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FaCubes className="text-white text-2xl" />
               </div>
               <h3 className="text-xl font-bold text-[#222222] mb-3">
@@ -190,19 +190,19 @@ const BoardDivisionPage = () => {
                 </h3>
                 <ul className="space-y-3 text-[#666666]">
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Modular kitchen cabinets and wardrobes</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Office furniture and workstations</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Home furniture and decorative pieces</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Custom furniture manufacturing</span>
                   </li>
                 </ul>
@@ -214,19 +214,19 @@ const BoardDivisionPage = () => {
                 </h3>
                 <ul className="space-y-3 text-[#666666]">
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#ED028C] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#C70275] mr-2 mt-1 flex-shrink-0" />
                     <span>Wall paneling and decorative surfaces</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#ED028C] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#C70275] mr-2 mt-1 flex-shrink-0" />
                     <span>False ceilings and partitions</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#ED028C] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#C70275] mr-2 mt-1 flex-shrink-0" />
                     <span>Flooring and laminated surfaces</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#ED028C] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#C70275] mr-2 mt-1 flex-shrink-0" />
                     <span>Commercial and residential interiors</span>
                   </li>
                 </ul>
@@ -238,19 +238,19 @@ const BoardDivisionPage = () => {
                 </h3>
                 <ul className="space-y-3 text-[#666666]">
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Structural and non-structural applications</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Door and window frames</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Building components and fixtures</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Architectural elements</span>
                   </li>
                 </ul>
@@ -262,19 +262,19 @@ const BoardDivisionPage = () => {
                 </h3>
                 <ul className="space-y-3 text-[#666666]">
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#ED028C] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#C70275] mr-2 mt-1 flex-shrink-0" />
                     <span>Packaging and crating materials</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#ED028C] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#C70275] mr-2 mt-1 flex-shrink-0" />
                     <span>Display stands and showcases</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#ED028C] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#C70275] mr-2 mt-1 flex-shrink-0" />
                     <span>Retail fixtures and fittings</span>
                   </li>
                   <li className="flex items-start">
-                    <FaCheckCircle className="text-[#ED028C] mr-2 mt-1 flex-shrink-0" />
+                    <FaCheckCircle className="text-[#C70275] mr-2 mt-1 flex-shrink-0" />
                     <span>Specialized industrial components</span>
                   </li>
                 </ul>
@@ -323,7 +323,7 @@ const BoardDivisionPage = () => {
           </p>
           <a
             href="/contact"
-            className="inline-block bg-white text-[#00AEEF] px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
+            className="inline-block bg-white text-[#006DA8] px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
           >
             Contact Us
           </a>

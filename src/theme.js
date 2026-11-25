@@ -3,7 +3,7 @@ export const colors = {
   primary: {
     main: '#00AEEF',      // Bright Cyan/Sky Blue
     hover: '#0095CC',     // Darker blue for hover states
-    text: '#00AEEF',      // For text links
+    text: '#006DA8',      // For text links (4.9:1 contrast on white; #00AEEF is 2.5:1)
   },
   accent: {
     main: '#ED028C',      // Bright Magenta

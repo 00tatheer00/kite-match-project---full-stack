@@ -10,10 +10,10 @@ const BriefExport = () => {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div>
-            <div className="inline-flex items-center gap-2 bg-[#EAF8FE] text-[#0095CC] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
+            <div className="inline-flex items-center gap-2 bg-[#EAF8FE] text-[#006DA8] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
               <span>Best Match Factory in Pakistan</span>
             </div>
-            <h2 className="text-[#00AEEF] text-lg font-semibold mb-2 uppercase tracking-wide">
+            <h2 className="text-[#006DA8] text-lg font-semibold mb-2 uppercase tracking-wide">
               Global Reach &amp; Export Excellence
             </h2>
             <h3 className="text-[#222222] text-justify text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
@@ -25,7 +25,7 @@ const BriefExport = () => {
 
             <div className="space-y-4 mb-8">
               <div className="flex items-start">
-                <FaGlobeAsia className="text-3xl text-[#00AEEF] mr-4 flex-shrink-0 mt-1" />
+                <FaGlobeAsia className="text-3xl text-[#006DA8] mr-4 flex-shrink-0 mt-1" />
                 <div>
                   <h4 className="text-[#222222] text-xl font-bold mb-2">
                     International Presence
@@ -39,7 +39,7 @@ const BriefExport = () => {
               </div>
 
               <div className="flex items-start">
-                <FaShippingFast className="text-3xl text-[#ED028C] mr-4 flex-shrink-0 mt-1" />
+                <FaShippingFast className="text-3xl text-[#C70275] mr-4 flex-shrink-0 mt-1" />
                 <div>
                   <h4 className="text-[#222222] text-xl font-bold mb-2">
                     Reliable Logistics
@@ -52,7 +52,7 @@ const BriefExport = () => {
               </div>
 
               <div className="flex items-start">
-                <FaCertificate className="text-3xl text-[#00AEEF] mr-4 flex-shrink-0 mt-1" />
+                <FaCertificate className="text-3xl text-[#006DA8] mr-4 flex-shrink-0 mt-1" />
                 <div>
                   <h4 className="text-[#222222] text-xl font-bold mb-2">
                     Quality Assured
@@ -67,7 +67,7 @@ const BriefExport = () => {
 
             <Link
               to="/export/safety-matches"
-              className="inline-block bg-[#00AEEF] text-white px-8 py-4 rounded-full font-semibold hover:bg-[#0095CC] transition-all duration-300 shadow-lg"
+              className="inline-block bg-[#006DA8] text-white px-8 py-4 rounded-full font-semibold hover:bg-[#005F92] transition-all duration-300 shadow-lg"
             >
               Explore Export Services
             </Link>

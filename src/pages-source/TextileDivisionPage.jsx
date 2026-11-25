@@ -201,7 +201,7 @@ const TextileDivisionPage = () => {
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
                 <div className="bg-[#FFEFF9] rounded-lg p-6 mb-4">
-                  <FaCertificate className="text-[#ED028C] text-5xl mx-auto" />
+                  <FaCertificate className="text-[#C70275] text-5xl mx-auto" />
                 </div>
                 <h3 className="text-xl font-bold text-[#222222] mb-2">
                   Oeko-Tex
@@ -214,7 +214,7 @@ const TextileDivisionPage = () => {
 
               <div className="text-center">
                 <div className="bg-[#E6F7FF] rounded-lg p-6 mb-4">
-                  <FaCertificate className="text-[#00AEEF] text-5xl mx-auto" />
+                  <FaCertificate className="text-[#006DA8] text-5xl mx-auto" />
                 </div>
                 <h3 className="text-xl font-bold text-[#222222] mb-2">
                   Control Union
@@ -227,7 +227,7 @@ const TextileDivisionPage = () => {
 
               <div className="text-center">
                 <div className="bg-[#FFEFF9] rounded-lg p-6 mb-4">
-                  <FaCertificate className="text-[#ED028C] text-5xl mx-auto" />
+                  <FaCertificate className="text-[#C70275] text-5xl mx-auto" />
                 </div>
                 <h3 className="text-xl font-bold text-[#222222] mb-2">
                   Inditex
@@ -253,7 +253,7 @@ const TextileDivisionPage = () => {
           </p>
           <a
             href="/contact"
-            className="inline-block bg-white text-[#00AEEF] px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
+            className="inline-block bg-white text-[#006DA8] px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
           >
             Contact Us
           </a>

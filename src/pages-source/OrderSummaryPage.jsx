@@ -153,7 +153,7 @@ const OrderSummaryPage = () => {
                         </div>
                         <div className="pt-3 border-t border-[#E0E0E0] flex justify-between items-center">
                           <span className="font-bold text-gray-800 text-lg">Total</span>
-                          <span className="font-bold text-[#00AEEF] text-xl">
+                          <span className="font-bold text-[#006DA8] text-xl">
                             Rs {orderDetails.totalAmount.toLocaleString()}
                           </span>
                         </div>
@@ -165,7 +165,7 @@ const OrderSummaryPage = () => {
             ) : (
               <div className="text-center py-8">
                 <p className="text-gray-500 mb-2">We have received your order details.</p>
-                <p className="font-semibold text-[#00AEEF]">Our team will contact you soon on the provided phone number to confirm the order.</p>
+                <p className="font-semibold text-[#006DA8]">Our team will contact you soon on the provided phone number to confirm the order.</p>
               </div>
             )}
 

@@ -76,7 +76,7 @@ const OrderConfirmModal = ({
                         : item.brandName || item.productTitle}
                     </p>
                     {item.itemType !== "promotion" && item.selectedVariant && (
-                      <p className="text-xs text-[#00AEEF] mt-0.5 font-medium">
+                      <p className="text-xs text-[#006DA8] mt-0.5 font-medium">
                         {item.selectedVariant}
                       </p>
                     )}
@@ -153,7 +153,7 @@ const OrderConfirmModal = ({
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-[#E0E0E0]">
                 <span className="font-bold text-[#222222] text-base">Total</span>
-                <span className="font-black text-[#00AEEF] text-xl">
+                <span className="font-black text-[#006DA8] text-xl">
                   Rs. {totals.grand.toLocaleString()}
                 </span>
               </div>

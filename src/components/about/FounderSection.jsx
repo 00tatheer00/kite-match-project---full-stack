@@ -90,7 +90,7 @@ const FounderSection = ({ founder }) => {
                 className="w-full aspect-[3/4] object-cover object-top rounded-2xl shadow-xl"
               />
               <div
-                className="absolute -bottom-3 right-3 md:-bottom-4 md:right-4 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-xl shadow-lg bg-[#00AEEF]"
+                className="absolute -bottom-3 right-3 md:-bottom-4 md:right-4 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-xl shadow-lg bg-[#006DA8]"
               >
                 <p className="font-bold">Founder</p>
               </div>

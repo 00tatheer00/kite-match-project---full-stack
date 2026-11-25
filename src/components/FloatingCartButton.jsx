@@ -29,7 +29,7 @@ const FloatingCartButton = () => {
               key={itemCount}
               initial={{ scale: 0.5 }}
               animate={{ scale: 1 }}
-              className="absolute -top-2 -right-2 bg-[#ED028C] text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full shadow-md border-2 border-white"
+              className="absolute -top-2 -right-2 bg-[#C70275] text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full shadow-md border-2 border-white"
             >
               {itemCount}
             </motion.div>

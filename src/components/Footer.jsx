@@ -90,13 +90,14 @@ const Footer = () => {
         const prefixMatch = parts[0].match(/^(\+\d+\s*\d+\s*)/);
         if (prefixMatch) fullNum = prefixMatch[1] + num;
       }
-      const cleanDigits = fullNum.replace(/[^0-9+]/g, "");
+      // "+92 42 37332711-12" lists two lines: dial the first, not "…3733271112".
+      const cleanDigits = fullNum.replace(/-\d{1,3}$/, "").replace(/[^0-9+]/g, "");
       return (
         <span key={i}>
           {i > 0 && <span className="text-white/40 mx-1">, </span>}
           <a
             href={`tel:${cleanDigits}`}
-            className="text-white/80 hover:text-[#00AEEF] transition-colors"
+            className="inline-block py-1.5 text-white/80 hover:text-[#00AEEF] transition-colors"
           >
             {num}
           </a>
@@ -136,9 +137,9 @@ const Footer = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-6 text-[#00AEEF]">
+            <h2 className="text-xl font-bold mb-6 text-[#00AEEF]">
               Kite Brand
-            </h3>
+            </h2>
             <p className="text-white/80 mb-6 leading-relaxed">
               Pakistan's most trusted FMCG brand under Mohsin Match Factory.
               Premium detergents, safety matches, and dish wash products - over
@@ -186,9 +187,9 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div className="">
-            <h3 className="text-xl font-bold mb-6 text-[#00AEEF]">
+            <h2 className="text-xl font-bold mb-6 text-[#00AEEF]">
               Quick Links
-            </h3>
+            </h2>
             <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.name}>
@@ -206,13 +207,13 @@ const Footer = () => {
 
           {/* Contact Info */}
           <div className="lg:col-span-2">
-            <h3 className="text-xl font-bold mb-6 text-[#00AEEF]">
+            <h2 className="text-xl font-bold mb-6 text-[#00AEEF]">
               Contact Us
-            </h3>
+            </h2>
             {/* <div className="bg-white/5 p-4 rounded-lg border border-[#00AEEF]/20 mb-4">
-              <h4 className="text-white font-semibold mb-2 text-sm uppercase tracking-wide">
+              <h3 className="text-white font-semibold mb-2 text-sm uppercase tracking-wide">
                 Email Contacts
-              </h4>
+              </h3>
               <ul className="space-y-2 text-sm">
                 {primaryEmails.map((email) => (
                   <li key={email} className="flex items-center">
@@ -236,9 +237,9 @@ const Footer = () => {
                     key={index}
                     className="bg-white/5 p-6 rounded-lg hover:bg-white/10 transition-all duration-300 border border-[#00AEEF]/30"
                   >
-                    <h4 className="text-white font-bold mb-3 text-lg">
+                    <h3 className="text-white font-bold mb-3 text-lg">
                       {info.title}
-                    </h4>
+                    </h3>
                     <ul className="space-y-2 text-sm flex flex-wrap justify-between gap-4">
                       <li className="flex items-start">
                         <FaMapMarkerAlt className="text-[#00AEEF] mt-1 mr-3 flex-shrink-0" />
@@ -254,7 +255,7 @@ const Footer = () => {
                         <FaEnvelope className="text-[#00AEEF] mr-3 flex-shrink-0" />
                         <a
                           href={`mailto:${info.email}`}
-                          className="text-white/80 hover:text-[#00AEEF] transition-colors"
+                          className="inline-block py-1.5 text-white/80 hover:text-[#00AEEF] transition-colors"
                         >
                           {info.email}
                         </a>
@@ -276,9 +277,9 @@ const Footer = () => {
                   key={index}
                   className="bg-white/5 p-4 rounded-lg hover:bg-white/10 transition-all duration-300"
                 >
-                  <h4 className="text-white font-bold mb-3 text-sm">
+                  <h3 className="text-white font-bold mb-3 text-sm">
                     {info.title}
-                  </h4>
+                  </h3>
                   <ul className="space-y-2 text-xs">
                     <li className="flex items-start">
                       <FaMapMarkerAlt className="text-[#00AEEF] mt-1 mr-2 flex-shrink-0 text-xs" />
@@ -301,7 +302,7 @@ const Footer = () => {
                         <FaEnvelope className="text-[#00AEEF] mr-2 flex-shrink-0 text-xs" />
                         <a
                           href={`mailto:${info.email}`}
-                          className="text-white/80 hover:text-[#00AEEF] transition-colors break-all"
+                          className="inline-block py-1.5 text-white/80 hover:text-[#00AEEF] transition-colors break-all"
                         >
                           {info.email}
                         </a>
@@ -322,7 +323,7 @@ const Footer = () => {
               © {new Date().getFullYear()} Kite Brand - Aziz Group of
               Industries. All Rights Reserved.
             </p>
-            <DeveloperCredit className="text-white/35" />
+            <DeveloperCredit className="text-white/60" />
           </div>
         </div>
       </div>

@@ -38,14 +38,14 @@ export default function MobileBottomNav() {
                   type="button"
                   onClick={openCart}
                   className={`relative flex-1 flex flex-col items-center justify-center gap-1 text-[11px] font-semibold ${
-                    isCartOpen ? 'text-[#00AEEF]' : 'text-slate-500'
+                    isCartOpen ? 'text-[#006DA8]' : 'text-slate-500'
                   }`}
                   aria-label={`Open cart, ${count} item${count === 1 ? '' : 's'}`}
                 >
-                  <span className="relative -mt-6 w-14 h-14 rounded-full bg-[#00AEEF] text-white flex items-center justify-center shadow-lg shadow-sky-500/30 border-4 border-white">
+                  <span className="relative -mt-6 w-14 h-14 rounded-full bg-[#006DA8] text-white flex items-center justify-center shadow-lg shadow-sky-500/30 border-4 border-white">
                     <Icon className="text-xl" />
                     {count > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-[#ED028C] text-white text-[11px] font-bold flex items-center justify-center border-2 border-white">
+                      <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-[#C70275] text-white text-[11px] font-bold flex items-center justify-center border-2 border-white">
                         {count > 99 ? '99+' : count}
                       </span>
                     )}
@@ -61,7 +61,7 @@ export default function MobileBottomNav() {
               <Link
                 to={tab.href}
                 className={`flex-1 flex flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors ${
-                  active ? 'text-[#00AEEF]' : 'text-slate-500'
+                  active ? 'text-[#006DA8]' : 'text-slate-500'
                 }`}
                 aria-current={active ? 'page' : undefined}
               >

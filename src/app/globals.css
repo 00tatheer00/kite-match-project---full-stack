@@ -258,15 +258,16 @@ body:not(.admin-route) p {
   line-height: 1.8;
 }
 
-p a {
-  color: #00aeef;
-  text-decoration-color: #00aeef;
+/* Only links without their own colour class (links in dark/blue cards set text-white). */
+p a:not([class*="text-"]) {
+  color: #006DA8; /* 5.6:1 on white (brand #00aeef is 2.5:1) */
+  text-decoration-color: #006DA8;
   text-decoration-thickness: 2px;
 }
 
-p a:hover {
-  color: #0095cc;
-  text-decoration-color: #0095cc;
+p a:not([class*="text-"]):hover {
+  color: #005f92;
+  text-decoration-color: #005f92;
 }
 
 /* Input field styles */

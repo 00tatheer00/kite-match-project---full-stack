@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import azizGroupLogo from "../../assets/ajlogo.png";
+import { readable } from "../../utils/contrast";
 
 const CompanyOverview = ({ companies }) => {
   const [ref, inView] = useInView({
@@ -80,7 +81,7 @@ const CompanyOverview = ({ companies }) => {
                   <div className="flex items-center mb-3">
                     <div
                       className="w-3 h-3 rounded-sm mr-3 flex-shrink-0"
-                      style={{ backgroundColor: division.color }}
+                      style={{ backgroundColor: readable(division.color) }}
                     ></div>
                     <h4 className="text-lg font-bold text-[#222222]">
                       {division.division}

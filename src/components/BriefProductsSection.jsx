@@ -4,6 +4,7 @@ import { FaFire, FaLayerGroup, FaArrowRight } from "react-icons/fa";
 import { Link } from '@/components/RouterCompat';
 import { useEffect, useState } from "react";
 import { getProducts } from "../services/api";
+import { readable } from "../utils/contrast";
 
 const placeholderImage = "/logo.png";
 
@@ -61,7 +62,7 @@ const BriefProductsSection = ({ initialProducts = [] }) => {
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-[#00AEEF] text-lg font-semibold mb-2 uppercase tracking-wide">
+          <h2 className="text-[#006DA8] text-lg font-semibold mb-2 uppercase tracking-wide">
             Our Products
           </h2>
           <h3 className="text-[#222222] text-3xl md:text-4xl font-bold mb-4">
@@ -113,7 +114,7 @@ const BriefProductsSection = ({ initialProducts = [] }) => {
                     />
                     <div
                       className="absolute top-3 right-3 px-2 py-1 rounded-full text-white text-xs font-semibold shadow-lg"
-                      style={{ backgroundColor: product.color }}
+                      style={{ backgroundColor: readable(product.color) }}
                     >
                       {product.category || product.productType || "Product"}
                     </div>
@@ -122,7 +123,7 @@ const BriefProductsSection = ({ initialProducts = [] }) => {
                   {/* Product Content */}
                   <div className="p-5 flex-1 flex flex-col">
                     <div className="flex items-center mb-3">
-                      <div className="mr-3 shrink-0" style={{ color: product.color }}>
+                      <div className="mr-3 shrink-0" style={{ color: readable(product.color) }}>
                         {getIcon(product)}
                       </div>
                       <h4 className="text-[#222222] text-lg font-bold group-hover:text-[#00AEEF] transition-colors line-clamp-2">
@@ -135,7 +136,7 @@ const BriefProductsSection = ({ initialProducts = [] }) => {
                     </p>
 
                     {/* View Details Link */}
-                    <div className="flex items-center text-[#00AEEF] font-semibold text-sm group-hover:text-[#ED028C] transition-colors mt-auto pt-2">
+                    <div className="flex items-center text-[#006DA8] font-semibold text-sm group-hover:text-[#ED028C] transition-colors mt-auto pt-2">
                       <span className="mr-2">View Details</span>
                       <FaArrowRight className="transform group-hover:translate-x-1 transition-transform text-xs" />
                     </div>

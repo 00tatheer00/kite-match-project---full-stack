@@ -89,7 +89,7 @@ const MatchMakingSection = () => {
               <div className="flex flex-wrap gap-4">
                 <Link
                   to="/products"
-                  className="bg-[#00AEEF] text-white px-8 py-2 rounded-full font-semibold hover:text-black hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 inline-flex items-center gap-2"
+                  className="bg-[#006DA8] text-white px-8 py-2 rounded-full font-semibold hover:text-black hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 inline-flex items-center gap-2"
                 >
                   Explore Our Products
                 </Link>
@@ -124,7 +124,7 @@ const MatchMakingSection = () => {
                 {/* Expand Indicator */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30 pointer-events-none">
                   <div className="bg-white/90 p-4 rounded-full">
-                    <FaExpand className="text-2xl text-[#00AEEF]" />
+                    <FaExpand className="text-2xl text-[#006DA8]" />
                   </div>
                 </div>
               </div>
