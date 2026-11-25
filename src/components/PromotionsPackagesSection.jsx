@@ -18,6 +18,7 @@ import {
 import { useEffect, useState, useMemo } from "react";
 import { getPromotions, getProducts } from "../services/api";
 import { useCart } from "../context/CartContext";
+import { readable } from "../utils/contrast";
 
 const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] }) => {
   const { addToCart, addPromotionToCart, openCart, cartItems } = useCart();
@@ -227,7 +228,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#222222] tracking-tight mb-4 flex items-center justify-center gap-3 flex-wrap">
-            <span>Online <span className="text-[#00AEEF]">Order</span></span>
+            <span>Online <span className="text-[#006DA8]">Order</span></span>
             <span className="text-xs sm:text-sm font-extrabold uppercase px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 tracking-wide">
               Order Now
             </span>
@@ -240,10 +241,10 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
           {/* Customer Helpline & Support Banner */}
           <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-lg mx-auto mb-2 sm:mb-8">
             <div className="bg-white text-[#222222] border border-gray-200 px-5 py-2.5 rounded-full font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-xs">
-              <FaPhoneAlt className="text-xs text-[#00AEEF]" />
+              <FaPhoneAlt className="text-xs text-[#006DA8]" />
               <span>Customer Helpline: 0301 8117666</span>
             </div>
-            <div className="bg-[#EAF8FE] text-[#00AEEF] px-4 py-2.5 rounded-full font-semibold text-xs sm:text-sm flex items-center gap-1.5 border border-[#00AEEF]/20">
+            <div className="bg-[#EAF8FE] text-[#006DA8] px-4 py-2.5 rounded-full font-semibold text-xs sm:text-sm flex items-center gap-1.5 border border-[#00AEEF]/20">
               <FaTruck className="text-xs" />
               <span>Nationwide Cash on Delivery</span>
             </div>
@@ -252,22 +253,22 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
           {/* Trust Highlights */}
           <div className="hidden sm:grid mt-8 grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
             <div className="bg-white p-3.5 rounded-xl border border-[#EBEBEB] shadow-sm flex items-center gap-3 text-left">
-              <div className="w-9 h-9 rounded-lg bg-[#EAF8FE] text-[#00AEEF] flex items-center justify-center flex-shrink-0 text-base">
+              <div className="w-9 h-9 rounded-lg bg-[#EAF8FE] text-[#006DA8] flex items-center justify-center flex-shrink-0 text-base">
                 <FaTruck />
               </div>
               <div>
                 <p className="text-xs font-bold text-[#222222]">Nationwide Delivery</p>
-                <p className="text-[11px] text-[#777777]">Direct to your doorstep</p>
+                <p className="text-[11px] text-[#666666]">Direct to your doorstep</p>
               </div>
             </div>
 
             <div className="bg-white p-3.5 rounded-xl border border-[#EBEBEB] shadow-sm flex items-center gap-3 text-left">
-              <div className="w-9 h-9 rounded-lg bg-pink-50 text-[#ED028C] flex items-center justify-center flex-shrink-0 text-base">
+              <div className="w-9 h-9 rounded-lg bg-pink-50 text-[#C70275] flex items-center justify-center flex-shrink-0 text-base">
                 <FaTag />
               </div>
               <div>
                 <p className="text-xs font-bold text-[#222222]">Factory Rates</p>
-                <p className="text-[11px] text-[#777777]">Best value guaranteed</p>
+                <p className="text-[11px] text-[#666666]">Best value guaranteed</p>
               </div>
             </div>
 
@@ -277,7 +278,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
               </div>
               <div>
                 <p className="text-xs font-bold text-[#222222]">100% Genuine</p>
-                <p className="text-[11px] text-[#777777]">Factory fresh stocks</p>
+                <p className="text-[11px] text-[#666666]">Factory fresh stocks</p>
               </div>
             </div>
 
@@ -287,7 +288,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
               </div>
               <div>
                 <p className="text-xs font-bold text-[#222222]">Cash on Delivery</p>
-                <p className="text-[11px] text-[#777777]">Pay upon receipt</p>
+                <p className="text-[11px] text-[#666666]">Pay upon receipt</p>
               </div>
             </div>
           </div>
@@ -306,13 +307,13 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                     onClick={() => setActiveTab(tab.id)}
                     className={`whitespace-nowrap px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
                       isActive
-                        ? "bg-[#00AEEF] text-white shadow-md shadow-[#00AEEF]/20 scale-102"
+                        ? "bg-[#006DA8] text-white shadow-md shadow-[#00AEEF]/20 scale-102"
                         : "bg-white text-[#555555] hover:bg-[#F0F0F0] border border-[#E0E0E0]"
                     }`}
                   >
                     <span>{tab.label}</span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                      isActive ? "bg-white/20 text-white" : "bg-[#EEEEEE] text-[#777777]"
+                      isActive ? "bg-white text-[#006DA8]" : "bg-[#EEEEEE] text-[#666666]"
                     }`}>
                       {tab.count}
                     </span>
@@ -347,7 +348,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
         {loading && (
           <div className="py-20 text-center">
             <div className="inline-block w-8 h-8 border-3 border-[#00AEEF] border-t-transparent rounded-full animate-spin"></div>
-            <p className="mt-3 text-sm text-[#777777] font-medium">Loading products and online order catalog...</p>
+            <p className="mt-3 text-sm text-[#666666] font-medium">Loading products and online order catalog...</p>
           </div>
         )}
 
@@ -359,14 +360,14 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-[#222222] flex items-center gap-2">
-                  <FaGift className="text-[#ED028C]" />
+                  <FaGift className="text-[#C70275]" />
                   <span>Special Value Packages &amp; Bundles</span>
                 </h2>
                 <p className="text-xs sm:text-sm text-[#666666] mt-0.5">
                   Curated combination boxes offering the maximum savings for families and wholesalers
                 </p>
               </div>
-              <span className="text-xs font-semibold px-2.5 py-1 bg-pink-50 text-[#ED028C] border border-pink-200 rounded-full">
+              <span className="text-xs font-semibold px-2.5 py-1 bg-pink-50 text-[#C70275] border border-pink-200 rounded-full">
                 {filteredPackages.length} {filteredPackages.length === 1 ? 'Bundle' : 'Bundles'} Available
               </span>
             </div>
@@ -401,7 +402,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                               <FaGift className="text-5xl" />
                             </div>
                           )}
-                          <span className="absolute top-3 left-3 bg-[#ED028C] text-white text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-md shadow-sm">
+                          <span className="absolute top-3 left-3 bg-[#C70275] text-white text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-md shadow-sm">
                             Value Pack
                           </span>
                         </div>
@@ -430,13 +431,13 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                                   key={itemIdx}
                                   className="flex items-center gap-3 p-3 rounded-xl bg-slate-50/90 border border-slate-200/80 shadow-2xs"
                                 >
-                                  <FaCheckCircle className="text-[#00AEEF] text-base flex-shrink-0" />
+                                  <FaCheckCircle className="text-[#006DA8] text-base flex-shrink-0" />
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm sm:text-base font-bold text-slate-900 truncate">
                                       {item.product}
                                     </p>
                                     <p className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
-                                      Quantity: <span className="font-black text-[#00AEEF] text-sm px-1.5 py-0.5 rounded bg-sky-50 border border-sky-100">{item.quantity}</span>
+                                      Quantity: <span className="font-black text-[#006DA8] text-sm px-1.5 py-0.5 rounded bg-sky-50 border border-sky-100">{item.quantity}</span>
                                     </p>
                                   </div>
                                 </div>
@@ -453,7 +454,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                             </p>
                             <div className="flex flex-wrap items-baseline gap-2.5 mb-2">
                               {pkg.originalPrice && (
-                                <span className="text-base sm:text-lg font-bold text-slate-400 line-through">
+                                <span className="text-base sm:text-lg font-bold text-slate-500 line-through">
                                   Original Price: {formatPrice(pkg.originalPrice)}
                                 </span>
                               )}
@@ -465,7 +466,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                             </div>
                             <div className="flex flex-wrap items-center gap-3">
                               <span className="text-sm sm:text-base font-black text-slate-800 uppercase tracking-wider">Final Price:</span>
-                              <p className="text-2xl sm:text-4xl md:text-5xl font-black text-[#00AEEF] tracking-tight">
+                              <p className="text-2xl sm:text-4xl md:text-5xl font-black text-[#006DA8] tracking-tight">
                                 {formatPrice(totals.totalPrice)}
                               </p>
                               {pkg.shippingCost === 0 ? (
@@ -513,7 +514,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                               className={`flex-1 sm:flex-none justify-center px-6 sm:px-8 py-3 rounded-xl font-black text-sm sm:text-base text-white flex items-center gap-2.5 transition-all shadow-md cursor-pointer ${
                                 isJustAdded
                                   ? "bg-emerald-600 hover:bg-emerald-700"
-                                  : "bg-[#00AEEF] hover:bg-[#0095CC] active:scale-95 shadow-sky-500/20"
+                                  : "bg-[#006DA8] hover:bg-[#005F92] active:scale-95 shadow-sky-500/20"
                               }`}
                               title="Add package to cart"
                             >
@@ -539,14 +540,14 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-[#222222] flex items-center gap-2">
-                  <FaBoxOpen className="text-[#00AEEF]" />
+                  <FaBoxOpen className="text-[#006DA8]" />
                   <span>Factory SKUs &amp; Individual Sizes</span>
                 </h2>
                 <p className="text-xs sm:text-sm text-[#666666] mt-0.5">
                   Select exact weights, pouch sizes, carton counts, and bar variants
                 </p>
               </div>
-              <span className="text-xs font-semibold px-2.5 py-1 bg-sky-50 text-[#00AEEF] border border-sky-200 rounded-full">
+              <span className="text-xs font-semibold px-2.5 py-1 bg-sky-50 text-[#006DA8] border border-sky-200 rounded-full">
                 {filteredSkus.length} {filteredSkus.length === 1 ? 'SKU' : 'SKUs'} Listed
               </span>
             </div>
@@ -586,7 +587,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                         <div className="absolute top-2.5 left-2.5">
                           <span
                             className="text-[9px] sm:text-xs font-black px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-white shadow-xs uppercase tracking-wider"
-                            style={{ backgroundColor: sku.color || "#00AEEF" }}
+                            style={{ backgroundColor: readable(sku.color || "#00AEEF") }}
                           >
                             {sku.category}
                           </span>
@@ -631,7 +632,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                     <div className="p-3 pt-0 sm:p-4 sm:pt-0">
                       <div className="flex items-baseline justify-between mb-2 sm:mb-3 border-t border-slate-100 pt-2 sm:pt-3">
                         <span className="hidden sm:inline text-sm font-black text-slate-700">Factory Price:</span>
-                        <span className="text-lg sm:text-3xl font-black text-[#00AEEF] tracking-tight">
+                        <span className="text-lg sm:text-3xl font-black text-[#006DA8] tracking-tight">
                           {formatPrice(sku.variant.price)}
                         </span>
                       </div>
@@ -644,7 +645,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                           className={`w-full py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-black text-xs sm:text-sm text-white flex items-center justify-center gap-1.5 sm:gap-2 transition-all shadow-md hover:shadow-lg cursor-pointer ${
                             isJustAdded
                               ? "bg-emerald-600 hover:bg-emerald-700"
-                              : "bg-[#00AEEF] hover:bg-[#0095CC] active:scale-95 shadow-sky-500/20"
+                              : "bg-[#006DA8] hover:bg-[#005F92] active:scale-95 shadow-sky-500/20"
                           }`}
                           title="Add SKU to cart"
                         >
@@ -668,12 +669,12 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
               <FaSearch />
             </div>
             <h3 className="text-base font-bold text-[#222222] mb-1">No items found</h3>
-            <p className="text-xs text-[#777777] mb-4">
+            <p className="text-xs text-[#666666] mb-4">
               We couldn't find any products matching "{searchQuery}". Try searching for "1 kg", "bar", or reset filters.
             </p>
             <button
               onClick={() => { setSearchQuery(""); setActiveTab("all"); }}
-              className="text-xs font-semibold text-[#00AEEF] hover:underline"
+              className="text-xs font-semibold text-[#006DA8] hover:underline"
             >
               Clear filters and show all products
             </button>
@@ -689,7 +690,7 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
             >
               <div className="relative">
                 <FaShoppingCart className="text-base" />
-                <span className="absolute -top-2 -right-2 bg-[#ED028C] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-[#C70275] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">
                   {totalCartCount}
                 </span>
               </div>

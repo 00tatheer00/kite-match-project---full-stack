@@ -41,7 +41,7 @@ const FMCGDivisionPage = () => {
             </h2>
             <div className="bg-white rounded-xl shadow-lg p-8 md:p-12">
               <p className="text-lg text-[#666666] leading-relaxed mb-6">
-                <strong className="text-[#00AEEF]">Kite</strong> is the flagship
+                <strong className="text-[#006DA8]">Kite</strong> is the flagship
                 brand of Mohsin Match Factory (Pvt.) Limited, part of the
                 prestigious Aziz Group. With over 50 years of manufacturing
                 excellence, we have established ourselves as Pakistan's largest
@@ -50,15 +50,15 @@ const FMCGDivisionPage = () => {
               </p>
               <p className="text-lg text-[#666666] leading-relaxed mb-6">
                 Our{" "}
-                <strong className="text-[#00AEEF]">Kite Glow detergent</strong>,
+                <strong className="text-[#006DA8]">Kite Glow detergent</strong>,
                 launched in March 2025, features five enzyme technology for
                 exceptional cleaning power and superior stain removal.{" "}
-                <strong className="text-[#ED028C]">Kite Dish Wash Bar</strong>
+                <strong className="text-[#C70275]">Kite Dish Wash Bar</strong>
                 has rapidly captured market share with its premium lemon
                 fragrance and advanced formula that beats market leaders.
               </p>
               <p className="text-lg text-[#666666] leading-relaxed">
-                <strong className="text-[#00AEEF]">Kite Safety Matches</strong>{" "}
+                <strong className="text-[#006DA8]">Kite Safety Matches</strong>{" "}
                 are renowned worldwide, exporting to over 40 countries since
                 1995. Our matches are carborised, damp-proof, and manufactured
                 with different striking surfaces to meet diverse customer needs.
@@ -95,7 +95,7 @@ const FMCGDivisionPage = () => {
             </div>
 
             <div className="card-hover bg-white rounded-xl shadow-lg p-8 text-center">
-              <div className="bg-[#0095CC] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-[#006DA8] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FaDollarSign className="text-white text-2xl" />
               </div>
               <h3 className="text-xl font-bold text-[#222222] mb-3">
@@ -202,27 +202,27 @@ const FMCGDivisionPage = () => {
                 </h3>
                 <ul className="space-y-3 text-[#666666]">
                   <li className="flex items-start">
-                    <span className="text-[#ED028C] mr-2 font-bold">▸</span>
+                    <span className="text-[#C70275] mr-2 font-bold">▸</span>
                     <span>
                       State-of-the-art facility delivering high-performance
                       cleaning solutions
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#ED028C] mr-2 font-bold">▸</span>
+                    <span className="text-[#C70275] mr-2 font-bold">▸</span>
                     <span>
                       Five enzyme technology in Kite Glow for superior stain
                       removal
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#ED028C] mr-2 font-bold">▸</span>
+                    <span className="text-[#C70275] mr-2 font-bold">▸</span>
                     <span>
                       Advanced powder technology with minimal variation
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#ED028C] mr-2 font-bold">▸</span>
+                    <span className="text-[#C70275] mr-2 font-bold">▸</span>
                     <span>
                       Private labeling available for toll manufacturing
                     </span>
@@ -236,21 +236,21 @@ const FMCGDivisionPage = () => {
                 </h3>
                 <ul className="space-y-3 text-[#666666]">
                   <li className="flex items-start">
-                    <span className="text-[#00AEEF] mr-2 font-bold">▸</span>
+                    <span className="text-[#006DA8] mr-2 font-bold">▸</span>
                     <span>
                       Mohsin Match Factory (Peshawar) - Established 1974
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#00AEEF] mr-2 font-bold">▸</span>
+                    <span className="text-[#006DA8] mr-2 font-bold">▸</span>
                     <span>Mohsin Enterprises (Peshawar) - Launched 1990</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#00AEEF] mr-2 font-bold">▸</span>
+                    <span className="text-[#006DA8] mr-2 font-bold">▸</span>
                     <span>A.J Match Factory (Sheikhupura) - Started 2006</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#00AEEF] mr-2 font-bold">▸</span>
+                    <span className="text-[#006DA8] mr-2 font-bold">▸</span>
                     <span>
                       Carborised and damp-proof products with different striking
                       surfaces
@@ -297,7 +297,7 @@ const FMCGDivisionPage = () => {
           </p>
           <a
             href="/contact"
-            className="inline-block bg-white text-[#00AEEF] px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
+            className="inline-block bg-white text-[#006DA8] px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
           >
             Contact Us
           </a>

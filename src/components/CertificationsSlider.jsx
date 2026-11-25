@@ -61,7 +61,7 @@ const CertificationsSlider = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-[#00AEEF] text-lg font-semibold mb-2 uppercase tracking-wide">
+          <h2 className="text-[#006DA8] text-lg font-semibold mb-2 uppercase tracking-wide">
             Quality Assurance
           </h2>
           <h3 className="text-[#222222] text-4xl md:text-5xl font-bold mb-6">

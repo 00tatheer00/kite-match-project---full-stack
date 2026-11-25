@@ -33,8 +33,8 @@ export default function ProductFaqSection() {
     <section className="py-16 bg-gradient-to-b from-white via-slate-50 to-white border-t border-slate-200">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#00AEEF]/10 text-[#00AEEF] mb-3">
-            <FaStar className="text-xs text-[#00AEEF]" /> Consumer Guide & FAQs
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#00AEEF]/10 text-[#006DA8] mb-3">
+            <FaStar className="text-xs text-[#006DA8]" /> Consumer Guide & FAQs
           </span>
           <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
             Frequently Asked Questions & Buyer’s Guide
@@ -58,12 +58,12 @@ export default function ProductFaqSection() {
                   className="w-full text-left px-6 py-5 flex items-center justify-between gap-4 font-semibold text-slate-900 hover:text-[#00AEEF] transition-colors"
                 >
                   <span className="text-base md:text-lg flex items-center gap-3">
-                    <FaCheckCircle className="text-[#00AEEF] shrink-0 text-sm" />
+                    <FaCheckCircle className="text-[#006DA8] shrink-0 text-sm" />
                     {faq.q}
                   </span>
                   <FaChevronDown
                     className={`shrink-0 text-slate-400 text-sm transition-transform duration-200 ${
-                      isOpen ? "rotate-180 text-[#00AEEF]" : ""
+                      isOpen ? "rotate-180 text-[#006DA8]" : ""
                     }`}
                   />
                 </button>
@@ -80,18 +80,18 @@ export default function ProductFaqSection() {
         {/* Consumer Trust Highlights */}
         <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           <div className="bg-white p-5 rounded-xl border border-slate-200 text-center shadow-xs">
-            <FaShieldAlt className="text-2xl text-[#00AEEF] mx-auto mb-2" />
-            <h4 className="font-bold text-slate-900 text-sm">50+ Years Manufacturing Heritage</h4>
+            <FaShieldAlt className="text-2xl text-[#006DA8] mx-auto mb-2" />
+            <h3 className="font-bold text-slate-900 text-sm">50+ Years Manufacturing Heritage</h3>
             <p className="text-xs text-slate-500 mt-1">Established in 1974 under Aziz Group of Industries.</p>
           </div>
           <div className="bg-white p-5 rounded-xl border border-slate-200 text-center shadow-xs">
-            <FaStar className="text-2xl text-[#ED028C] mx-auto mb-2" />
-            <h4 className="font-bold text-slate-900 text-sm">#1 Safety Match Exporter</h4>
+            <FaStar className="text-2xl text-[#C70275] mx-auto mb-2" />
+            <h3 className="font-bold text-slate-900 text-sm">#1 Safety Match Exporter</h3>
             <p className="text-xs text-slate-500 mt-1">Supplying matches and wooden splints to 40+ countries.</p>
           </div>
           <div className="bg-white p-5 rounded-xl border border-slate-200 text-center shadow-xs">
             <FaCheckCircle className="text-2xl text-emerald-600 mx-auto mb-2" />
-            <h4 className="font-bold text-slate-900 text-sm">Direct Factory Rates</h4>
+            <h3 className="font-bold text-slate-900 text-sm">Direct Factory Rates</h3>
             <p className="text-xs text-slate-500 mt-1">Best pricing on bulk cartons & retail value packs in Pakistan.</p>
           </div>
         </div>

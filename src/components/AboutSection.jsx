@@ -39,22 +39,22 @@ const AboutSection = () => {
 
   const stats = [
     {
-      icon: <FaAward className="text-5xl text-[#ED028C]" />,
+      icon: <FaAward className="text-5xl text-[#C70275]" />,
       number: "50+",
       label: "Years Legacy",
     },
     {
-      icon: <FaUsers className="text-5xl text-[#00AEEF]" />,
+      icon: <FaUsers className="text-5xl text-[#006DA8]" />,
       number: "10,000+",
       label: "Employees",
     },
     {
-      icon: <FaIndustry className="text-5xl text-[#ED028C]" />,
+      icon: <FaIndustry className="text-5xl text-[#C70275]" />,
       number: "#1",
       label: "Match Exporter",
     },
     {
-      icon: <FaGlobeAsia className="text-5xl text-[#00AEEF]" />,
+      icon: <FaGlobeAsia className="text-5xl text-[#006DA8]" />,
       number: "40+",
       label: "Export Countries",
     },
@@ -65,7 +65,7 @@ const AboutSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-[#00AEEF] text-lg font-semibold mb-2 uppercase tracking-wide">
+          <h2 className="text-[#006DA8] text-lg font-semibold mb-2 uppercase tracking-wide">
             About Us
           </h2>
           <h3 className="text-[#222222] text-4xl md:text-5xl font-bold mb-6">

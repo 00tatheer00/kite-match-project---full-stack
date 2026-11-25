@@ -156,24 +156,24 @@ const TrustSection = () => {
 
   const trustPoints = [
     {
-      icon: <FaCheckCircle className="text-5xl text-[#00AEEF]" />,
+      icon: <FaCheckCircle className="text-5xl text-[#006DA8]" />,
       title: "Over 50 Years of Excellence",
       description:
         "Manufacturing excellence since the 1970s with a proven track record of quality and reliability.",
     },
     {
-      icon: <FaHandshake className="text-5xl text-[#ED028C]" />,
+      icon: <FaHandshake className="text-5xl text-[#C70275]" />,
       title: "Trusted Partnerships",
       description:
         "Long-standing relationships with international brands and financial institutions across the globe.",
     },
     {
-      icon: <FaCertificate className="text-5xl text-[#00AEEF]" />,
+      icon: <FaCertificate className="text-5xl text-[#006DA8]" />,
       title: "Internationally Certified",
       description: "Multiple certification including ISO 9001, UKAS, IAF",
     },
     {
-      icon: <FaGlobe className="text-5xl text-[#ED028C]" />,
+      icon: <FaGlobe className="text-5xl text-[#C70275]" />,
       title: "Global Reach",
       description:
         "Exporting to over 40 countries across Europe, Asia, and Africa.",
@@ -328,7 +328,7 @@ const TrustSection = () => {
     <section ref={sectionRef} className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-[#00AEEF] text-lg font-semibold mb-2 uppercase tracking-wide">
+          <h2 className="text-[#006DA8] text-lg font-semibold mb-2 uppercase tracking-wide">
             Why Choose Us
           </h2>
           <h3 className="text-[#222222] text-4xl md:text-5xl font-bold mb-6">
@@ -409,7 +409,7 @@ const TrustSection = () => {
                               className="absolute inset-0 z-30 flex items-center justify-center"
                               aria-label={`Play ${video.title}`}
                             >
-                              <span className="inline-flex items-center justify-center rounded-full bg-white/90 p-5 text-[#00AEEF] shadow-2xl transition-all duration-300 hover:bg-white hover:scale-105">
+                              <span className="inline-flex items-center justify-center rounded-full bg-white/90 p-5 text-[#006DA8] shadow-2xl transition-all duration-300 hover:bg-white hover:scale-105">
                                 <FaPlay className="text-2xl" />
                               </span>
                             </button>
@@ -440,7 +440,7 @@ const TrustSection = () => {
             <button
               type="button"
               onClick={() => scrollCarouselByTwo(-1)}
-              className={`hidden lg:inline-flex absolute left-0 top-1/2 -translate-y-1/2 z-10 items-center gap-2 rounded-full border border-[#00AEEF] bg-white/95 px-5 py-3 text-sm font-semibold text-[#00AEEF] shadow-xl backdrop-blur transition-all duration-300 hover:bg-[#00AEEF] hover:text-white active:scale-95 ${
+              className={`hidden lg:inline-flex absolute left-0 top-1/2 -translate-y-1/2 z-10 items-center gap-2 rounded-full border border-[#00AEEF] bg-white/95 px-5 py-3 text-sm font-semibold text-[#006DA8] shadow-xl backdrop-blur transition-all duration-300 hover:bg-[#00AEEF] hover:text-white active:scale-95 ${
                 scrollState.showLeft
                   ? "opacity-100"
                   : "opacity-0 pointer-events-none"
@@ -453,7 +453,7 @@ const TrustSection = () => {
             <button
               type="button"
               onClick={() => scrollCarouselByTwo(1)}
-              className={`hidden lg:inline-flex absolute right-0 top-1/2 -translate-y-1/2 z-10 items-center gap-2 rounded-full bg-[#00AEEF] px-5 py-3 text-sm font-semibold text-white shadow-xl transition-all duration-300 hover:bg-[#0095CC] active:scale-95 ${
+              className={`hidden lg:inline-flex absolute right-0 top-1/2 -translate-y-1/2 z-10 items-center gap-2 rounded-full bg-[#006DA8] px-5 py-3 text-sm font-semibold text-white shadow-xl transition-all duration-300 hover:bg-[#005F92] active:scale-95 ${
                 scrollState.showRight
                   ? "opacity-100"
                   : "opacity-0 pointer-events-none"
@@ -508,13 +508,13 @@ const TrustSection = () => {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               to="/contact"
-              className="bg-[#00AEEF] text-white px-8 py-4 rounded-full font-semibold hover:bg-[#0095CC] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
+              className="bg-[#006DA8] text-white px-8 py-4 rounded-full font-semibold hover:bg-[#005F92] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
             >
               Get in Touch
             </Link>
             <Link
               to="/products"
-              className="bg-transparent border-2 border-[#00AEEF] text-[#00AEEF] px-8 py-4 rounded-full font-semibold hover:bg-[#00AEEF] hover:text-white transition-all duration-300 active:scale-95"
+              className="bg-transparent border-2 border-[#00AEEF] text-[#006DA8] px-8 py-4 rounded-full font-semibold hover:bg-[#00AEEF] hover:text-white transition-all duration-300 active:scale-95"
             >
               Explore Our Brands
             </Link>

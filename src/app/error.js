@@ -20,7 +20,7 @@ export default function Error({ error, reset }) {
           <button
             type="button"
             onClick={() => reset()}
-            className="px-5 py-2.5 rounded-lg bg-[#00AEEF] text-white font-semibold hover:bg-[#0095CC] cursor-pointer"
+            className="px-5 py-2.5 rounded-lg bg-[#006DA8] text-white font-semibold hover:bg-[#005F92] cursor-pointer"
           >
             Try again
           </button>

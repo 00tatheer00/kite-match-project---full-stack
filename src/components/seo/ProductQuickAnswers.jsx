@@ -45,7 +45,7 @@ export default function ProductQuickAnswers({ product, settings }) {
             <details key={q} className="group rounded-xl border border-[#E0E0E0] bg-[#FAFAFA] open:bg-white" open={i === 0}>
               <summary className="cursor-pointer list-none px-5 py-4 font-semibold text-[#222222] flex justify-between gap-4">
                 <h3 className="text-base">{q}</h3>
-                <span aria-hidden="true" className="text-[#00AEEF] transition-transform group-open:rotate-45">+</span>
+                <span aria-hidden="true" className="text-[#006DA8] transition-transform group-open:rotate-45">+</span>
               </summary>
               <p className="px-5 pb-5 text-[#555555] leading-relaxed">{a}</p>
             </details>

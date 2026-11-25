@@ -73,7 +73,7 @@ const CartDrawer = () => {
               <button
                 type="button"
                 onClick={closeCart}
-                className="mt-4 px-6 py-2.5 rounded-full text-sm font-semibold border-2 border-[#00AEEF] text-[#00AEEF] hover:bg-[#F0FAFF] transition-colors cursor-pointer"
+                className="mt-4 px-6 py-2.5 rounded-full text-sm font-semibold border-2 border-[#00AEEF] text-[#006DA8] hover:bg-[#F0FAFF] transition-colors cursor-pointer"
               >
                 Continue Shopping
               </button>
@@ -172,7 +172,7 @@ const CartDrawer = () => {
               type="button"
               onClick={handleCheckout}
               disabled={hasUnavailableItems}
-              className="w-full py-3.5 rounded-full text-white font-semibold flex items-center justify-center gap-2 bg-[#00AEEF] hover:bg-[#0095CC] transition-all shadow-md text-sm active:scale-98 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3.5 rounded-full text-white font-semibold flex items-center justify-center gap-2 bg-[#006DA8] hover:bg-[#005F92] transition-all shadow-md text-sm active:scale-98 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Proceed to Checkout
             </button>

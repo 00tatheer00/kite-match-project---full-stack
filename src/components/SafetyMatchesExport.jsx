@@ -230,9 +230,9 @@ const SafetyMatchesExport = () => {
         {/* Section Header & Contact */}
         <div className="mb-16">
           <div className="text-center mb-8">
-            <h3 className="text-[#222222] text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-[#222222] text-4xl md:text-5xl font-bold mb-6">
               Export of Premium Quality Safety Matches
-            </h3>
+            </h1>
             <div className="w-24 h-1 bg-[#ED028C] mx-auto"></div>
           </div>
           <div className="grid md:grid-cols-2 gap-8 items-center bg-white rounded-2xl shadow-lg p-8 border-2 border-[#E0E0E0]">
@@ -244,7 +244,7 @@ const SafetyMatchesExport = () => {
               </p>
             </div>
             <div className="md:border-l-2 md:border-[#E0E0E0] md:pl-8">
-              <h4 className="text-[#222222] text-xl font-bold mb-4">Export Department Contact</h4>
+              <h2 className="text-[#222222] text-xl font-bold mb-4">Export Department Contact</h2>
               <div className="space-y-2">
                 <p className="text-[#666666]">
                   <strong className="text-[#222222]">Email:</strong> match.export@azizgrp.com
@@ -275,15 +275,15 @@ const SafetyMatchesExport = () => {
 
         {/* Trust Cards */}
         <div className="mb-16">
-          <h3 className="text-[#222222] text-3xl font-bold text-center mb-12">
+          <h2 className="text-[#222222] text-3xl font-bold text-center mb-12">
             Why Choose Us for Export?
-          </h3>
+          </h2>
 
           <div className="bg-white rounded-2xl border-2 border-[#E0E0E0] p-8 md:p-12">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {trustCards.map((card, index) => (
                 <div key={index} className="flex items-start">
-                  <FaAward className="text-2xl text-[#ED028C] mr-4 flex-shrink-0 mt-1" />
+                  <FaAward className="text-2xl text-[#C70275] mr-4 flex-shrink-0 mt-1" />
                   <p className="text-[#666666] font-medium">{card}</p>
                 </div>
               ))}
@@ -294,12 +294,12 @@ const SafetyMatchesExport = () => {
         {/* Custom Striking Surface Visual Showcase (Point 2) */}
         <div className="mb-20">
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-[#EAF8FE] text-[#0095CC] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
+            <div className="inline-flex items-center gap-2 bg-[#EAF8FE] text-[#006DA8] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
               <span>Manufacturing Customization</span>
             </div>
-            <h3 className="text-[#222222] text-3xl sm:text-4xl font-black mb-3">
-              Custom <span className="text-[#00AEEF]">Striking Surface</span> Options
-            </h3>
+            <h2 className="text-[#222222] text-3xl sm:text-4xl font-black mb-3">
+              Custom <span className="text-[#006DA8]">Striking Surface</span> Options
+            </h2>
             <p className="text-[#666666] text-base max-w-2xl mx-auto">
               Visual friction band configurations engineered for superior spark sensitivity, all-weather damp proofing, and luxury box aesthetics.
             </p>
@@ -329,13 +329,13 @@ const SafetyMatchesExport = () => {
                     </div>
                   </div>
 
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#00AEEF] bg-[#EAF8FE] px-2.5 py-0.5 rounded-full inline-block mb-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#006DA8] bg-[#EAF8FE] px-2.5 py-0.5 rounded-full inline-block mb-2">
                     {surface.tag}
                   </span>
 
-                  <h4 className="text-lg font-bold text-[#222222] mb-2 leading-tight">
+                  <h3 className="text-lg font-bold text-[#222222] mb-2 leading-tight">
                     {surface.name}
-                  </h4>
+                  </h3>
 
                   <p className="text-xs text-[#666666] leading-relaxed mb-4">
                     {surface.description}
@@ -343,8 +343,8 @@ const SafetyMatchesExport = () => {
                 </div>
 
                 <div className="pt-3 border-t border-[#F0F0F0]">
-                  <div className="flex items-center text-xs font-semibold text-[#00AEEF]">
-                    <FaCheckCircle className="text-[#ED028C] mr-2 flex-shrink-0" />
+                  <div className="flex items-center text-xs font-semibold text-[#006DA8]">
+                    <FaCheckCircle className="text-[#C70275] mr-2 flex-shrink-0" />
                     <span>{surface.feature}</span>
                   </div>
                 </div>
@@ -355,9 +355,9 @@ const SafetyMatchesExport = () => {
 
         {/* Other Custom Order Options (Box Sizes, Packing, Carton) */}
         <div className="mb-20">
-          <h3 className="text-[#222222] text-2xl sm:text-3xl font-bold text-center mb-3">
+          <h2 className="text-[#222222] text-2xl sm:text-3xl font-bold text-center mb-3">
             Box Sizes &amp; Packaging Specifications
-          </h3>
+          </h2>
           <p className="text-[#666666] text-center mb-10 max-w-xl mx-auto text-sm">
             Tailor-made packaging dimensions and export configurations to suit your destination market standards.
           </p>
@@ -369,12 +369,12 @@ const SafetyMatchesExport = () => {
                 className="bg-white rounded-2xl shadow-sm hover:shadow-md p-6 border-2 border-[#E5E5E5] transition-all"
               >
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-xl bg-[#EAF8FE] text-[#00AEEF] flex items-center justify-center text-xl flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#EAF8FE] text-[#006DA8] flex items-center justify-center text-xl flex-shrink-0">
                     <FaCog />
                   </div>
-                  <h4 className="text-[#222222] text-lg font-bold">
+                  <h3 className="text-[#222222] text-lg font-bold">
                     {option.title}
-                  </h4>
+                  </h3>
                 </div>
                 <ul className="space-y-2.5">
                   {option.options.map((opt, idx) => (
@@ -382,7 +382,7 @@ const SafetyMatchesExport = () => {
                       key={idx}
                       className="flex items-start text-xs sm:text-sm text-[#555555]"
                     >
-                      <FaCheckCircle className="text-[#ED028C] mr-2.5 mt-0.5 flex-shrink-0 text-xs" />
+                      <FaCheckCircle className="text-[#C70275] mr-2.5 mt-0.5 flex-shrink-0 text-xs" />
                       <span>{opt}</span>
                     </li>
                   ))}
@@ -394,9 +394,9 @@ const SafetyMatchesExport = () => {
 
         {/* Export Services */}
         <div className="mb-20">
-          <h3 className="text-[#222222] text-3xl font-bold text-center mb-12">
+          <h2 className="text-[#222222] text-3xl font-bold text-center mb-12">
             Comprehensive Export Services
-          </h3>
+          </h2>
 
           <div className="grid md:grid-cols-2 gap-8">
             {exportServices.map((service, index) => (
@@ -409,9 +409,9 @@ const SafetyMatchesExport = () => {
                     {service.icon}
                   </div>
                   <div>
-                    <h4 className="text-2xl font-bold mb-3 drop-shadow-md">
+                    <h3 className="text-2xl font-bold mb-3 drop-shadow-md">
                       {service.title}
-                    </h4>
+                    </h3>
                     <p className="text-white/90 leading-relaxed mb-4">
                       {service.description}
                     </p>
@@ -432,9 +432,9 @@ const SafetyMatchesExport = () => {
 
         {/* Export Brands */}
         <div className="mb-20">
-          <h3 className="text-[#222222] text-3xl font-bold text-center mb-4">
+          <h2 className="text-[#222222] text-3xl font-bold text-center mb-4">
             Our Export Brands
-          </h3>
+          </h2>
           <p className="text-[#666666] text-center mb-12 max-w-2xl mx-auto">
             Premium quality safety matches exported to countries worldwide
           </p>
@@ -466,9 +466,9 @@ const SafetyMatchesExport = () => {
                       />
                     </div>
                     <div className="p-4 text-center border-t-2 border-[#E0E0E0] mt-auto">
-                      <h4 className="text-[#222222] font-bold text-lg mb-0">
+                      <h3 className="text-[#222222] font-bold text-lg mb-0">
                         {match.brand}
-                      </h4>
+                      </h3>
                     </div>
                   </div>
                 </SwiperSlide>
@@ -480,12 +480,12 @@ const SafetyMatchesExport = () => {
         {/* Global Presence Map & Revised Country Sequence (Point 1) */}
         <div className="mb-20">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 bg-[#EAF8FE] text-[#0095CC] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
+            <div className="inline-flex items-center gap-2 bg-[#EAF8FE] text-[#006DA8] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
               <span>Worldwide Footprint</span>
             </div>
-            <h3 className="text-[#222222] text-3xl sm:text-4xl font-black mb-3">
-              Our <span className="text-[#00AEEF]">Global Presence</span> &amp; Export Map
-            </h3>
+            <h2 className="text-[#222222] text-3xl sm:text-4xl font-black mb-3">
+              Our <span className="text-[#006DA8]">Global Presence</span> &amp; Export Map
+            </h2>
             <p className="text-[#666666] text-base max-w-2xl mx-auto">
               Exporting reliable safety matches and premium wooden splints to over 40+ countries across 4 continents.
             </p>
@@ -515,9 +515,9 @@ const SafetyMatchesExport = () => {
         <div className="bg-gradient-to-r from-[#ED028C] to-[#d4027a] rounded-3xl p-8 md:p-12">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
-              <h3 className="text-white text-3xl md:text-4xl font-bold mb-6 drop-shadow-lg">
+              <h2 className="text-white text-3xl md:text-4xl font-bold mb-6 drop-shadow-lg">
                 Ready to Start Exporting with Us?
-              </h3>
+              </h2>
               <p className="text-white/90 text-lg leading-relaxed mb-8 drop-shadow-md">
                 Join our network of international partners and benefit from our
                 extensive export experience, reliable logistics, and commitment
@@ -528,7 +528,7 @@ const SafetyMatchesExport = () => {
                   href="mailto:match.export@azizgrp.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white text-[#ED028C] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg active:scale-95"
+                  className="bg-white text-[#C70275] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg active:scale-95"
                 >
                   Email Us
                 </a>

@@ -165,6 +165,7 @@ const jsonLdStructuredData = {
         merchantReturnDays: 2,
         returnMethod: "https://schema.org/ReturnByMail",
         returnFees: "https://schema.org/FreeReturn",
+        refundType: "https://schema.org/FullRefund", // Terms: damaged/wrong items are replaced or refunded
         merchantReturnLink: "https://www.kitepk.com/terms",
       },
       priceRange: "$$",

@@ -183,7 +183,7 @@ const ExportSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-[#00AEEF] text-lg font-semibold mb-2 uppercase tracking-wide">
+          <h2 className="text-[#006DA8] text-lg font-semibold mb-2 uppercase tracking-wide">
             Global Reach
           </h2>
           <h3 className="text-[#222222] text-4xl md:text-5xl font-bold mb-6">
@@ -408,7 +408,7 @@ const ExportSection = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {achievements.map((achievement, index) => (
                 <div key={index} className="flex items-start">
-                  <FaAward className="text-2xl text-[#ED028C] mr-4 flex-shrink-0 mt-1" />
+                  <FaAward className="text-2xl text-[#C70275] mr-4 flex-shrink-0 mt-1" />
                   <p className="text-[#666666] font-medium">{achievement}</p>
                 </div>
               ))}
@@ -433,7 +433,7 @@ const ExportSection = () => {
                   href="mailto:match.export@azizgrp.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white text-[#ED028C] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg active:scale-95"
+                  className="bg-white text-[#C70275] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg active:scale-95"
                 >
                   Email Us
                 </a>

@@ -16,7 +16,7 @@ export default function OrderTrustStrip({ compact = false, className = "" }) {
     >
       {POINTS.map(({ Icon, title, text }) => (
         <li key={title} className="flex items-start gap-2.5 rounded-xl border border-[#E0E0E0] bg-white p-3">
-          <Icon aria-hidden="true" className="mt-0.5 shrink-0 text-[#00AEEF] text-lg" />
+          <Icon aria-hidden="true" className="mt-0.5 shrink-0 text-[#006DA8] text-lg" />
           <span>
             <span className="block text-sm font-semibold text-[#222222]">{title}</span>
             {!compact && <span className="block text-xs text-[#666666] mt-0.5">{text}</span>}

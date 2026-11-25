@@ -6,7 +6,7 @@ export function HomeIntro() {
   return (
     <section className="bg-white py-12 md:py-16">
       <div className="max-w-5xl mx-auto px-4 text-center">
-        <p className="text-[#00AEEF] font-bold uppercase tracking-widest text-sm mb-3">
+        <p className="text-[#006DA8] font-bold uppercase tracking-widest text-sm mb-3">
           Since 1974 · Peshawar, Pakistan
         </p>
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#222222] leading-tight">
@@ -18,10 +18,10 @@ export function HomeIntro() {
           Industries, exporting to 40+ countries and delivering across Pakistan.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <Link href="/online-order" className="px-6 py-3 rounded-full bg-[#00AEEF] text-white font-bold shadow-md hover:bg-[#0095CC] transition-colors">
+          <Link href="/online-order" className="px-6 py-3 rounded-full bg-[#006DA8] text-white font-bold shadow-md hover:bg-[#005F92] transition-colors">
             Order Online
           </Link>
-          <Link href="/export/safety-matches" className="px-6 py-3 rounded-full border-2 border-[#00AEEF] text-[#00AEEF] font-bold hover:bg-sky-50 transition-colors">
+          <Link href="/export/safety-matches" className="px-6 py-3 rounded-full border-2 border-[#00AEEF] text-[#006DA8] font-bold hover:bg-sky-50 transition-colors">
             Export Enquiry
           </Link>
         </div>
@@ -43,7 +43,7 @@ export function HomeFaq() {
             <details key={q} className="group bg-white rounded-2xl border border-slate-200 shadow-sm open:shadow-md transition-shadow">
               <summary className="cursor-pointer list-none flex items-center justify-between gap-4 px-6 py-5 font-bold text-[#222222] text-lg">
                 <h3 className="text-lg font-bold">{q}</h3>
-                <span className="shrink-0 text-[#00AEEF] text-2xl leading-none transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+                <span className="shrink-0 text-[#006DA8] text-2xl leading-none transition-transform group-open:rotate-45" aria-hidden="true">+</span>
               </summary>
               <p className="px-6 pb-6 -mt-1 text-slate-600 leading-relaxed">{a}</p>
             </details>

@@ -29,7 +29,9 @@ export default async function Page() {
   return (
     <>
       {/* Preload the hero (LCP) image the page will actually show */}
-      {!isImageBanner && <link rel="preload" as="image" href="/videos/kite-motion-poster.jpg" fetchPriority="high" />}
+      {!isImageBanner && (
+        <link rel="preload" as="image" type="image/webp" href="/videos/kite-hero-poster-1920.webp" fetchPriority="high" />
+      )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(homeFaqSchema) }} />
       <HomePage initialProducts={products} heroSettings={heroSettings} />
     </>

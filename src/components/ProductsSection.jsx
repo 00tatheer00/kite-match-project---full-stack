@@ -6,6 +6,7 @@ import { FaArrowRight } from "react-icons/fa";
 import { Link } from '@/components/RouterCompat';
 import { useEffect, useState } from "react";
 import { getProducts } from "../services/api";
+import { readable } from "../utils/contrast";
 
 const placeholderImage =
   "/logo.png";
@@ -90,7 +91,7 @@ const ProductsSection = ({ initialProducts = [] }) => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-[#00AEEF] text-lg font-semibold mb-2 uppercase tracking-wide">
+          <h2 className="text-[#006DA8] text-lg font-semibold mb-2 uppercase tracking-wide">
             Our Products
           </h2>
           <h3 className="text-[#222222] text-4xl md:text-5xl font-bold mb-6">
@@ -160,7 +161,7 @@ const ProductsSection = ({ initialProducts = [] }) => {
                       />
                       <span
                         className="absolute top-2 left-2 sm:top-4 sm:left-4 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-white text-[10px] sm:text-xs font-bold tracking-wide shadow-md"
-                        style={{ backgroundColor: accent }}
+                        style={{ backgroundColor: readable(accent) }}
                       >
                         {product.category || product.productType || "Product"}
                       </span>
@@ -189,7 +190,7 @@ const ProductsSection = ({ initialProducts = [] }) => {
                             </span>
                           ))}
                           {sizes.length > 4 && (
-                            <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 text-xs font-semibold">
+                            <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold">
                               +{sizes.length - 4} more
                             </span>
                           )}
@@ -199,7 +200,7 @@ const ProductsSection = ({ initialProducts = [] }) => {
                       <div className="mt-auto pt-3 sm:pt-6">
                         <span
                           className="flex items-center justify-center gap-2 w-full rounded-xl sm:rounded-2xl py-2.5 sm:py-3 text-xs sm:text-base font-bold text-white shadow-md group-hover:shadow-lg transition-all"
-                          style={{ backgroundColor: accent }}
+                          style={{ backgroundColor: readable(accent) }}
                         >
                           <span className="sm:hidden">View</span>
                           <span className="hidden sm:inline">View details &amp; prices</span>
@@ -232,7 +233,7 @@ const ProductsSection = ({ initialProducts = [] }) => {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               to="/contact"
-              className="bg-white text-[#00AEEF] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 cursor-pointer"
+              className="bg-white text-[#006DA8] px-8 py-4 rounded-full font-semibold hover:bg-[#F9F9F9] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 cursor-pointer"
             >
               Request Quote
             </Link>

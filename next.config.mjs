@@ -46,6 +46,16 @@ const nextConfig = {
         ],
       },
       {
+        // Hero / factory videos and posters. Give a NEW file name when a video changes.
+        source: '/videos/:file*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=2592000, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      {
         source: '/:all*(svg|jpg|jpeg|png|webp|avif|ico|woff|woff2)',
         headers: [
           {

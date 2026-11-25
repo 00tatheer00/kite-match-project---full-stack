@@ -31,7 +31,7 @@ const HeroSection = ({ backgroundImage }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-[#00AEEF] font-semibold text-lg md:text-xl mb-4 tracking-wider uppercase"
+            className="text-[#006DA8] font-semibold text-lg md:text-xl mb-4 tracking-wider uppercase"
           >
             Since 1950s
           </motion.p>

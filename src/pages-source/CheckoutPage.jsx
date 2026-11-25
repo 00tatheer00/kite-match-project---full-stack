@@ -230,7 +230,7 @@ const CheckoutPage = () => {
             </p>
             <Link
               to="/products"
-              className="text-[#00AEEF] font-semibold hover:text-[#ED028C]"
+              className="text-[#006DA8] font-semibold hover:text-[#ED028C]"
             >
               Go to Products
             </Link>
@@ -380,7 +380,7 @@ const CheckoutPage = () => {
           <div className="mb-6 p-4 rounded-xl bg-sky-50 border border-sky-200 flex items-start gap-3">
             <span className="text-xl">🚚</span>
             <div className="flex-1">
-              <h3 className="text-sm font-bold text-sky-950">Cash on Delivery (COD) Available Nationwide</h3>
+              <h2 className="text-sm font-bold text-sky-950">Cash on Delivery (COD) Available Nationwide</h2>
               <p className="text-xs text-sky-800 mt-0.5 leading-relaxed">
                 Apna shipping address dain aur order place karein. Payment delivery ke waqt li jaye gi.
               </p>
@@ -514,10 +514,10 @@ const CheckoutPage = () => {
                   type="checkbox"
                   checked={acceptedTerms}
                   onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className="mt-1 w-4 h-4 text-[#00AEEF] border-gray-300 rounded focus:ring-[#00AEEF]"
+                  className="mt-1 w-4 h-4 text-[#006DA8] border-gray-300 rounded focus:ring-[#00AEEF]"
                 />
                 <span className="text-sm text-gray-600">
-                  I have read and agree to the website's <Link to="/terms" className="text-[#00AEEF] hover:underline" target="_blank" rel="noopener">Terms &amp; Conditions</Link> and <Link to="/privacy" className="text-[#00AEEF] hover:underline" target="_blank" rel="noopener">Privacy Policy</Link>.
+                  I have read and agree to the website's <Link to="/terms" className="text-[#006DA8] underline underline-offset-2" target="_blank" rel="noopener">Terms &amp; Conditions</Link> and <Link to="/privacy" className="text-[#006DA8] underline underline-offset-2" target="_blank" rel="noopener">Privacy Policy</Link>.
                 </span>
               </label>
             </div>
@@ -531,7 +531,7 @@ const CheckoutPage = () => {
               <button
                 type="submit"
                 disabled={submitting || Boolean(quoteState.error)}
-                className="w-full px-5 py-3.5 rounded-lg text-white font-bold bg-[#00AEEF] hover:bg-[#0095CC] flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all text-sm disabled:opacity-50 cursor-pointer"
+                className="w-full px-5 py-3.5 rounded-lg text-white font-bold bg-[#006DA8] hover:bg-[#005F92] flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all text-sm disabled:opacity-50 cursor-pointer"
               >
                 {submitting ? "Placing Order..." : "Place Order (Cash on Delivery)"}
               </button>
@@ -570,7 +570,7 @@ const CheckoutPage = () => {
                                 {item.itemType === 'promotion' ? item.promotionTitle : (item.brandName ? item.brandName : item.productTitle)}
                               </p>
                               {item.itemType !== 'promotion' && (
-                                <p className="text-xs font-semibold text-[#00AEEF] mt-1">{item.selectedVariant}</p>
+                                <p className="text-xs font-semibold text-[#006DA8] mt-1">{item.selectedVariant}</p>
                               )}
                             </div>
                             <button
@@ -620,7 +620,7 @@ const CheckoutPage = () => {
                     </div>
                     <div className="flex justify-between items-center border-t border-[#E0E0E0] pt-4">
                       <p className="text-base font-bold text-[#222222]">Estimated Total</p>
-                      <p className="text-2xl font-black text-[#00AEEF]">
+                      <p className="text-2xl font-black text-[#006DA8]">
                         Rs {Number(displayTotal).toLocaleString()}
                       </p>
                     </div>
@@ -629,7 +629,7 @@ const CheckoutPage = () => {
               ) : (
                 <div className="py-8 text-center">
                   <p className="text-[#666] mb-4">Your cart is empty.</p>
-                  <Link to="/products" className="text-[#00AEEF] hover:underline font-semibold">
+                  <Link to="/products" className="text-[#006DA8] hover:underline font-semibold">
                     Continue Shopping
                   </Link>
                 </div>
@@ -668,7 +668,7 @@ const CheckoutPage = () => {
                 </div>
                 <div className="flex justify-between items-center pt-2 mt-2 border-t border-[#E0E0E0]">
                   <p className="text-sm font-semibold text-[#222222]">Estimated Total</p>
-                  <p className="text-2xl font-bold text-[#00AEEF]">
+                  <p className="text-2xl font-bold text-[#006DA8]">
                     Rs {Number(displayTotal).toLocaleString()}
                   </p>
                 </div>

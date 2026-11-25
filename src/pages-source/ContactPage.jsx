@@ -19,7 +19,7 @@ const ContactPage = () => {
       />
       <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-[#00AEEF] to-[#0095CC] text-white py-20">
+      <section className="relative bg-gradient-to-r from-[#006DA8] to-[#005F92] text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
@@ -39,7 +39,7 @@ const ContactPage = () => {
             </h2>
 
             {/* FMCG Division Head Office */}
-            <div className="bg-gradient-to-br from-[#00AEEF] to-[#0095CC] rounded-xl shadow-lg p-8 mb-6">
+            <div className="bg-gradient-to-br from-[#006DA8] to-[#005F92] rounded-xl shadow-lg p-8 mb-6">
               <div className="flex items-start mb-4">
                 <div className="bg-white/20 backdrop-blur-sm w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
                   <FaBuilding className="text-white text-xl" />
@@ -83,26 +83,26 @@ const ContactPage = () => {
                   <h3 className="text-2xl font-bold text-[#222222] mb-3">
                     Mohsin Match Factory Pvt. Ltd.
                   </h3>
-                  <p className="text-sm text-[#00AEEF] font-semibold mb-3">
+                  <p className="text-sm text-[#006DA8] font-semibold mb-3">
                     Earliest Private Sector Match Manufacturer in KPK
                   </p>
                   <div className="text-[#666666] space-y-2">
                     <p className="flex items-start">
-                      <FaMapMarkerAlt className="text-[#ED028C] mr-3 mt-1 flex-shrink-0" />
+                      <FaMapMarkerAlt className="text-[#C70275] mr-3 mt-1 flex-shrink-0" />
                       <span>
                         Industrial Estate, Old Jamrud Road, Peshawar, Pakistan
                       </span>
                     </p>
                     <p className="flex items-center">
-                      <FaPhone className="text-[#ED028C] mr-3 flex-shrink-0" />
+                      <FaPhone className="text-[#C70275] mr-3 flex-shrink-0" />
                       <span>Tel. No: <a href="tel:+92915817787" className="hover:text-[#00AEEF] hover:underline">+92-91-5817787</a>, <a href="tel:+92915817795" className="hover:text-[#00AEEF] hover:underline">5817795</a></span>
                     </p>
                     <p className="flex items-center">
-                      <FaPhone className="text-[#ED028C] mr-3 flex-shrink-0" />
+                      <FaPhone className="text-[#C70275] mr-3 flex-shrink-0" />
                       <span>Fax No: <a href="tel:+92915837648" className="hover:text-[#00AEEF] hover:underline">+92-91-5837648</a></span>
                     </p>
                     <p className="flex items-center">
-                      <FaEnvelope className="text-[#ED028C] mr-3 flex-shrink-0" />
+                      <FaEnvelope className="text-[#C70275] mr-3 flex-shrink-0" />
                       <a
                         href="mailto:sales@kitepk.com"
                         className=" visited:text-white! hover:text-white/90 transition-colors"
@@ -118,30 +118,30 @@ const ContactPage = () => {
             {/* A.J Match Factory */}
             <div className="bg-white rounded-xl shadow-lg p-8 border-2 border-[#0095CC] mb-6">
               <div className="flex items-start mb-4">
-                <div className="bg-[#0095CC] w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                <div className="bg-[#006DA8] w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
                   <FaBuilding className="text-white text-xl" />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-[#222222] mb-3">
                     A.J Match Factory Pvt. Ltd.
                   </h3>
-                  <p className="text-sm text-[#0095CC] font-semibold mb-3">
+                  <p className="text-sm text-[#006DA8] font-semibold mb-3">
                     Sheikhupura Manufacturing Unit
                   </p>
                   <div className="text-[#666666] space-y-2">
                     <p className="flex items-start">
-                      <FaMapMarkerAlt className="text-[#ED028C] mr-3 mt-1 flex-shrink-0" />
+                      <FaMapMarkerAlt className="text-[#C70275] mr-3 mt-1 flex-shrink-0" />
                       <span>
                         26 KM Lahore Sheikhupura Road, Distt
                         Sheikhupura, Pakistan
                       </span>
                     </p>
                     <p className="flex items-center">
-                      <FaPhone className="text-[#ED028C] mr-3 flex-shrink-0" />
+                      <FaPhone className="text-[#C70275] mr-3 flex-shrink-0" />
                       <span>Tel. No: <a href="tel:+924237332711" className="hover:text-[#00AEEF] hover:underline">+92-42-37332711</a> / <a href="tel:+924237332712" className="hover:text-[#00AEEF] hover:underline">12</a></span>
                     </p>
                     <p className="flex items-center">
-                      <FaEnvelope className="text-[#ED028C] mr-3 flex-shrink-0" />
+                      <FaEnvelope className="text-[#C70275] mr-3 flex-shrink-0" />
                       <a
                         href="mailto:aj.match@azizgrp.com"
                         className="hover:text-[#00AEEF] transition-colors underline-none!"
@@ -164,19 +164,19 @@ const ContactPage = () => {
                   <h3 className="text-2xl font-bold text-[#222222] mb-3">
                     Mohsin Enterprises Pvt. Ltd.
                   </h3>
-                  <p className="text-sm text-[#00AEEF] font-semibold mb-3">
+                  <p className="text-sm text-[#006DA8] font-semibold mb-3">
                     Detergent and DishWash Bar Manufacturing Unit
                   </p>
                   <div className="text-[#666666] space-y-2">
                     <p className="flex items-start">
-                      <FaMapMarkerAlt className="text-[#ED028C] mr-3 mt-1 flex-shrink-0" />
+                      <FaMapMarkerAlt className="text-[#C70275] mr-3 mt-1 flex-shrink-0" />
                       <span>
                         Address: W-21, 22 Industrial Estate, Jamrud Road,
                         Hayatabad, Peshawar
                       </span>
                     </p>
                     <p className="flex items-center">
-                      <FaPhone className="text-[#ED028C] mr-3 flex-shrink-0" />
+                      <FaPhone className="text-[#C70275] mr-3 flex-shrink-0" />
                       <span>Tel. No: <a href="tel:+92915817416" className="hover:text-[#00AEEF] hover:underline">+92-91-5817416</a> / <a href="tel:+92915817417" className="hover:text-[#00AEEF] hover:underline">17</a></span>
                     </p>
                   </div>
@@ -196,19 +196,19 @@ const ContactPage = () => {
                 <h3 className="text-xl font-bold text-[#222222] mb-3">Premier Formica</h3>
                 <div className="text-sm text-[#666666] space-y-2">
                   <p className="flex items-start">
-                    <FaMapMarkerAlt className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaMapMarkerAlt className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Address: 92-E, Industrial Estate, Jamrud Road, Peshawar, Pakistan</span>
                   </p>
                   <p className="flex items-start">
-                    <FaPhone className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaPhone className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Tel. No: +92-(0)91-5813051, 5817785, 5815057</span>
                   </p>
                   <p className="flex items-start">
-                    <FaPhone className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaPhone className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Fax No: +92-(0)91-5812787</span>
                   </p>
                   <p className="flex items-start">
-                    <FaEnvelope className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaEnvelope className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <a href="mailto:formica@azizgrp.net.pk" className="hover:text-[#00AEEF] transition-colors">
                       E-Mail: formica@azizgrp.net.pk
                     </a>
@@ -221,19 +221,19 @@ const ContactPage = () => {
                 <h3 className="text-xl font-bold text-[#222222] mb-3">A.J Textile Mills Limited</h3>
                 <div className="text-sm text-[#666666] space-y-2">
                   <p className="flex items-start">
-                    <FaMapMarkerAlt className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaMapMarkerAlt className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Mill Address: Plot No 209 Industrial Estate, Gadoon Amazai, Swabi-Pakistan</span>
                   </p>
                   <p className="flex items-start">
-                    <FaPhone className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaPhone className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Tel. No: +92-(0)938-270109, 270093, 270603</span>
                   </p>
                   <p className="flex items-start">
-                    <FaPhone className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaPhone className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Fax No: +92-(0)938-270201</span>
                   </p>
                   <p className="flex items-start">
-                    <FaEnvelope className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaEnvelope className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <a href="mailto:ajtm.gdn@azizgrp.com" className="hover:text-[#00AEEF] transition-colors">
                       E-Mail: ajtm.gdn@azizgrp.com
                     </a>
@@ -246,15 +246,15 @@ const ContactPage = () => {
                 <h3 className="text-xl font-bold text-[#222222] mb-3">AJ Towers</h3>
                 <div className="text-sm text-[#666666] space-y-2">
                   <p className="flex items-start">
-                    <FaMapMarkerAlt className="text-[#00AEEF] mr-2 mt-1 flex-shrink-0" />
+                    <FaMapMarkerAlt className="text-[#006DA8] mr-2 mt-1 flex-shrink-0" />
                     <span>Address: Plot No. 6, Main Expressway, Gulberg Green, Islamabad</span>
                   </p>
                   <p className="flex items-center">
-                    <FaPhone className="text-[#00AEEF] mr-2 flex-shrink-0" />
+                    <FaPhone className="text-[#006DA8] mr-2 flex-shrink-0" />
                     <span>Cell No: +92 311 333 5550</span>
                   </p>
                   <p className="flex items-center">
-                    <FaEnvelope className="text-[#00AEEF] mr-2 flex-shrink-0" />
+                    <FaEnvelope className="text-[#006DA8] mr-2 flex-shrink-0" />
                     <a href="mailto:info@ajtowers.com" className="hover:text-[#00AEEF] transition-colors">
                       E-Mail: info@ajtowers.com
                     </a>
@@ -343,7 +343,7 @@ const ContactPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-[#00AEEF] to-[#0095CC] py-16">
+      <section className="bg-gradient-to-r from-[#006DA8] to-[#005F92] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Connect with Kite Brand?
@@ -357,7 +357,7 @@ const ContactPage = () => {
               href="https://wa.me/923018117666"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-white text-[#00AEEF] px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
+              className="inline-block bg-white text-[#006DA8] px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
             >
               <FaPhone className="inline mr-2" />
               Call FMCG Division
