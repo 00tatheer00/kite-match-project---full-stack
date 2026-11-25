@@ -517,7 +517,7 @@ const CheckoutPage = () => {
                   className="mt-1 w-4 h-4 text-[#00AEEF] border-gray-300 rounded focus:ring-[#00AEEF]"
                 />
                 <span className="text-sm text-gray-600">
-                  I have read and agree to the website's <Link to="/terms" className="text-[#00AEEF] hover:underline" target="_blank" rel="noopener">Terms &amp; Conditions</Link> and <Link to="/privacy" className="text-[#00AEEF] hover:underline" target="_blank" rel="noopener">Privacy Policy</Link>.
+                  I have read and agree to the website's <Link to="/terms" className="text-[#0077B6] underline underline-offset-2" target="_blank" rel="noopener">Terms &amp; Conditions</Link> and <Link to="/privacy" className="text-[#0077B6] underline underline-offset-2" target="_blank" rel="noopener">Privacy Policy</Link>.
                 </span>
               </label>
             </div>

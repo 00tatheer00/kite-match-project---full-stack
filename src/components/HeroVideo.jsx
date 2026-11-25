@@ -25,22 +25,42 @@ const HeroVideo = ({ initialSettings = null }) => {
     };
   }, []);
 
+  // The poster (53 KB WebP) is painted first. The video file is only attached after the
+  // page has finished loading, so it never competes with the poster, fonts or scripts
+  // for bandwidth on slow mobile connections.
+  const [loadVideo, setLoadVideo] = useState(false);
+
+  useEffect(() => {
+    if (settings?.bannerType === 'image' && settings?.bannerImage) return undefined;
+    let timer;
+    const start = () => {
+      timer = window.setTimeout(() => setLoadVideo(true), 300);
+    };
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
+    return () => {
+      window.removeEventListener('load', start);
+      window.clearTimeout(timer);
+    };
+  }, [settings]);
+
   // Guarantee seamless autoplay across all browsers and devices
   useEffect(() => {
-    if (settings?.bannerType === 'image' && settings?.bannerImage) return;
+    if (!loadVideo) return;
     const video = videoRef.current;
     if (!video) return;
 
     video.defaultMuted = true;
     video.muted = true;
+    video.load();
 
     const playPromise = video.play();
     if (playPromise !== undefined) {
       playPromise.catch(() => {
-        // Autoplay policy fallback
+        // Autoplay blocked (e.g. data saver): the poster image stays visible.
       });
     }
-  }, [settings]);
+  }, [loadVideo]);
 
   const isImageBanner = settings?.bannerType === 'image' && Boolean(settings?.bannerImage);
 
@@ -94,21 +114,22 @@ const HeroVideo = ({ initialSettings = null }) => {
       <div className={HERO_SIZE}>
         <video
           ref={videoRef}
-          autoPlay
           loop
           muted
           playsInline
-          preload="metadata"
-          poster="/videos/kite-motion-poster.jpg"
+          preload="none"
+          /* The poster is in the server HTML (and preloaded), so this <video> is the
+             Largest Contentful Paint element from the first paint. The video file itself
+             is attached after the page has loaded and never re-times LCP. */
+          poster="/videos/kite-hero-poster-1920.webp"
           aria-label="Kite Motion Banner"
           className="absolute inset-0 w-full h-full object-cover object-center block"
           style={{ objectFit: 'cover', width: '100%', height: '100%' }}
         >
           {/* Phones/tablets get the 720p encode (~2 MB); large screens the 1080p one (~4.5 MB).
               Browsers without <source media> support use the first (lighter) source. */}
-          <source src="/videos/kite-hero-720.mp4" type="video/mp4" media="(max-width: 1024px)" />
-          <source src="/videos/kite-hero-1080.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
+          {loadVideo && <source src="/videos/kite-hero-720.mp4" type="video/mp4" media="(max-width: 1024px)" />}
+          {loadVideo && <source src="/videos/kite-hero-1080.mp4" type="video/mp4" />}
         </video>
       </div>
     </section>

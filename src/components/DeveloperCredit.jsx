@@ -10,7 +10,7 @@ export default function DeveloperCredit({ className = '' }) {
     <p className={`text-[11px] leading-snug ${className}`}>
       Designed &amp; developed by <span className="font-semibold">{DEVELOPER.name}</span>
       {' · '}
-      <a href={`tel:${DEVELOPER.phoneTel}`} className="hover:underline" aria-label={`Call ${DEVELOPER.name}`}>
+      <a href={`tel:${DEVELOPER.phoneTel}`} className="underline underline-offset-2" aria-label={`Call ${DEVELOPER.name}`}>
         {DEVELOPER.phoneDisplay}
       </a>
     </p>
