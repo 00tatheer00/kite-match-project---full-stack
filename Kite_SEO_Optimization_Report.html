@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Kite SEO Optimization Report</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+:root{
+  --blue:#00AEEF; --blue-d:#0077B6; --pink:#ED028C; --navy:#0B1B33; --slate:#334155; --muted:#64748B;
+  --border:#E2E8F0; --bg:#F8FAFC; --green:#10B981; --amber:#F59E0B; --violet:#7C3AED; --teal:#0D9488;
+}
+@page{size:A4;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#fff}
+body{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;color:var(--slate);font-size:12px;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:210mm;height:297mm;position:relative;overflow:hidden;page-break-after:always;background:#fff}
+.page:last-child{page-break-after:auto}
+.inner{padding:16mm 15mm 18mm}
+.foot{position:absolute;left:15mm;right:15mm;bottom:8mm;display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:6px}
+.foot b{color:var(--blue)}
+
+/* Cover */
+.cover{background:linear-gradient(150deg,#071428 0%,#0B2447 45%,#005F92 80%,#00AEEF 100%);color:#fff}
+.cover .blob{position:absolute;border-radius:50%;filter:blur(2px);opacity:.55}
+.b1{width:420px;height:420px;right:-140px;top:-120px;background:radial-gradient(circle,#ED028C 0%,rgba(237,2,140,0) 70%)}
+.b2{width:380px;height:380px;left:-150px;bottom:40px;background:radial-gradient(circle,#00AEEF 0%,rgba(0,174,239,0) 70%)}
+.b3{width:260px;height:260px;right:40px;bottom:-60px;background:radial-gradient(circle,#F59E0B 0%,rgba(245,158,11,0) 70%)}
+.cover .inner{position:relative;z-index:2;padding:22mm 18mm;height:100%;display:flex;flex-direction:column}
+.brand{font-size:30px;font-weight:800;letter-spacing:-.5px}
+.brand span{color:var(--blue)}
+.brand-sub{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#9FC5E8;margin-top:2px}
+.pill{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);padding:5px 14px;border-radius:30px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.cover h1{font-size:40px;line-height:1.1;font-weight:800;letter-spacing:-1px;margin:18px 0 14px}
+.cover h1 em{font-style:normal;background:linear-gradient(90deg,#00AEEF,#7DD3FC,#F9A8D4,#ED028C);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cover .lead{font-size:14px;color:#CFE3F5;max-width:150mm}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{padding:7px 14px;border-radius:10px;font-weight:800;font-size:12px;color:#fff}
+.status{margin-top:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.status div{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:14px}
+.status small{display:block;color:#9FC5E8;font-size:9.5px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.status b{font-size:14px}
+.status .ok{color:#6EE7B7}
+.meta{margin-top:14px;display:flex;justify-content:space-between;font-size:10.5px;color:#9FC5E8;border-top:1px solid rgba(255,255,255,.15);padding-top:12px}
+
+/* Headings */
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--pink)}
+h2{font-size:24px;font-weight:800;color:var(--navy);letter-spacing:-.5px;margin:3px 0 4px}
+.sub{color:var(--muted);font-size:12px;margin-bottom:14px}
+h3{font-size:13.5px;font-weight:800;color:var(--navy)}
+
+/* Score bars */
+.scores{display:grid;gap:9px;margin:6px 0 14px}
+.score{display:grid;grid-template-columns:120px 1fr 74px;align-items:center;gap:12px}
+.score .lbl b{display:block;font-size:13px;color:var(--navy)}
+.score .lbl span{font-size:9.5px;color:var(--muted)}
+.track{height:24px;background:#F1F5F9;border-radius:8px;position:relative;overflow:hidden}
+.before{position:absolute;left:0;top:0;bottom:0;background:#CBD5E1;border-radius:8px}
+.after{position:absolute;left:0;top:0;bottom:0;border-radius:8px;opacity:.95}
+.before{z-index:2;height:8px;top:16px;background:#64748B;opacity:.55}
+.after .v{position:absolute;right:8px;top:4px;color:#fff;font-weight:800;font-size:11px}
+.delta{font-weight:800;font-size:13px;text-align:right}
+.delta small{display:block;font-size:9.5px;color:var(--muted);font-weight:600}
+.legend{display:flex;gap:16px;font-size:10px;color:var(--muted);margin-top:2px}
+.legend i{display:inline-block;width:18px;height:7px;border-radius:4px;vertical-align:middle;margin-right:5px}
+
+/* KPI tiles */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.kpi{border-radius:14px;padding:13px 12px;color:#fff}
+.kpi b{display:block;font-size:24px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+.kpi span{font-size:10px;opacity:.95;font-weight:600}
+.g1{background:linear-gradient(135deg,#00AEEF,#0077B6)}
+.g2{background:linear-gradient(135deg,#ED028C,#9D174D)}
+.g3{background:linear-gradient(135deg,#10B981,#047857)}
+.g4{background:linear-gradient(135deg,#F59E0B,#C2410C)}
+.g5{background:linear-gradient(135deg,#7C3AED,#4C1D95)}
+.g6{background:linear-gradient(135deg,#0D9488,#115E59)}
+
+.note{background:#F0F9FF;border:1px solid #BAE6FD;color:#075985;border-radius:12px;padding:10px 14px;font-size:10.5px}
+.note.warn{background:#FFFBEB;border-color:#FDE68A;color:#92400E}
+.note.good{background:#ECFDF5;border-color:#A7F3D0;color:#065F46}
+
+/* Area cards */
+.areas{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.area{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff}
+.area .hd{padding:10px 14px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+.area .hd b{font-size:14px;font-weight:800}
+.area .hd span{font-size:9.5px;opacity:.9;font-weight:600}
+.area ul{list-style:none;padding:10px 14px 12px}
+.area li{position:relative;padding-left:20px;margin:4px 0;font-size:11px}
+.area li:before{content:"✓";position:absolute;left:0;top:0;width:14px;height:14px;border-radius:50%;background:#D1FAE5;color:#047857;font-weight:800;font-size:9px;display:flex;align-items:center;justify-content:center}
+
+/* Table */
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:11px;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+th{background:var(--navy);color:#fff;text-align:left;padding:8px 11px;font-size:10px;letter-spacing:.6px;text-transform:uppercase}
+td{padding:7px 11px;border-top:1px solid var(--border)}
+tr:nth-child(even) td{background:#F8FAFC}
+.down{color:var(--green);font-weight:800}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9.5px;font-weight:700}
+.t-b{background:#E0F2FE;color:#0369A1}.t-p{background:#FCE7F3;color:#9D174D}.t-g{background:#D1FAE5;color:#047857}.t-v{background:#EDE9FE;color:#5B21B6}.t-a{background:#FEF3C7;color:#92400E}
+
+/* Steps */
+.steps{display:grid;gap:8px}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;border:1px solid var(--border);border-radius:12px;padding:10px 12px}
+.num{width:34px;height:34px;border-radius:10px;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px}
+.step p{font-size:11px;color:var(--slate);margin-top:2px}
+code{font-family:ui-monospace,Menlo,monospace;font-size:10px;background:#F1F5F9;color:#0F172A;padding:1px 5px;border-radius:5px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mini{border-radius:14px;padding:12px 14px;border:1px solid var(--border)}
+.mini h3{margin-bottom:4px}
+.mini p{font-size:11px}
+.prio{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE 1: COVER ============ -->
+<section class="page cover">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="inner">
+    <div>
+      <div class="brand">kite<span>pk</span>.com</div>
+      <div class="brand-sub">Kite FMCG · Mohsin Match Factory (Pvt.) Ltd.</div>
+    </div>
+    <div style="margin-top:34mm">
+      <span class="pill">✓ Completed &amp; Live</span>
+      <h1>Search, AI &amp; Conversion<br><em>Optimization Report</em></h1>
+      <p class="lead">A complete upgrade of kitepk.com for Google search, AI assistants (ChatGPT, Gemini, Claude, Perplexity), page speed and online-order conversion. Every item in this report has been built, tested and deployed to production.</p>
+      <div class="chips">
+        <span class="chip" style="background:#00AEEF">SEO</span>
+        <span class="chip" style="background:#7C3AED">AIO</span>
+        <span class="chip" style="background:#ED028C">GEO</span>
+        <span class="chip" style="background:#0D9488">AEO</span>
+        <span class="chip" style="background:#F59E0B">SXO</span>
+        <span class="chip" style="background:#10B981">CRO</span>
+      </div>
+    </div>
+    <div class="status">
+      <div><small>Code review &amp; build</small><b class="ok">✓ Passed · 0 errors</b></div>
+      <div><small>GitHub</small><b class="ok">✓ Pull Request #1 merged</b></div>
+      <div><small>Vercel production</small><b class="ok">✓ Deployment completed</b></div>
+    </div>
+    <div class="meta">
+      <span>Report date: 25 November 2026</span>
+      <span>Website: www.kitepk.com</span>
+      <span>Prepared by: S Tatheer Hussain</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAGE 2: SUMMARY ============ -->
+<section class="page">
+  <div class="inner">
+    <div class="eyebrow">Executive summary</div>
+    <h2>Where the website stood, and where it stands now</h2>
+    <p class="sub">Scores are an expert audit estimate against a standard checklist for each discipline (structure, content, speed, schema, trust and tracking), not a single tool's score.</p>
+
+    <div class="scores">
+      <div class="score"><div class="lbl"><b>SEO</b><span>Google ranking</span></div>
+        <div class="track"><div class="after" style="width:90%;background:linear-gradient(90deg,#7DD3FC,#00AEEF)"><span class="v">90%</span></div><div class="before" style="width:75%"></div></div>
+        <div class="delta" style="color:#0077B6">+15<small>from 75%</small></div></div>
+      <div class="score"><div class="lbl"><b>AIO</b><span>AI-readable content</span></div>
+        <div class="track"><div class="after" style="width:88%;background:linear-gradient(90deg,#C4B5FD,#7C3AED)"><span class="v">88%</span></div><div class="before" style="width:60%"></div></div>
+        <div class="delta" style="color:#7C3AED">+28<small>from 60%</small></div></div>
+      <div class="score"><div class="lbl"><b>GEO</b><span>Cited by ChatGPT / Gemini</span></div>
+        <div class="track"><div class="after" style="width:75%;background:linear-gradient(90deg,#F9A8D4,#ED028C)"><span class="v">75%</span></div><div class="before" style="width:55%"></div></div>
+        <div class="delta" style="color:#ED028C">+20<small>from 55%</small></div></div>
+      <div class="score"><div class="lbl"><b>AEO</b><span>Direct answers / snippets</span></div>
+        <div class="track"><div class="after" style="width:88%;background:linear-gradient(90deg,#5EEAD4,#0D9488)"><span class="v">88%</span></div><div class="before" style="width:60%"></div></div>
+        <div class="delta" style="color:#0D9488">+28<small>from 60%</small></div></div>
+      <div class="score"><div class="lbl"><b>SXO</b><span>Speed &amp; search experience</span></div>
+        <div class="track"><div class="after" style="width:82%;background:linear-gradient(90deg,#FCD34D,#F59E0B)"><span class="v">82%</span></div><div class="before" style="width:55%"></div></div>
+        <div class="delta" style="color:#C2410C">+27<small>from 55%</small></div></div>
+      <div class="score"><div class="lbl"><b>CRO</b><span>Visitor → order</span></div>
+        <div class="track"><div class="after" style="width:72%;background:linear-gradient(90deg,#6EE7B7,#10B981)"><span class="v">72%</span></div><div class="before" style="width:50%"></div></div>
+        <div class="delta" style="color:#047857">+22<small>from 50%</small></div></div>
+    </div>
+    <div class="legend"><span><i style="background:linear-gradient(90deg,#7DD3FC,#00AEEF)"></i>Now (after this work)</span><span><i style="background:#64748B;opacity:.55"></i>Before</span></div>
+
+    <div class="kpis" style="margin-top:16px">
+      <div class="kpi g1"><b>−80%</b><span>Homepage banner video size (22 MB → 4.5 MB)</span></div>
+      <div class="kpi g2"><b>−61%</b><span>Factory video (50 MB → 19.6 MB, loads only on click)</span></div>
+      <div class="kpi g3"><b>45</b><span>Images compressed 60–85%, same look</span></div>
+      <div class="kpi g4"><b>20+</b><span>Pages with new Google structured data</span></div>
+    </div>
+    <div class="kpis" style="margin-top:0;grid-template-columns:repeat(3,1fr)">
+      <div class="kpi g5"><b>7 Q&amp;A</b><span>Quick answers on every product page</span></div>
+      <div class="kpi g6"><b>5</b><span>New Google Analytics sales events</span></div>
+      <div class="kpi" style="background:linear-gradient(135deg,#0B1B33,#1E3A8A)"><b>12</b><span>AI crawlers explicitly allowed</span></div>
+    </div>
+
+    <div class="note good"><b>Result:</b> kitepk.com now loads faster on mobile, shows prices and answers directly in its HTML for Google and AI assistants, presents one consistent company identity, and tracks every step from product view to order.</div>
+  </div>
+  <div class="foot"><span><b>kitepk.com</b> · Search, AI &amp; Conversion Optimization Report</span><span>Page 2</span></div>
+</section>
+
+<!-- ============ PAGE 3: WORK COMPLETED ============ -->
+<section class="page">
+  <div class="inner">
+    <div class="eyebrow">Work completed</div>
+    <h2>What was done, area by area</h2>
+    <p class="sub">All changes are live on www.kitepk.com. No customer data, prices or admin features were changed.</p>
+
+    <div class="areas">
+      <div class="area"><div class="hd" style="background:linear-gradient(90deg,#00AEEF,#0077B6)"><b>SEO</b><span>Google search</span></div>
+        <ul>
+          <li>Product titles now match how people search: <i>“… Price in Pakistan | Order Online”</i></li>
+          <li>Descriptions show starting price and Cash on Delivery</li>
+          <li>Correct canonical URL for every product</li>
+          <li>Breadcrumb data on all public pages</li>
+          <li>Sitemap now includes product images and stable dates</li>
+        </ul></div>
+      <div class="area"><div class="hd" style="background:linear-gradient(90deg,#F59E0B,#C2410C)"><b>SXO</b><span>Speed &amp; experience</span></div>
+        <ul>
+          <li>Banner video re-encoded: 2.1 MB on phones, 4.5 MB on desktop</li>
+          <li>Factory video: 1.6 MB preview; full film only on click</li>
+          <li>45 images made 60–85% lighter, same size and look</li>
+          <li>Arabic/Urdu font self-hosted (no blocking request)</li>
+          <li>Banner image preloaded; no video→image “jump” on load</li>
+        </ul></div>
+      <div class="area"><div class="hd" style="background:linear-gradient(90deg,#7C3AED,#4C1D95)"><b>AIO</b><span>AI-readable website</span></div>
+        <ul>
+          <li>Homepage products now in the first HTML (visible to crawlers)</li>
+          <li>Product, Offer, shipping and return-policy data on every product</li>
+          <li>Duplicate “company” data removed: one Organization entity</li>
+          <li>Wrong logo &amp; non-www links in old data fixed</li>
+        </ul></div>
+      <div class="area"><div class="hd" style="background:linear-gradient(90deg,#ED028C,#9D174D)"><b>GEO</b><span>Cited by AI assistants</span></div>
+        <ul>
+          <li><code>/llms.txt</code> now generated live with current prices &amp; packages</li>
+          <li>ChatGPT, Claude, Perplexity, Gemini &amp; Apple AI bots explicitly allowed</li>
+          <li>Contact points: customer service, sales &amp; export</li>
+          <li>Private pages (<code>/api</code>, admin, checkout) blocked</li>
+        </ul></div>
+      <div class="area"><div class="hd" style="background:linear-gradient(90deg,#0D9488,#115E59)"><b>AEO</b><span>Direct answers</span></div>
+        <ul>
+          <li>New “Key facts &amp; quick answers” section on every product</li>
+          <li>7 questions each: price, sizes, how to order, COD, delivery, returns, maker</li>
+          <li>Answers built only from live catalog + Terms page (always accurate)</li>
+          <li>FAQ data so Google can show answers directly in results</li>
+        </ul></div>
+      <div class="area"><div class="hd" style="background:linear-gradient(90deg,#10B981,#047857)"><b>CRO</b><span>More orders</span></div>
+        <ul>
+          <li>“Order on WhatsApp” button beside Add to Cart, product pre-filled</li>
+          <li>Trust boxes: COD · Delivery all over Pakistan · 48-hour replacement · Since 1974</li>
+          <li>Trust row + “no advance payment” under the Place Order button</li>
+          <li>Google Analytics: view_item, add_to_cart, begin_checkout, purchase, whatsapp_click</li>
+        </ul></div>
+    </div>
+
+    <div class="eyebrow" style="margin-top:18px">Delivery timeline</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px">
+      <div class="mini" style="background:#F0F9FF;border-color:#BAE6FD;padding:10px"><div class="prio" style="color:#0077B6">Step 1</div><h3 style="font-size:12px">Audit</h3><p style="font-size:10px">Code-level review of all 6 areas</p></div>
+      <div class="mini" style="background:#F5F3FF;border-color:#DDD6FE;padding:10px"><div class="prio" style="color:#5B21B6">Step 2</div><h3 style="font-size:12px">Build</h3><p style="font-size:10px">Speed, schema, answers, trust &amp; tracking</p></div>
+      <div class="mini" style="background:#FDF2F8;border-color:#FBCFE8;padding:10px"><div class="prio" style="color:#9D174D">Step 3</div><h3 style="font-size:12px">Test</h3><p style="font-size:10px">Production build, HTML &amp; mobile checks</p></div>
+      <div class="mini" style="background:#FFFBEB;border-color:#FDE68A;padding:10px"><div class="prio" style="color:#92400E">Step 4</div><h3 style="font-size:12px">Review</h3><p style="font-size:10px">Pull Request #1 approved &amp; merged</p></div>
+      <div class="mini" style="background:#ECFDF5;border-color:#A7F3D0;padding:10px"><div class="prio" style="color:#047857">Step 5</div><h3 style="font-size:12px">Live ✓</h3><p style="font-size:10px">Deployed on Vercel to www.kitepk.com</p></div>
+    </div>
+  </div>
+  <div class="foot"><span><b>kitepk.com</b> · Search, AI &amp; Conversion Optimization Report</span><span>Page 3</span></div>
+</section>
+
+<!-- ============ PAGE 4: DETAILS ============ -->
+<section class="page">
+  <div class="inner">
+    <div class="eyebrow">Before &amp; after</div>
+    <h2>Measured file-size savings</h2>
+    <p class="sub">Smaller files mean faster pages on mobile data, which Google uses as a ranking signal (Core Web Vitals).</p>
+
+    <table>
+      <thead><tr><th>Item</th><th>Before</th><th>After</th><th>Saving</th><th>Where</th></tr></thead>
+      <tbody>
+        <tr><td>Banner video – desktop</td><td>21.8 MB</td><td>4.5 MB</td><td class="down">−80%</td><td><span class="tag t-b">Homepage</span></td></tr>
+        <tr><td>Banner video – phones &amp; tablets</td><td>6.7 MB</td><td>2.1 MB</td><td class="down">−69%</td><td><span class="tag t-b">Homepage</span></td></tr>
+        <tr><td>“How Kite Matches Are Made” – inline</td><td>50 MB</td><td>1.6 MB preview</td><td class="down">−97%</td><td><span class="tag t-b">Homepage</span></td></tr>
+        <tr><td>“How Kite Matches Are Made” – full film</td><td>50 MB</td><td>19.6 MB, on click</td><td class="down">−61%</td><td><span class="tag t-b">Homepage</span></td></tr>
+        <tr><td>Footer logo (A.J Match, on every page)</td><td>409 KB</td><td>74 KB</td><td class="down">−82%</td><td><span class="tag t-v">All pages</span></td></tr>
+        <tr><td>Export brand images (14 boxes)</td><td>116–236 KB each</td><td>32–58 KB each</td><td class="down">≈ −75%</td><td><span class="tag t-p">Export</span></td></tr>
+        <tr><td>Package pictures (13)</td><td>311–376 KB each</td><td>80–199 KB each</td><td class="down">≈ −50%</td><td><span class="tag t-g">Packages / Order</span></td></tr>
+        <tr><td>Wooden splints banner</td><td>1,044 KB</td><td>207 KB</td><td class="down">−80%</td><td><span class="tag t-p">Export</span></td></tr>
+        <tr><td>Shipment banner</td><td>791 KB</td><td>158 KB</td><td class="down">−80%</td><td><span class="tag t-p">Export</span></td></tr>
+        <tr><td>Division hero image</td><td>478 KB</td><td>120 KB</td><td class="down">−75%</td><td><span class="tag t-a">Divisions</span></td></tr>
+      </tbody>
+    </table>
+
+    <div style="height:16px"></div>
+    <div class="eyebrow">Google structured data</div>
+    <h2 style="font-size:19px">What Google &amp; AI now read on a product page</h2>
+    <div class="two" style="margin-top:8px">
+      <div class="mini" style="background:#F0F9FF;border-color:#BAE6FD">
+        <h3>Product &amp; Offer</h3>
+        <p>Name, images, brand “Kite”, maker, and every size with its PKR price, stock status, delivery charge and 48-hour return policy.</p>
+      </div>
+      <div class="mini" style="background:#FDF2F8;border-color:#FBCFE8">
+        <h3>FAQ &amp; Quick answers</h3>
+        <p>7 short questions and answers, visible on the page and in Google’s data, so they can appear directly in search and AI answers.</p>
+      </div>
+      <div class="mini" style="background:#F5F3FF;border-color:#DDD6FE">
+        <h3>Breadcrumb</h3>
+        <p>Home › Products › Product. Google shows this path instead of a raw link.</p>
+      </div>
+      <div class="mini" style="background:#ECFDF5;border-color:#A7F3D0">
+        <h3>One company identity</h3>
+        <p>Mohsin Match Factory with address, founding year, contact points, social profiles and return policy, the same on every page.</p>
+      </div>
+    </div>
+    <div class="note warn" style="margin-top:12px"><b>Kept honest by design:</b> no star ratings or reviews were added, because there are no real customer reviews yet. Fake ratings break Google’s rules and can remove the site from rich results.</div>
+  </div>
+  <div class="foot"><span><b>kitepk.com</b> · Search, AI &amp; Conversion Optimization Report</span><span>Page 4</span></div>
+</section>
+
+<!-- ============ PAGE 5: VERIFY + NEXT ============ -->
+<section class="page">
+  <div class="inner">
+    <div class="eyebrow">How to verify</div>
+    <h2>Check the results yourself in 10 minutes</h2>
+    <div class="steps" style="margin-top:10px">
+      <div class="step"><div class="num" style="background:#00AEEF">1</div><div><h3>Speed</h3><p>Open <code>pagespeed.web.dev</code>, enter <code>www.kitepk.com</code> and look at the <b>Mobile</b> score.</p></div></div>
+      <div class="step"><div class="num" style="background:#7C3AED">2</div><div><h3>Google rich results</h3><p>Open <code>search.google.com/test/rich-results</code> with <code>https://www.kitepk.com/products/kite-glow</code>. Expect ✓ Product, ✓ Breadcrumbs, ✓ FAQ.</p></div></div>
+      <div class="step"><div class="num" style="background:#ED028C">3</div><div><h3>AI brief &amp; crawler rules</h3><p>Open <code>www.kitepk.com/llms.txt</code> (product prices list) and <code>www.kitepk.com/robots.txt</code> (GPTBot, ClaudeBot, PerplexityBot listed).</p></div></div>
+      <div class="step"><div class="num" style="background:#0D9488">4</div><div><h3>Product page on a phone</h3><p>Green “Order on WhatsApp” under Add to Cart, 4 trust boxes, and “Key facts &amp; quick answers” at the bottom.</p></div></div>
+      <div class="step"><div class="num" style="background:#10B981">5</div><div><h3>Sales tracking</h3><p>Google Analytics › Reports › Realtime: open a product and add it to cart. You should see <code>view_item</code> and <code>add_to_cart</code>.</p></div></div>
+    </div>
+
+    <div style="height:14px"></div>
+    <div class="eyebrow">Recommended next steps</div>
+    <h2 style="font-size:19px">From here to 100%: work beyond the code</h2>
+    <div class="two" style="margin-top:8px">
+      <div class="mini" style="border-left:4px solid #ED028C"><div class="prio" style="color:#ED028C">High · CRO, SEO</div><h3>Real customer reviews</h3><p>Collect reviews after delivery. They unlock ★ stars in Google and are the strongest trust signal for new buyers.</p></div>
+      <div class="mini" style="border-left:4px solid #00AEEF"><div class="prio" style="color:#00AEEF">High · GEO, local SEO</div><h3>Google Business Profile</h3><p>Verify the Peshawar factory profile with photos, hours and the website link.</p></div>
+      <div class="mini" style="border-left:4px solid #7C3AED"><div class="prio" style="color:#7C3AED">Medium · GEO</div><h3>Mentions on other sites</h3><p>Trade directories, news and supplier listings that link to kitepk.com. AI assistants rely on these.</p></div>
+      <div class="mini" style="border-left:4px solid #F59E0B"><div class="prio" style="color:#C2410C">Medium · SEO, AEO</div><h3>Guides &amp; blog</h3><p>Helpful articles, e.g. “Best washing powder in Pakistan” or “How safety matches are made”.</p></div>
+    </div>
+    <div class="note" style="margin-top:12px"><b>After launch:</b> in Google Search Console, re-submit <code>sitemap.xml</code> and use “Request indexing” on 2–3 product pages. Ranking changes usually appear within 2–6 weeks.</div>
+  </div>
+  <div class="foot"><span><b>kitepk.com</b> · Search, AI &amp; Conversion Optimization Report</span><span>Page 5</span></div>
+</section>
+
+</body>
+</html>
