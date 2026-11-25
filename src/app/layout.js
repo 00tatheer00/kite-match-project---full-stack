@@ -222,7 +222,6 @@ export default function RootLayout({ children }) {
     <html lang="en" className={amiri.variable}>
       <head>
         {/* Performance Preconnect Resource Hints */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" />
 
         {/* Structured Data (JSON-LD) for #1 Google Rank for "best match factory in pakistan" & "mohsin match factory" */}
         <script
@@ -233,10 +232,7 @@ export default function RootLayout({ children }) {
       <body>
         {GA_ID && (
           <>
-            <Script
-              strategy="afterInteractive"
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-            />
+            {/* Tiny inline stub: gtag() calls queue in dataLayer immediately... */}
             <Script
               id="google-analytics"
               strategy="afterInteractive"
@@ -244,6 +240,7 @@ export default function RootLayout({ children }) {
                 __html: `
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
+                  window.gtag = gtag;
                   gtag('js', new Date());
                   gtag('config', '${GA_ID}', {
                     page_path: window.location.pathname,
@@ -254,6 +251,8 @@ export default function RootLayout({ children }) {
                 `,
               }}
             />
+            {/* ...and the ~90 KB gtag.js library loads after the page (not competing with LCP). */}
+            <Script strategy="lazyOnload" src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
           </>
         )}
         <ClientShell>{children}</ClientShell>

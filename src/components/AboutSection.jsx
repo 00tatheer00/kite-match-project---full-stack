@@ -5,6 +5,7 @@ import chairman from "../assets/people/chairman.jpg";
 import ceo from "../assets/people/ceo.jpeg";
 import aziz_group_logo from "../assets/ajlogo.png";
 import waleed from "../assets/people/waleed.jpg";
+import LazyImg from "./LazyImg";
 
 const AboutSection = () => {
   const leaders = [
@@ -74,12 +75,10 @@ const AboutSection = () => {
           <p className="text-[#666666] text-xl max-w-3xl mx-auto mb-4">
             Part of Aziz Group of Industries
           </p>
-          <img
+          <LazyImg
             src={aziz_group_logo?.src || aziz_group_logo}
             className="w-36 h-24 sm:w-44 sm:h-32 md:w-48 md:h-36 mx-auto mt-3 mb-6 object-contain"
             alt="Aziz Group of Industries"
-            loading="lazy"
-            decoding="async"
             width="192"
             height="144"
           />
@@ -194,11 +193,9 @@ const AboutSection = () => {
                 className="card-hover bg-white rounded-2xl overflow-hidden border-2 border-[#E0E0E0] group"
               >
                 <div className="relative overflow-hidden">
-                  <img
+                  <LazyImg
                     src={leader.image?.src || leader.image}
                     alt={leader.name}
-                    loading="lazy"
-                    decoding="async"
                     width="480"
                     height="600"
                     className={`w-full object-cover transition-transform duration-500 sm group-hover:scale-110 aspect-[4/5] sm:aspect-[3/4] ${leader.className}`}
