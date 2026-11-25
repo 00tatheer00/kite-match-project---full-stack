@@ -8,32 +8,8 @@ import {
   FaBuilding,
 } from "react-icons/fa";
 import SeoHead from "../components/seo/SeoHead";
-import StructuredData from "../components/seo/StructuredData";
-import { SITE_URL } from "../utils/seo";
 
 const ContactPage = () => {
-  const contactSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "Kite Brand Pakistan",
-    url: `${SITE_URL}/contact`,
-    contactPoint: [
-      {
-        "@type": "ContactPoint",
-        telephone: "+92-91-5815056",
-        contactType: "customer service",
-        email: "info@kitepk.com",
-        areaServed: "PK",
-      },
-      {
-        "@type": "ContactPoint",
-        contactType: "sales",
-        email: "sales@kitepk.com",
-        areaServed: "PK",
-      },
-    ],
-  };
-
   return (
     <>
       <SeoHead
@@ -41,7 +17,6 @@ const ContactPage = () => {
         description="Get in touch with Kite Brand for FMCG product inquiries, export opportunities, and business partnerships."
         path="/contact"
       />
-      <StructuredData data={contactSchema} />
       <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-[#00AEEF] to-[#0095CC] text-white py-20">

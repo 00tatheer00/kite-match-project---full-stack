@@ -1,3 +1,5 @@
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import ProductsPage from "@/pages-source/ProductsPage";
 import { fetchServerProducts } from "@/lib/server-products";
 import { toJsonLd } from "@/lib/json-ld";
@@ -69,6 +71,7 @@ export default async function Page() {
 
   return (
     <>
+      <JsonLd data={breadcrumbSchema([{ name: "Products", path: "/products" }])} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: toJsonLd(faqSchema) }}

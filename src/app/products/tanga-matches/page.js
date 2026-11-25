@@ -1,3 +1,5 @@
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import TangaMatchesPage from "@/pages-source/TangaMatchesPage";
 
 export const metadata = {
@@ -17,5 +19,10 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <TangaMatchesPage />;
+  return (
+    <>
+      <JsonLd data={breadcrumbSchema([{ name: "Products", path: "/products" }, { name: "Tanga Safety Matches", path: "/products/tanga-matches" }])} />
+      <TangaMatchesPage />
+    </>
+  );
 }

@@ -1,3 +1,5 @@
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import BirdMatchesPage from "@/pages-source/BirdMatchesPage";
 
 export const metadata = {
@@ -17,5 +19,10 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <BirdMatchesPage />;
+  return (
+    <>
+      <JsonLd data={breadcrumbSchema([{ name: "Products", path: "/products" }, { name: "Bird Safety Matches", path: "/products/bird" }])} />
+      <BirdMatchesPage />
+    </>
+  );
 }

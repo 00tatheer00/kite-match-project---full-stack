@@ -1,3 +1,4 @@
+import { productImages } from "@/lib/product-seo";
 import { fetchServerProducts } from "@/lib/server-products";
 
 export const revalidate = 3600;
@@ -5,6 +6,9 @@ export const revalidate = 3600;
 export default async function sitemap() {
   const baseUrl = "https://www.kitepk.com";
   const now = new Date();
+  // Static pages: a fixed "content last changed" date (a lastModified of "now" on every
+  // request teaches Google to ignore the field).
+  const STATIC_UPDATED = new Date("2026-11-25T00:00:00Z");
 
   const staticRoutes = [
     { url: `${baseUrl}`, priority: 1.0, changeFrequency: "daily" },
@@ -35,17 +39,18 @@ export default async function sitemap() {
     dynamicRoutes = products.map((product) => ({
       url: `${baseUrl}/products/${product.id || product._id}`,
       lastModified: product.updatedAt ? new Date(product.updatedAt) : now,
+      images: productImages(product).filter((u) => /^https?:/.test(u)).slice(0, 5),
       changeFrequency: "weekly",
       priority: 0.9,
     }));
-  } catch (e) {
+  } catch {
     // fallback if error
   }
 
   return [
     ...staticRoutes.map((route) => ({
       ...route,
-      lastModified: now,
+      lastModified: STATIC_UPDATED,
     })),
     ...dynamicRoutes,
   ];

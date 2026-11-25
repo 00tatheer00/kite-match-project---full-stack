@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { getProducts, getPromotions } from '@/services/api';
+import { trackEvent } from '@/lib/gtag';
 
 const CartContext = createContext();
 
@@ -131,6 +132,11 @@ export const CartProvider = ({ children }) => {
       ];
     });
     openCart();
+    trackEvent('add_to_cart', {
+      currency: 'PKR',
+      value: (Number(variant.price) || 0) * clampQty(quantity),
+      items: [{ item_id: String(product.id), item_name: brandName || product.title, item_variant: variant.name, price: Number(variant.price) || 0, quantity: clampQty(quantity) }],
+    });
     const label = brandName && brandName !== product.title ? brandName : product.title;
     toast.success(`Added to cart: ${label} (${variant.name}) × ${clampQty(quantity)}`, { id: 'cart-add' });
 
@@ -169,6 +175,11 @@ export const CartProvider = ({ children }) => {
       ];
     });
     openCart();
+    trackEvent('add_to_cart', {
+      currency: 'PKR',
+      value: (Number(price) || 0) * clampQty(quantity),
+      items: [{ item_id: String(promotion.id), item_name: promotion.title, item_category: 'Package', price: Number(price) || 0, quantity: clampQty(quantity) }],
+    });
     toast.success(`Added to cart: ${promotion.title}`, { id: 'cart-add' });
 
     setTimeout(() => {

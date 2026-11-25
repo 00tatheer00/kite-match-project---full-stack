@@ -1,3 +1,5 @@
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import WoodenSplintsPage from "@/pages-source/WoodenSplintsPage";
 
 export const metadata = {
@@ -17,5 +19,10 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <WoodenSplintsPage />;
+  return (
+    <>
+      <JsonLd data={breadcrumbSchema([{ name: "Export", path: "/export" }, { name: "Wooden Splints Export", path: "/export/wooden-splints" }])} />
+      <WoodenSplintsPage />
+    </>
+  );
 }

@@ -2,6 +2,10 @@ import "./globals.css";
 import ClientShell from "@/components/ClientShell";
 import Script from "next/script";
 import { toJsonLd } from "@/lib/json-ld";
+import { Amiri } from "next/font/google";
+
+// Self-hosted by Next (no render-blocking request to Google Fonts).
+const amiri = Amiri({ subsets: ["latin", "arabic"], weight: ["400", "700"], style: ["normal", "italic"], display: "swap", variable: "--font-amiri", preload: false });
 
 export const metadata = {
   metadataBase: new URL("https://www.kitepk.com"),
@@ -129,6 +133,40 @@ const jsonLdStructuredData = {
       },
       telephone: ["+92-91-5815056", "+92-300-8592829"],
       email: "match.export@azizgrp.com",
+      contactPoint: [
+        {
+          "@type": "ContactPoint",
+          contactType: "customer service",
+          telephone: "+92-301-8117666",
+          areaServed: "PK",
+          availableLanguage: ["English", "Urdu"],
+        },
+        {
+          "@type": "ContactPoint",
+          contactType: "sales",
+          telephone: "+92-91-5815056",
+          email: "sales@kitepk.com",
+          areaServed: "PK",
+          availableLanguage: ["English", "Urdu"],
+        },
+        {
+          "@type": "ContactPoint",
+          contactType: "export sales",
+          telephone: "+92-300-8592829",
+          email: "match.export@azizgrp.com",
+          availableLanguage: ["English"],
+        },
+      ],
+      areaServed: { "@type": "Country", name: "Pakistan" },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "PK",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 2,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn",
+        merchantReturnLink: "https://www.kitepk.com/terms",
+      },
       priceRange: "$$",
       foundingDate: "1974",
       founder: {
@@ -171,11 +209,7 @@ const jsonLdStructuredData = {
       publisher: {
         "@id": "https://www.kitepk.com/#organization",
       },
-      potentialAction: {
-        "@type": "SearchAction",
-        target: "https://www.kitepk.com/products?search={search_term_string}",
-        "query-input": "required name=search_term_string",
-      },
+      inLanguage: "en-PK",
     },
   ],
 };
@@ -184,15 +218,10 @@ export default function RootLayout({ children }) {
   const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-ZBCNV5GV6C";
 
   return (
-    <html lang="en">
+    <html lang="en" className={amiri.variable}>
       <head>
         {/* Performance Preconnect Resource Hints */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap"
-        />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
 
         {/* Structured Data (JSON-LD) for #1 Google Rank for "best match factory in pakistan" & "mohsin match factory" */}
         <script

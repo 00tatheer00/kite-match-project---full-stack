@@ -10,6 +10,8 @@ import { colors } from "../theme";
 import { FaTrash } from "react-icons/fa";
 import OrderConfirmModal from "../components/checkout/OrderConfirmModal";
 import toast from "react-hot-toast";
+import { trackEvent, toGaItem, cartValue } from "../lib/gtag";
+import OrderTrustStrip from "../components/OrderTrustStrip";
 
 const PHONE_REGEX = /^(?:\+92|92|0)3\d{9}$/;
 
@@ -70,6 +72,17 @@ const CheckoutPage = () => {
       unitPrice: Number(orderContext.totalPrice) || 0,
     };
   }, [isCartCheckout, cartItems, cartTotal, orderContext]);
+
+  // GA4: one begin_checkout per visit, once the order data is known.
+  const [checkoutTracked, setCheckoutTracked] = useState(false);
+  useEffect(() => {
+    if (checkoutTracked || !checkoutData) return;
+    setCheckoutTracked(true);
+    const items = checkoutData.type === "cart"
+      ? checkoutData.items.map(toGaItem).filter(Boolean)
+      : [{ item_id: String(checkoutData.productId || checkoutData.promotionId || ""), item_name: checkoutData.title, item_variant: checkoutData.selectedSkuOrSize || undefined, price: checkoutData.unitPrice, quantity: checkoutData.quantity }];
+    trackEvent("begin_checkout", { currency: "PKR", value: cartValue(items), items });
+  }, [checkoutData, checkoutTracked]);
 
   useEffect(() => {
     if (!checkoutData || isCartCheckout) return;
@@ -326,6 +339,20 @@ const CheckoutPage = () => {
         paymentMethod: "COD",
       });
 
+      {
+        const items = isCartCheckout
+          ? checkoutData.items.map(toGaItem).filter(Boolean)
+          : [{ item_id: String(checkoutData.productId || checkoutData.promotionId || ""), item_name: checkoutData.title, item_variant: checkoutData.selectedSkuOrSize || undefined, price: checkoutData.unitPrice, quantity: parsedQuantity }];
+        trackEvent("purchase", {
+          transaction_id: orderResult.orderNumber || orderResult.id,
+          currency: "PKR",
+          value: Number(orderResult.totalAmount) || cartValue(items),
+          shipping: Number(orderResult.shippingCost) || 0,
+          payment_type: "COD",
+          items,
+        });
+      }
+
       if (isCartCheckout) {
         clearCart();
       }
@@ -508,6 +535,11 @@ const CheckoutPage = () => {
               >
                 {submitting ? "Placing Order..." : "Place Order (Cash on Delivery)"}
               </button>
+              <OrderTrustStrip compact className="pt-2" />
+              <p className="text-xs text-[#666666] text-center">
+                No advance payment. By ordering you agree to our{" "}
+                <Link to="/terms" className="underline hover:text-[#00AEEF]">terms</Link>.
+              </p>
             </div>
           </form>
         </div>

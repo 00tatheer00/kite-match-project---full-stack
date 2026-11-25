@@ -16,8 +16,9 @@ import {
 } from "react-icons/fa";
 import { getProduct } from "../services/api";
 import SeoHead from "../components/seo/SeoHead";
-import StructuredData from "../components/seo/StructuredData";
-import { SITE_URL, toAbsoluteUrl } from "../utils/seo";
+import OrderTrustStrip from "../components/OrderTrustStrip";
+import { trackEvent } from "../lib/gtag";
+import { FaWhatsapp } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
 
 const firstVariantOf = (p) =>
@@ -88,7 +89,6 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
     );
 
   const productPath = `/products/${id}`;
-  const canonicalUrl = toAbsoluteUrl(productPath);
   const productDescription =
     product?.description ||
     "Explore product details, features, and specifications from Kite Brand Pakistan.";
@@ -97,32 +97,20 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
     product?.images?.[0] ||
     "/logo.png";
 
-  const breadcrumbSchema = product
-    ? {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: "Home",
-            item: SITE_URL,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Products",
-            item: `${SITE_URL}/products`,
-          },
-          {
-            "@type": "ListItem",
-            position: 3,
-            name: product.title,
-            item: canonicalUrl,
-          },
-        ],
-      }
-    : null;
+  // GA4 view_item (once per product).
+  const viewedRef = useRef(null);
+  useEffect(() => {
+    if (!product?.id || viewedRef.current === product.id) return;
+    viewedRef.current = product.id;
+    trackEvent("view_item", {
+      currency: "PKR",
+      items: [{ item_id: String(product.id), item_name: product.title, item_category: product.category || product.productType || undefined }],
+    });
+  }, [product]);
+
+  const whatsappOrderUrl = product
+    ? `https://wa.me/923018117666?text=${encodeURIComponent(`Assalam o Alaikum, I want to order: ${product.title}${selectedVariant ? ` (${selectedVariant})` : ""}. Page: https://www.kitepk.com${productPath}`)}`
+    : "https://wa.me/923018117666";
 
   if (loading) {
     return (
@@ -391,7 +379,6 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
         image={productImage}
         type="product"
       />
-      <StructuredData data={breadcrumbSchema} />
       <div className="min-h-screen bg-gradient-to-b from-white via-[#F9F9F9] to-white">
         {/* Hero Section */}
         <div
@@ -660,6 +647,16 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                         <FaShoppingCart className="text-base" />
                         <span>{addingToCart ? "Added to Cart!" : "Add to Cart"}</span>
                       </button>
+                      <a
+                        href={whatsappOrderUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => trackEvent("whatsapp_click", { location: "product_buy_box", item_id: String(product.id) })}
+                        className="px-6 py-3 rounded-full font-semibold border-2 border-[#25D366] text-[#128C7E] hover:bg-[#25D366] hover:text-white transition-all flex items-center justify-center gap-2 active:scale-95"
+                      >
+                        <FaWhatsapp aria-hidden="true" className="text-base" />
+                        <span>Order on WhatsApp</span>
+                      </a>
                     </div>
                   </div>
                 )}
@@ -694,7 +691,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                               {brandSelectedVariants[bIdx] || brand.variants?.[0]?.name || "Select Variant"}
                             </div>
                             {brand.image ? (
-                              <img src={brand.image?.src || brand.image} alt={brand.name} className="w-full max-w-[320px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
+                              <img loading="lazy" decoding="async" src={brand.image?.src || brand.image} alt={brand.name} className="w-full max-w-[320px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
                             ) : (
                               <div className="w-full max-w-[320px] aspect-[3/4] flex items-center justify-center bg-gray-100 rounded-xl text-gray-400 font-medium">Image coming soon</div>
                             )}
@@ -860,6 +857,8 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
             )}
           </Motion.div>
 
+          <OrderTrustStrip className="mt-12 sm:mt-16" />
+
           {/* CTA Section */}
           <Motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -882,12 +881,13 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                   Request Quote
                 </Link>
                 <a
-                  href="https://wa.me/923008592829"
+                  href={whatsappOrderUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-[#00AEEF] transition-all duration-300 active:scale-95"
+                  onClick={() => trackEvent("whatsapp_click", { location: "product_cta", item_id: String(product.id) })}
+                  className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-[#00AEEF] transition-all duration-300 active:scale-95 inline-flex items-center justify-center gap-2"
                 >
-                  Call Us Now
+                  <FaWhatsapp aria-hidden="true" /> Order on WhatsApp
                 </a>
               </div>
             </div>

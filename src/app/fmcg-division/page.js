@@ -1,3 +1,5 @@
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import FMCGDivisionPage from "@/pages-source/FMCGDivisionPage";
 
 export const metadata = {
@@ -17,5 +19,10 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <FMCGDivisionPage />;
+  return (
+    <>
+      <JsonLd data={breadcrumbSchema([{ name: "FMCG Division", path: "/fmcg-division" }])} />
+      <FMCGDivisionPage />
+    </>
+  );
 }

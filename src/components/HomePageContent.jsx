@@ -40,13 +40,13 @@ const DeferredSection = ({ SectionComponent, minHeight }) => {
   );
 };
 
-const HomePageContent = () => {
+const HomePageContent = ({ initialProducts = [], heroSettings = null }) => {
   return (
     <>
-      <HeroVideo />
+      <HeroVideo initialSettings={heroSettings} />
       {/* Visible H1 + intro (main search keywords, real facts) */}
       <HomeIntro />
-      <BriefProductsSection />
+      <BriefProductsSection initialProducts={initialProducts} />
       <AboutSection />
       <BriefExport />
       <DeferredSection SectionComponent={BrandsShowcaseSection} minHeight={320} />
