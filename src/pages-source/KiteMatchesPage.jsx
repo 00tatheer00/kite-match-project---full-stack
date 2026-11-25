@@ -82,7 +82,7 @@ const KiteMatchesPage = () => {
         <div className="grid lg:grid-cols-2 gap-12 mb-16">
           {/* Product Image */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={false} /* above the fold: visible in server HTML (LCP) */
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             className="sticky top-24 h-fit"
@@ -98,7 +98,7 @@ const KiteMatchesPage = () => {
 
           {/* Product Details */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={false} /* above the fold: visible in server HTML (LCP) */
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >

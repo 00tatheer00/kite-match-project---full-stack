@@ -5,6 +5,7 @@ import { Link } from '@/components/RouterCompat';
 import { useEffect, useState } from "react";
 import { getProducts } from "../services/api";
 import { readable } from "../utils/contrast";
+import { optimizedSrc, optimizedSrcSet } from "../utils/image";
 
 const placeholderImage = "/logo.png";
 
@@ -104,9 +105,9 @@ const BriefProductsSection = ({ initialProducts = [] }) => {
                   {/* Product Image */}
                   <div className="relative aspect-auto sm:aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden flex-shrink-0">
                     <img
-                      src={
-                        (product.image?.src || product.image) || (product.images?.[0]?.src || product.images?.[0]) || placeholderImage
-                      }
+                      src={optimizedSrc((product.image?.src || product.image) || (product.images?.[0]?.src || product.images?.[0]) || placeholderImage, 640)}
+                      srcSet={optimizedSrcSet((product.image?.src || product.image) || (product.images?.[0]?.src || product.images?.[0]) || placeholderImage, [384, 640, 828])}
+                      sizes="(max-width: 640px) 92vw, (max-width: 1024px) 33vw, 20vw"
                       alt={product.title}
                       loading="lazy"
                       decoding="async"

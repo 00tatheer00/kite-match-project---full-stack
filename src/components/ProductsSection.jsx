@@ -7,6 +7,7 @@ import { Link } from '@/components/RouterCompat';
 import { useEffect, useState } from "react";
 import { getProducts } from "../services/api";
 import { readable } from "../utils/contrast";
+import { optimizedSrc, optimizedSrcSet } from "../utils/image";
 
 const placeholderImage =
   "/logo.png";
@@ -153,7 +154,9 @@ const ProductsSection = ({ initialProducts = [] }) => {
                       style={{ background: `radial-gradient(circle at 50% 40%, ${accent}22 0%, ${accent}0d 45%, #f8fafc 80%)` }}
                     >
                       <img
-                        src={image}
+                        src={optimizedSrc(image, 640)}
+                        srcSet={optimizedSrcSet(image, [384, 640, 828])}
+                        sizes="(max-width: 640px) 50vw, 33vw"
                         alt={product.title}
                         loading="lazy"
                         decoding="async"

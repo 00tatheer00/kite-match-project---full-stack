@@ -19,6 +19,7 @@ import { useEffect, useState, useMemo } from "react";
 import { getPromotions, getProducts } from "../services/api";
 import { useCart } from "../context/CartContext";
 import { readable } from "../utils/contrast";
+import { optimizedSrc, optimizedSrcSet } from "../utils/image";
 
 const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] }) => {
   const { addToCart, addPromotionToCart, openCart, cartItems } = useCart();
@@ -391,7 +392,9 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                         <div className="relative aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-[#F5F5F5] to-[#EEEEEE] border border-[#E5E5E5]">
                           {pkg.image ? (
                             <img
-                              src={pkg.image?.src || pkg.image}
+                              src={optimizedSrc(pkg.image, 640)}
+                              srcSet={optimizedSrcSet(pkg.image, [384, 640, 828])}
+                              sizes="(max-width: 640px) 92vw, 320px"
                               alt={pkg.title}
                               loading="eager"
                               decoding="async"
@@ -571,7 +574,9 @@ const PromotionsPackagesSection = ({ initialPackages = [], initialProducts = [] 
                       <div className="relative aspect-square w-full bg-[#F7F7F7] flex items-center justify-center p-3 sm:p-4 overflow-hidden border-b border-[#EFEFEF]">
                         {sku.image ? (
                           <img
-                            src={sku.image?.src || sku.image}
+                            src={optimizedSrc(sku.image, 384)}
+                            srcSet={optimizedSrcSet(sku.image, [256, 384, 640])}
+                            sizes="(max-width: 640px) 45vw, 240px"
                             alt={`${sku.brandName} - ${sku.variant.name}`}
                             loading="lazy"
                             decoding="async"
