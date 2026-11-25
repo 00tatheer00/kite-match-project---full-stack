@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { FaWhatsapp, FaTimes } from 'react-icons/fa';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const WhatsAppButton = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,15 +16,13 @@ const WhatsAppButton = () => {
 
   return (
     <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 md:bottom-8 md:right-8 z-50">
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.8 }}
-            transition={{ duration: 0.3 }}
-            className="absolute bottom-20 right-0 bg-white rounded-2xl shadow-2xl p-4 w-64 border border-gray-100"
-          >
+      {/* CSS transitions instead of framer-motion: keeps ~40 KB of JS off every page. */}
+      <div
+        aria-hidden={!isMenuOpen}
+        className={`absolute bottom-20 right-0 bg-white rounded-2xl shadow-2xl p-4 w-64 border border-gray-100 origin-bottom-right transition-all duration-300 ${
+          isMenuOpen ? "opacity-100 translate-y-0 scale-100" : "pointer-events-none invisible opacity-0 translate-y-5 scale-90"
+        }`}
+      >
             <div className="mb-3">
               <h3 className="text-lg font-bold text-[#222222] mb-1">Chat with us!</h3>
               <p className="text-sm text-[#666666]">We're here to help</p>
@@ -42,24 +39,21 @@ const WhatsAppButton = () => {
             <div className="mt-3 text-center">
               <p className="text-xs text-[#666666]">0301 8117666</p>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </div>
 
       {/* Main WhatsApp Button */}
-      <motion.button
+      <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white rounded-full p-4 shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 active:scale-95"
-        whileHover={{ rotate: 360 }}
-        transition={{ duration: 0.6 }}
+        className="bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white rounded-full p-4 shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-110 hover:rotate-[360deg] active:scale-95"
         aria-label="WhatsApp Chat"
+        aria-expanded={isMenuOpen}
       >
         {isMenuOpen ? (
           <FaTimes className="text-3xl" />
         ) : (
           <FaWhatsapp className="text-3xl" />
         )}
-      </motion.button>
+      </button>
 
       {/* Pulse Animation Ring */}
       {!isMenuOpen && (

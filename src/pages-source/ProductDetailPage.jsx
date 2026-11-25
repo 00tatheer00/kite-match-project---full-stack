@@ -21,6 +21,7 @@ import { trackEvent } from "../lib/gtag";
 import { FaWhatsapp } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
 import { readable } from "../utils/contrast";
+import { optimizedSrc, optimizedSrcSet } from "../utils/image";
 
 const firstVariantOf = (p) =>
   p?.variants?.[0]?.name || p?.variantImages?.[0]?.name || p?.sizes?.[0]?.size || p?.skus?.[0]?.size || "";
@@ -406,7 +407,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
           {product.productType === 'matches' ? (
             <div className="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
               <Motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={false} /* above the fold: visible in server HTML (LCP) */
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
@@ -436,7 +437,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
             <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 mb-12 sm:mb-16">
               {/* Product Image */}
               <Motion.div
-                initial={{ opacity: 0, x: -30 }}
+                initial={false} /* above the fold: visible in server HTML (LCP) */
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
                 className="lg:sticky lg:top-24 h-fit"
@@ -450,7 +451,9 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                   >
                     <img
                       key={displayImage}
-                      src={displayImage?.src || displayImage}
+                      src={optimizedSrc(displayImage, 828)}
+                      srcSet={optimizedSrcSet(displayImage, [640, 828, 1200])}
+                      sizes="(max-width: 1024px) 92vw, 560px"
                       alt={product.title}
                       loading="eager"
                       decoding="async"
@@ -500,7 +503,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                         aria-current={boundedActiveIndex === idx}
                       >
                         <img
-                          src={item.image?.src || item.image}
+                          src={optimizedSrc(item.image, 128)}
                           alt={item.name}
                           loading="lazy"
                           decoding="async"
@@ -514,7 +517,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
 
               {/* Product Details */}
               <Motion.div
-                initial={{ opacity: 0, x: 30 }}
+                initial={false} /* above the fold: visible in server HTML (LCP) */
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
@@ -692,7 +695,7 @@ const ProductDetailPage = ({ initialProduct = null, productId = null }) => {
                               {brandSelectedVariants[bIdx] || brand.variants?.[0]?.name || "Select Variant"}
                             </div>
                             {brand.image ? (
-                              <img loading="lazy" decoding="async" src={brand.image?.src || brand.image} alt={brand.name} className="w-full max-w-[320px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
+                              <img loading="lazy" decoding="async" src={optimizedSrc(brand.image, 640)} alt={brand.name} className="w-full max-w-[320px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
                             ) : (
                               <div className="w-full max-w-[320px] aspect-[3/4] flex items-center justify-center bg-gray-100 rounded-xl text-gray-400 font-medium">Image coming soon</div>
                             )}

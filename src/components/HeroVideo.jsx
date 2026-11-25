@@ -25,7 +25,7 @@ const HeroVideo = ({ initialSettings = null }) => {
     };
   }, []);
 
-  // The poster (53 KB WebP) is painted first. The video file is only attached after the
+  // The poster (32 KB WebP) is painted first. The video file is only attached after the
   // page has finished loading, so it never competes with the poster, fonts or scripts
   // for bandwidth on slow mobile connections.
   const [loadVideo, setLoadVideo] = useState(false);
@@ -121,7 +121,7 @@ const HeroVideo = ({ initialSettings = null }) => {
           /* The poster is in the server HTML (and preloaded), so this <video> is the
              Largest Contentful Paint element from the first paint. The video file itself
              is attached after the page has loaded and never re-times LCP. */
-          poster="/videos/kite-hero-poster-1920.webp"
+          poster="/videos/kite-hero-poster-1280.webp"
           aria-label="Kite Motion Banner"
           className="absolute inset-0 w-full h-full object-cover object-center block"
           style={{ objectFit: 'cover', width: '100%', height: '100%' }}

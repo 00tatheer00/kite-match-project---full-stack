@@ -484,3 +484,7 @@ body:not(.admin-route) { background-color: #ffffff; }
   background-color: transparent !important;
   background-image: none !important;
 }
+
+/* Floating cart badge "pop" when the count changes (replaces framer-motion). */
+@keyframes cart-badge-pop { from { transform: scale(0.5); } to { transform: scale(1); } }
+.cart-badge-pop { animation: cart-badge-pop 0.25s ease-out; }
