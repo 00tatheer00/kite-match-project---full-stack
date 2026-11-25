@@ -3,14 +3,17 @@
 import { FaPlay, FaTimes, FaExpand } from "react-icons/fa";
 import { Link } from '@/components/RouterCompat';
 import { useEffect, useRef, useState } from "react";
-const match_making = "/videos/match_making.mp4";
+// Inline: 20-second muted preview (~1.6 MB). Full film with sound (~7 MB) only loads when expanded.
+const match_making_preview = "/videos/match-making-preview.mp4";
+const match_making = "/videos/match-making.mp4";
+const match_making_poster = "/videos/match-making-poster.jpg";
 
 const MatchMakingSection = () => {
   const videoRef = useRef(null);
   const expandedVideoRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // The source video is large (~50 MB): only start streaming it when the section is on screen,
+  // Only start streaming it when the section is on screen,
   // and pause it again when scrolled away, instead of downloading it on every home-page visit.
   useEffect(() => {
     const video = videoRef.current;
@@ -110,9 +113,11 @@ const MatchMakingSection = () => {
                   muted
                   playsInline
                   preload="none"
+                  poster={match_making_poster}
+                  aria-label="How Kite safety matches are made (click to watch the full video)"
                   onClick={handleVideoClick}
                 >
-                  <source src={match_making} type="video/mp4" />
+                  <source src={match_making_preview} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
 
@@ -155,6 +160,7 @@ const MatchMakingSection = () => {
                   loop
                   playsInline
                   preload="metadata"
+                  poster={match_making_poster}
                   controls
                 >
                   <source src={match_making} type="video/mp4" />

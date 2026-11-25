@@ -1,3 +1,5 @@
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import BoardDivisionPage from "@/pages-source/BoardDivisionPage";
 
 export const metadata = {
@@ -17,5 +19,10 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <BoardDivisionPage />;
+  return (
+    <>
+      <JsonLd data={breadcrumbSchema([{ name: "Board Division", path: "/board-division" }])} />
+      <BoardDivisionPage />
+    </>
+  );
 }

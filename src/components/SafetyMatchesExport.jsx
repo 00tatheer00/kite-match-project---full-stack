@@ -321,7 +321,7 @@ const SafetyMatchesExport = () => {
 
                     {/* Simulated Matchbox Sidewall */}
                     <div className="w-full bg-[#E8DCB8] rounded border border-[#C5B48D] p-1.5 shadow-sm flex items-center justify-center overflow-hidden">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={surface.image?.src || surface.image}
                         alt={surface.name}
                         className="w-full h-11 object-fill rounded shadow-xs"

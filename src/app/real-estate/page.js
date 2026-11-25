@@ -1,3 +1,5 @@
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import RealEstatePage from "@/pages-source/RealEstatePage";
 
 export const metadata = {
@@ -17,5 +19,10 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <RealEstatePage />;
+  return (
+    <>
+      <JsonLd data={breadcrumbSchema([{ name: "Real Estate", path: "/real-estate" }])} />
+      <RealEstatePage />
+    </>
+  );
 }

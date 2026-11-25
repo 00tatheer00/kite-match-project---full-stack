@@ -1,3 +1,5 @@
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import PromotionsPackagesPage from "@/pages-source/PromotionsPackagesPage";
 import { fetchServerProducts, fetchServerPromotions } from "@/lib/server-products";
 
@@ -26,9 +28,12 @@ export default async function Page() {
     fetchServerPromotions(),
   ]);
   return (
-    <PromotionsPackagesPage
-      initialProducts={products}
-      initialPackages={packages}
-    />
+    <>
+      <JsonLd data={breadcrumbSchema([{ name: "Promotions & Packages", path: "/promotions-packages" }])} />
+      <PromotionsPackagesPage
+        initialProducts={products}
+        initialPackages={packages}
+      />
+    </>
   );
 }

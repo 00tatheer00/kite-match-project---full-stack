@@ -1,8 +1,11 @@
 import ProductDetailPage from "@/pages-source/ProductDetailPage";
 import { notFound } from "next/navigation";
 import { fetchServerProductById } from "@/lib/server-products";
-import { resolveProduct } from "@/lib/data";
-import { toJsonLd } from "@/lib/json-ld";
+import { resolveProduct, getSettings } from "@/lib/data";
+import JsonLd from "@/components/seo/JsonLd";
+import ProductQuickAnswers from "@/components/seo/ProductQuickAnswers";
+import { productSchema, productFaq, productImages, priceOptions } from "@/lib/product-seo";
+import { breadcrumbSchema, faqSchema } from "@/lib/seo-schema";
 
 export const revalidate = 300;
 
@@ -17,32 +20,39 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  const title = `${product.title} | Kite Brand Pakistan`;
-  const description = (
+  // "<product> Price in Pakistan" is how people search; price + COD in the snippet lifts click-through.
+  const title = `${product.title} Price in Pakistan | Order Online – Kite`;
+  const prices = priceOptions(product).map((o) => o.price);
+  const priceText = prices.length ? ` From Rs ${Math.min(...prices).toLocaleString("en-US")}.` : "";
+  const tail = `${priceText} Cash on delivery all over Pakistan.`;
+  const base = String(
     product.description ||
-    `${product.title} - premium quality FMCG and safety match product manufactured in Pakistan by Kite Brand.`
+      `${product.title} - premium quality product manufactured in Pakistan by Kite Brand.`
   )
-    .replace(/\r?\n|\r/g, " ")
-    .trim()
-    .slice(0, 155);
+    .replace(/\s+/g, " ")
+    .trim();
+  const room = 158 - tail.length;
+  const description = (base.length > room ? `${base.slice(0, room - 1).replace(/\s+\S*$/, "")}…` : base) + tail;
+  const canonical = `/products/${product.id}`;
 
   return {
     title,
     description,
     alternates: {
-      canonical: `/products/${id}`,
+      canonical,
     },
     openGraph: {
       title,
       description,
-      url: `https://www.kitepk.com/products/${id}`,
-      images: product.image ? [{ url: product.image }] : ["https://www.kitepk.com/logo.png"],
+      url: `https://www.kitepk.com${canonical}`,
+      type: "website",
+      images: productImages(product).slice(0, 4).map((url) => ({ url, alt: product.title })),
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: product.image ? [product.image] : ["https://www.kitepk.com/logo.png"],
+      images: productImages(product).slice(0, 1),
     },
   };
 }
@@ -61,53 +71,24 @@ export default async function Page({ params }) {
   }
   if (!databaseError && (!product || product.isActive === false)) notFound();
 
-  // All purchasable prices (product variants + brand variants), for an accurate AggregateOffer.
-  const prices = product
-    ? [
-        ...(product.variants || []),
-        ...(product.brands || []).flatMap((b) => b?.variants || []),
-        ...(product.skus || []),
-      ]
-        .map((v) => Number(v?.price))
-        .filter((n) => Number.isFinite(n) && n > 0)
-    : [];
+  const settings = await getSettings().catch(() => null);
 
-  const productSchema = product
-    ? {
-        "@context": "https://schema.org",
-        "@type": "Product",
-        name: product.title,
-        image: product.image || "https://www.kitepk.com/logo.png",
-        description: product.description?.replace(/\s+/g, " ").trim() || undefined,
-        sku: product.id,
-        category: product.category || undefined,
-        brand: {
-          "@type": "Brand",
-          name: "Kite Brand Pakistan",
-        },
-        ...(prices.length > 0 && {
-          offers: {
-            "@type": "AggregateOffer",
-            priceCurrency: "PKR",
-            lowPrice: Math.min(...prices),
-            highPrice: Math.max(...prices),
-            offerCount: prices.length,
-            availability: "https://schema.org/InStock",
-            url: `https://www.kitepk.com/products/${product.id}`,
-          },
-        }),
-      }
+  const schemas = product
+    ? [
+        productSchema(product, settings),
+        breadcrumbSchema([
+          { name: "Products", path: "/products" },
+          { name: product.title, path: `/products/${product.id}` },
+        ]),
+        faqSchema(productFaq(product, settings)),
+      ]
     : null;
 
   return (
     <>
-      {productSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: toJsonLd(productSchema) }}
-        />
-      )}
+      <JsonLd data={schemas} />
       <ProductDetailPage initialProduct={product} productId={id} />
+      <ProductQuickAnswers product={product} settings={settings} />
     </>
   );
 }

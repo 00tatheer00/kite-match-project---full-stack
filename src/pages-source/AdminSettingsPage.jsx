@@ -291,7 +291,7 @@ const AdminSettingsPage = () => {
                         </h3>
                       </div>
                       <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                        Plays the official autoplay <code>Kite Motion Banner.mp4</code> video with cinematic branding.
+                        Plays the official autoplay Kite motion banner video with cinematic branding.
                       </p>
                     </div>
 

@@ -1,3 +1,5 @@
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import KiteMatchesPage from "@/pages-source/KiteMatchesPage";
 
 export const metadata = {
@@ -17,5 +19,10 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <KiteMatchesPage />;
+  return (
+    <>
+      <JsonLd data={breadcrumbSchema([{ name: "Products", path: "/products" }, { name: "Kite Safety Matches", path: "/products/kite-matches" }])} />
+      <KiteMatchesPage />
+    </>
+  );
 }

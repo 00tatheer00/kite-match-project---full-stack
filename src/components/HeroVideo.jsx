@@ -8,9 +8,10 @@ import { getSettings } from '../services/api';
 // screen. Pages render at zoom var(--home-scale) (globals.css), so the height is divided by it.
 const HERO_SIZE = "hero-frame relative w-full overflow-hidden";
 
-const HeroVideo = () => {
+const HeroVideo = ({ initialSettings = null }) => {
   const videoRef = useRef(null);
-  const [settings, setSettings] = useState(null);
+  // Server-provided banner settings avoid a video→image swap (layout shift) after load.
+  const [settings, setSettings] = useState(initialSettings);
 
   useEffect(() => {
     let isMounted = true;
@@ -103,10 +104,10 @@ const HeroVideo = () => {
           className="absolute inset-0 w-full h-full object-cover object-center block"
           style={{ objectFit: 'cover', width: '100%', height: '100%' }}
         >
-          {/* Phones/tablets get the 6.7 MB encode; large screens get the 21.8 MB master.
+          {/* Phones/tablets get the 720p encode (~2 MB); large screens the 1080p one (~4.5 MB).
               Browsers without <source media> support use the first (lighter) source. */}
-          <source src="/videos/kite-motion-banner.mp4" type="video/mp4" media="(max-width: 1024px)" />
-          <source src="/videos/Kite%20Motion%20Banner.mp4" type="video/mp4" />
+          <source src="/videos/kite-hero-720.mp4" type="video/mp4" media="(max-width: 1024px)" />
+          <source src="/videos/kite-hero-1080.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       </div>

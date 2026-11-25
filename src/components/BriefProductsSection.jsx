@@ -13,29 +13,34 @@ const getOrderValue = (product) => {
   return 0;
 };
 
-const BriefProductsSection = () => {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+const pickFeatured = (data) =>
+  (Array.isArray(data) ? data : [])
+    .filter((p) => p.showOnLanding !== false)
+    .sort((a, b) => {
+      const byOrder = getOrderValue(a) - getOrderValue(b);
+      if (byOrder !== 0) return byOrder;
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return aTime - bTime;
+    })
+    .slice(0, 5);
+
+// Products arrive from the server (in the initial HTML for Google/AI crawlers);
+// the client refreshes them quietly in the background.
+const BriefProductsSection = ({ initialProducts = [] }) => {
+  const [featuredProducts, setFeaturedProducts] = useState(() => pickFeatured(initialProducts));
+  const [loading, setLoading] = useState(() => !(initialProducts?.length > 0));
 
   useEffect(() => {
     let isMounted = true;
     getProducts()
       .then((data) => {
         if (!isMounted || !Array.isArray(data)) return;
-        const allProducts = data
-          .filter((p) => p.showOnLanding !== false)
-          .sort((a, b) => {
-            const byOrder = getOrderValue(a) - getOrderValue(b);
-            if (byOrder !== 0) return byOrder;
-            const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-            return aTime - bTime;
-          })
-          .slice(0, 5);
-        setFeaturedProducts(allProducts);
+        const next = pickFeatured(data);
+        if (next.length > 0) setFeaturedProducts(next);
       })
       .catch(() => {
-        if (isMounted) setFeaturedProducts([]);
+        // keep the server-rendered products
       })
       .finally(() => {
         if (isMounted) setLoading(false);
